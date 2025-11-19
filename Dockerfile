@@ -3,7 +3,7 @@ FROM debian:latest
 ENV DEBIAN_FRONTEND="noninteractive" TZ="Europe/Paris" 
 
 RUN apt-get update -qq && \
-    apt-get install -qy x11vnc xvfb xterm openbox locales auto-multiple-choice
+    apt-get install -qy x11vnc xvfb xterm openbox locales auto-multiple-choice xpdf
 
 RUN sed -i -e 's/# \(fr_FR\.UTF-8 .*\)/\1/' /etc/locale.gen && \
 sed -i -e 's/# \(en_US\.UTF-8 .*\)/\1/' /etc/locale.gen && \
