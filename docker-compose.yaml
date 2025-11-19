@@ -1,17 +1,44 @@
 version: '3.8'
 
 services:
-  amc-container:
+  amc:
     build: .
-    container_name: amc-vm
+    container_name: amc-novnc
     ports:
-      - "5900:5900"
+      - "6080:6080"  # noVNC (interface web)
+      - "5900:5900"  # VNC direct (optionnel)
     volumes:
-      - ./home:/root
+      # Projets AMC persistants
+      - ./amc-projects:/home/amc/AMC-projects
+      # Configuration AMC (optionnel)
+      - ./amc-config:/home/amc/.config/AMC
+      # Packages LaTeX personnalisés
+      - ./texmf:/home/amc/texmf
     environment:
       - DISPLAY=:0
       - LC_ALL=fr_FR.UTF-8
       - LANG=fr_FR.UTF-8
       - LANGUAGE=fr_FR.UTF-8
-      - VNC_PASSWORD=${VNC_PASSWORD:-monpasswordsecret}
-    command: sh -c 'x11vnc -passwd ${VNC_PASSWORD:-monpasswordsecret} -create -bg -reopen -forever -env FD_PROG=/usr/bin/openbox -afteraccept "uxterm -hold -e auto-multiple-choice & uxterm &" && sleep infinity'
+      # Résolution de l'écran virtuel
+      - VNC_RESOLUTION=1920x1080
+      # Mot de passe VNC (IMPORTANT: changez-le!)
+      - VNC_PASSWORD=${VNC_PASSWORD:-amc2024}
+      - VNC_PORT=5900
+      - NOVNC_PORT=6080
+    restart: unless-stopped
+    # Limites de ressources (optionnel mais recommandé)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 512M
+    # Nom du réseau personnalisé (optionnel)
+    networks:
+      - amc-network
+
+networks:
+  amc-network:
+    driver: bridge
