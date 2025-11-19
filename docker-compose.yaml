@@ -14,4 +14,4 @@ services:
       - LANG=fr_FR.UTF-8
       - LANGUAGE=fr_FR.UTF-8
       - VNC_PASSWORD=${VNC_PASSWORD:-monpasswordsecret}
-    command: x11vnc -passwd ${VNC_PASSWORD:-monpasswordsecret} -create -bg -reopen -forever -env FD_PROG='/usr/bin/openbox' -afteraccept 'uxterm -hold -e auto-multiple-choice & uxterm &' && tail -f /dev/null
+    command: sh -c 'x11vnc -passwd ${VNC_PASSWORD:-monpasswordsecret} -create -bg -reopen -forever -env FD_PROG=/usr/bin/openbox -afteraccept "uxterm -hold -e auto-multiple-choice & uxterm &" && sleep infinity'
