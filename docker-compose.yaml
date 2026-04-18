@@ -1,44 +1,58 @@
-version: '3.8'
+# ============================================================
+# Auto-Multiple-Choice — docker-compose pour Mac Apple Silicon
+# ============================================================
+# Prérequis : XQuartz installé et configuré (voir README)
+# Usage     : ./launch.sh
+# ============================================================
 
 services:
   amc:
-    build: .
-    container_name: amc-novnc
-    ports:
-      - "6080:6080"  # noVNC (interface web)
-      - "5900:5900"  # VNC direct (optionnel)
-    volumes:
-      # Projets AMC persistants
-      - ./amc-projects:/home/amc/AMC-projects
-      # Configuration AMC (optionnel)
-      - ./amc-config:/home/amc/.config/AMC
-      # Packages LaTeX personnalisés
-      - ./texmf:/home/amc/texmf
-    environment:
-      - DISPLAY=:0
-      - LC_ALL=fr_FR.UTF-8
-      - LANG=fr_FR.UTF-8
-      - LANGUAGE=fr_FR.UTF-8
-      # Résolution de l'écran virtuel
-      - VNC_RESOLUTION=1920x1080
-      # Mot de passe VNC (IMPORTANT: changez-le!)
-      - VNC_PASSWORD=${VNC_PASSWORD:-amc2024}
-      - VNC_PORT=5900
-      - NOVNC_PORT=6080
-    restart: unless-stopped
-    # Limites de ressources (optionnel mais recommandé)
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 2G
-        reservations:
-          cpus: '1'
-          memory: 512M
-    # Nom du réseau personnalisé (optionnel)
-    networks:
-      - amc-network
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: amc-nqcm:latest
 
-networks:
-  amc-network:
-    driver: bridge
+    # Force arm64 natif (pas d'émulation x86 lente)
+    platform: linux/arm64
+
+    # ── Affichage X11 via XQuartz ──────────────────────────
+    environment:
+      - DISPLAY=host.docker.internal:0
+      - LANG=fr_FR.UTF-8
+      - LC_ALL=fr_FR.UTF-8
+      # Chemin des projets AMC par défaut
+      - AMC_PROJECTS_DIR=/amc/projets
+
+    # ── Volumes ────────────────────────────────────────────
+    volumes:
+      # Classe LaTeX personnalisée nQCM (lecture seule)
+      - nQcm:/nqcm:ro
+
+      # Dossier SCAN (lecture/écriture — AMC y écrit ses résultats)
+      - scan:/amc/scan
+
+      # Dossier CONTROLES (accès complet)
+      - controles:/amc/controles
+
+      # Données persistantes AMC (projets, configuration)
+      - amc-data:/root/.AMC.d
+
+    # ── Accès réseau au host (pour X11 TCP) ───────────────
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    # Permet d'éviter certains problèmes de rendu GTK/Cairo
+    shm_size: '256mb'
+
+    # Redémarre jamais automatiquement (c'est une appli GUI)
+    restart: "no"
+
+    # Profil de sécurité relâché pour X11
+    security_opt:
+      - seccomp:unconfined
+
+# ── Volumes nommés ─────────────────────────────────────────
+volumes:
+  amc-data:
+    driver: local
+    # Les projets AMC sont persistés entre les sessions
