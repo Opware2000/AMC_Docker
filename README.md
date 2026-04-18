@@ -229,8 +229,45 @@ docker compose logs
 # Arrêter le conteneur
 docker compose down
 
-# Supprimer les données AMC (projets sauvegardés dans Docker)
+# Supprimer les projets AMC stockés dans Docker (irréversible)
 docker volume rm amc-docker_amc-data
 # Vérifier la classe nQCM dans le conteneur
 docker compose run --entrypoint bash amc -c "kpsewhich -all nQCM.cls 2>/dev/null || echo 'non trouvé'"
 ```
+
+---
+
+## Créer une icône AMC dans le Dock
+
+Pour lancer AMC comme n'importe quelle application macOS, sans passer par le Terminal :
+
+### 1. Générer l'application
+
+```bash
+chmod +x create-app.sh
+./create-app.sh
+```
+
+Ce script crée `Auto Multiple Choice.app` dans `~/Applications/` et ouvre
+automatiquement le dossier pour vous. Il télécharge l'icône officielle d'AMC
+si la connexion internet est disponible.
+
+### 2. Ajouter au Dock
+
+Glissez `Auto Multiple Choice` depuis la fenêtre Finder qui s'est ouverte
+vers le Dock (à droite de la séparation, avec les applications).
+
+### 3. Utilisation
+
+Un clic sur l'icône dans le Dock ouvre un Terminal dédié et lance AMC.
+Vous voyez les messages de démarrage (utile pour diagnostiquer un problème).
+
+> **Note** : si macOS affiche « application non vérifiée » au premier lancement,
+> faites **Ctrl + clic** sur l'icône > **Ouvrir** > **Ouvrir** pour la débloquer.
+> Cette fenêtre n'apparaît qu'une seule fois.
+
+### Recréer l'application après un déplacement du dossier amc-docker
+
+L'application contient le chemin absolu vers `launch.sh`. Si vous déplacez
+le dossier `amc-docker`, relancez simplement `./create-app.sh` pour mettre
+à jour l'application.
