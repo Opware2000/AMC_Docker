@@ -14,16 +14,14 @@ ENV LANGUAGE=fr_FR:fr
 RUN echo 'path-include /usr/share/locale/fr/*' \
     >> /etc/dpkg/dpkg.cfg.d/docker
 
-# ── 0b. Dépôt officiel Xpra (xpra n'est pas dans Debian) ────
+# ── 0b. Clé GPG Xpra (dépôt ajouté séparément après les paquets Debian) ─────
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
     && curl -fsSL https://xpra.org/xpra.asc -o /usr/share/keyrings/xpra.asc \
-    && printf 'Types: deb\nURIs: https://xpra.org\nSuites: forky\nComponents: main\nSigned-By: /usr/share/keyrings/xpra.asc\nArchitectures: arm64\n' \
-       > /etc/apt/sources.list.d/xpra.sources \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# ── 1. Dépendances système ───────────────────────────────────
+# ── 1. Dépendances système (dépôt Debian uniquement — pas encore xpra) ───────
 RUN apt-get update && apt-get install -y --no-install-recommends \
     # AMC et ses dépendances Perl/système
     auto-multiple-choice \
@@ -40,7 +38,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Utilitaires
     locales \
     wget \
-    curl \
     unzip \
     rsync \
     # Notifications bureau (module Perl + binaire notify-send)
@@ -54,15 +51,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     x11-utils \
     x11-xkb-utils \
     xkb-data \
-    # VNC — framebuffer virtuel + serveur VNC (mode fallback)
+    # Framebuffer virtuel (requis par xpra-server)
     xvfb \
-    x11vnc \
-    fluxbox \
-    # noVNC — client VNC dans le navigateur (mode fallback)
-    novnc \
-    websockify \
-    # Xpra — fenêtre native Mac (sans bureau virtuel)
-    xpra \
     # gnumeric/ssconvert (conversion ODS→PDF pour l'export AMC, ~30 Mo)
     gnumeric \
     && echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen \
@@ -70,6 +60,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && printf 'LANG=fr_FR.UTF-8\nLC_ALL=fr_FR.UTF-8\nLANGUAGE=fr_FR:fr\n' > /etc/default/locale \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# ── 1b. Xpra server (dépôt trixie — RUN séparé pour isoler les conflits) ────
+# Le dépôt xpra trixie est ajouté ici seulement, après les paquets Debian
+RUN printf 'Types: deb\nURIs: https://xpra.org\nSuites: trixie\nComponents: main\nSigned-By: /usr/share/keyrings/xpra.asc\nArchitectures: arm64\n' \
+       > /etc/apt/sources.list.d/xpra.sources \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        xpra-server \
+        xpra-client-gtk3 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # ── 2. Réinstaller le paquet de traductions AMC (locales filtrées au départ) ─
 RUN apt-get update \
