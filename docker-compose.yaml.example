@@ -17,7 +17,7 @@ services:
 
     # ── Affichage X11 via XQuartz ──────────────────────────
     environment:
-      - DISPLAY=host.docker.internal:0
+      - DISPLAY=docker.for.mac.host.internal:0
       - LANG=fr_FR.UTF-8
       - LC_ALL=fr_FR.UTF-8
       # Chemin des projets AMC par défaut
@@ -36,6 +36,9 @@ services:
 
       # Données persistantes AMC (projets, configuration)
       - amc-data:/root/.AMC.d
+
+      # Cookie d'authentification X11 (nécessaire sur macOS/M1)
+      - ~/.Xauthority:/root/.Xauthority:ro
 
     # ── Accès réseau au host (pour X11 TCP) ───────────────
     extra_hosts:

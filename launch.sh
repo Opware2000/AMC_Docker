@@ -84,9 +84,9 @@ if [ ! -f "$XQUARTZ_CHECKED" ]; then
 fi
 
 # ── 4b. Forcer nolisten_tcp=0 (XQuartz doit écouter en TCP) ──
-if defaults read org.macosforge.xquartz.X11 nolisten_tcp 2>/dev/null | grep -q 1; then
+if defaults read org.xquartz.X11 nolisten_tcp 2>/dev/null | grep -q 1; then
     echo -e "${YELLOW}→ Correction nolisten_tcp (XQuartz doit redémarrer)...${NC}"
-    defaults write org.macosforge.xquartz.X11 nolisten_tcp 0
+    defaults write org.xquartz.X11 nolisten_tcp 0
     pkill -x Xquartz 2>/dev/null || true
     sleep 2
     open -a XQuartz
@@ -132,7 +132,7 @@ echo ""
 echo -e "${GREEN}→ Lancement d'AMC...${NC}"
 echo ""
 
-DISPLAY=host.docker.internal:0 docker compose up --remove-orphans
+DISPLAY=docker.for.mac.host.internal:0 docker compose up --remove-orphans
 
 echo ""
 echo -e "${BLUE}AMC terminé.${NC}"
