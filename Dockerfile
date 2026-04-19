@@ -45,13 +45,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     x11-utils \
     x11-xkb-utils \
     xkb-data \
-    # VNC — framebuffer virtuel + serveur VNC
+    # VNC — framebuffer virtuel + serveur VNC (mode fallback)
     xvfb \
     x11vnc \
     fluxbox \
-    # noVNC — client VNC dans le navigateur
+    # noVNC — client VNC dans le navigateur (mode fallback)
     novnc \
     websockify \
+    # Xpra — fenêtre native Mac (sans bureau virtuel)
+    xpra \
     # gnumeric/ssconvert (conversion ODS→PDF pour l'export AMC, ~30 Mo)
     gnumeric \
     && echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen \
