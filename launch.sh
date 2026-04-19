@@ -100,9 +100,9 @@ if ! nc -z 127.0.0.1 6000 2>/dev/null; then
 fi
 
 # ── 6. Configuration xhost ──────────────────────────────────
+# xhost + nécessaire car Docker connecte via l'IP du gateway VM (pas 127.0.0.1)
 echo -e "${YELLOW}→ Autorisation X11 depuis Docker...${NC}"
-xhost +127.0.0.1 2>/dev/null || true
-xhost +localhost  2>/dev/null || true
+xhost + 2>/dev/null || true
 echo -e "${GREEN}✓ Accès X11 configuré${NC}"
 
 # ── 7. Construction de l'image si nécessaire ────────────────
