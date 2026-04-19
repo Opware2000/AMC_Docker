@@ -89,6 +89,9 @@ BRIDGE_EOF
     echo -e "${GREEN}✓ Pont Mac-bridge démarré (port 6081)${NC}"
 fi
 
+# Nettoyage d'un éventuel conteneur précédent encore actif
+docker compose down 2>/dev/null || true
+
 # ── 4. Lancement d'AMC ──────────────────────────────────────
 echo ""
 echo -e "${GREEN}→ Lancement d'AMC (mode Xpra)...${NC}"
@@ -107,6 +110,8 @@ done
 
 if nc -z localhost 14500 2>/dev/null; then
     echo -e "${GREEN}✓ Xpra disponible${NC}"
+    # Laisser le temps à xpra de finir son initialisation avant que le client se connecte
+    sleep 3
     echo ""
     echo -e "${BLUE}→ Ouverture de la fenêtre AMC...${NC}"
     # Lance xpra attach en arrière-plan (ouvre la fenêtre native Mac)

@@ -76,7 +76,7 @@ export XPRA_KEYBOARD_LAYOUT="fr"
 export XPRA_KEYBOARD_MODEL="apple"
 
 exec xpra start "$XPRA_DISPLAY" \
-    --bind-tcp=0.0.0.0:$XPRA_PORT \
+    --bind-tcp=0.0.0.0:$XPRA_PORT,auth=none \
     --html=off \
     --daemon=no \
     --exit-with-children=yes \
