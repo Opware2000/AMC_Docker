@@ -37,6 +37,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     x11-utils \
     x11-xkb-utils \
     xkb-data \
+    # VNC — framebuffer virtuel + serveur VNC
+    xvfb \
+    x11vnc \
+    fluxbox \
+    # noVNC — client VNC dans le navigateur
+    novnc \
+    websockify \
     && echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen \
     && locale-gen \
     && printf 'LANG=fr_FR.UTF-8\nLC_ALL=fr_FR.UTF-8\n' > /etc/default/locale \
@@ -55,7 +62,17 @@ RUN mkdir -p \
     /amc/controles \
     /texmf-local/nQcm
 
-# ── 4. Entrypoint ────────────────────────────────────────────
+# ── 4. Config fluxbox minimale (pas de fond d'écran, pas de fbsetbg) ──
+RUN mkdir -p /root/.fluxbox && \
+    printf 'session.styleFile: /usr/share/fluxbox/styles/bloe\n' > /root/.fluxbox/init && \
+    printf '#!/bin/sh\n# no wallpaper\n' > /root/.fluxbox/startup && \
+    chmod +x /root/.fluxbox/startup
+
+# ── 5. Remplacer notify-send par un no-op (silence libnotify) ─
+RUN printf '#!/bin/sh\nexit 0\n' > /usr/local/bin/notify-send && \
+    chmod +x /usr/local/bin/notify-send
+
+# ── 6. Entrypoint ────────────────────────────────────────────
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 

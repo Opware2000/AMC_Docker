@@ -1,15 +1,48 @@
 #!/bin/bash
 # ============================================================
-# Entrypoint AMC Docker — MacBook Air (trackpad, sans souris)
+# Entrypoint AMC Docker — Mode VNC (contournement fond noir XQuartz)
+# - Démarre Xvfb (framebuffer virtuel :99)
+# - Démarre x11vnc sur le port 5900
 # - Installe la classe nQCM dans TEXMFLOCAL si présente
-# - Vérifie le DISPLAY
-# - Configure le clavier Mac français (Apple AZERTY)
-# - Configure le trackpad / comportement souris X11
-# - Configure GTK pour usage confortable sans souris
-# - Lance AMC
+# - Lance AMC sur l'affichage virtuel
 # ============================================================
 
 set -e
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+echo -e "${GREEN}=== AMC Docker — Démarrage (mode VNC) ===${NC}"
+
+# ── 0. Démarrage Xvfb + x11vnc ──────────────────────────────
+VNC_DISPLAY=:99
+VNC_PORT=5900
+VNC_GEOMETRY="${VNC_GEOMETRY:-1280x900}"
+
+echo -e "${GREEN}→ Démarrage Xvfb ($VNC_GEOMETRY)...${NC}"
+Xvfb "$VNC_DISPLAY" -screen 0 "${VNC_GEOMETRY}x24" -ac &
+XVFB_PID=$!
+sleep 1
+
+export DISPLAY="$VNC_DISPLAY"
+
+# Gestionnaire de fenêtres léger (nécessaire pour GTK)
+fluxbox &>/dev/null &
+
+echo -e "${GREEN}→ Démarrage x11vnc (port 5900)...${NC}"
+x11vnc -display "$VNC_DISPLAY" -forever -nopw -quiet \
+       -rfbport 5900 -bg -o /tmp/x11vnc.log
+
+echo -e "${GREEN}→ Démarrage noVNC (port 6080)...${NC}"
+websockify --web /usr/share/novnc 6080 localhost:5900 &>/tmp/novnc.log &
+
+echo -e "${GREEN}✓ Interface disponible sur : http://localhost:6080/vnc.html${NC}"
+echo ""
+
+# Nettoyage au exit
+trap "kill $XVFB_PID 2>/dev/null; true" EXIT
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -35,96 +68,30 @@ else
     echo "  Vérifiez le volume dans docker-compose.yml"
 fi
 
-# ── 2. Vérification du DISPLAY ──────────────────────────────
-if [ -z "$DISPLAY" ]; then
-    echo -e "${RED}✗ Variable DISPLAY non définie !${NC}"
-    echo "  Assurez-vous que XQuartz est lancé et que xhost est configuré."
-    exit 1
-fi
-
-# Force IPv4 : getent hosts peut retourner une IPv6 inaccessible depuis Docker
-_DISP_HOST=$(echo "$DISPLAY" | cut -d: -f1)
-_DISP_NUM=$(echo "$DISPLAY" | cut -d: -f2-)
-_DISP_IPV4=$(getent ahostsv4 "$_DISP_HOST" 2>/dev/null | head -1 | awk '{print $1}')
-if [ -n "$_DISP_IPV4" ]; then
-    export DISPLAY="$_DISP_IPV4:$_DISP_NUM"
-fi
-
-echo -e "${GREEN}→ DISPLAY = $DISPLAY${NC}"
-
-if ! xset -display "$DISPLAY" q >/dev/null 2>&1; then
-    echo -e "${RED}✗ Impossible de se connecter au serveur X ($DISPLAY)${NC}"
-    echo "  Vérifiez que XQuartz est lancé et que xhost +127.0.0.1 a été exécuté."
-    exit 1
-fi
-
-echo -e "${GREEN}✓ Serveur X accessible${NC}"
-
-# ── 3. Configuration du clavier Mac français ─────────────────
-echo -e "${GREEN}→ Configuration du clavier Mac français (Apple AZERTY)...${NC}"
+# ── 2. Configuration du clavier Mac français ─────────────────
 if command -v setxkbmap &>/dev/null; then
-    setxkbmap -model apple -layout fr -variant mac -display "$DISPLAY" 2>/dev/null \
-        && echo -e "${GREEN}✓ Clavier Apple FR (variante mac) configuré${NC}" \
-        || echo -e "${YELLOW}⚠ setxkbmap a échoué — clavier par défaut conservé${NC}"
-else
-    echo -e "${YELLOW}⚠ setxkbmap non disponible${NC}"
+    setxkbmap -model apple -layout fr -variant mac -display "$DISPLAY" 2>/dev/null || true
 fi
 
-# ── 4. Configuration trackpad / pointeur X11 ─────────────────
-# Sur MacBook Air avec XQuartz, le trackpad envoie des événements souris X11.
-# On ajuste :
-#   - xset m : accélération du pointeur adaptée au trackpad
-#              (ratio 2/1, seuil 4 px) — plus confortable sans souris physique
-#   - xset r rate : délai avant répétition clavier (250 ms) + vitesse (40/s)
-echo -e "${GREEN}→ Configuration du pointeur (trackpad MacBook)...${NC}"
-if command -v xset &>/dev/null; then
-    # Accélération modérée, seuil bas → bon compromis trackpad
-    xset m 2/1 4 -display "$DISPLAY" 2>/dev/null || true
-    # Répétition clavier fluide
-    xset r rate 250 40 -display "$DISPLAY" 2>/dev/null || true
-    echo -e "${GREEN}✓ Pointeur et clavier configurés${NC}"
-fi
-
-# ── 5. Configuration GTK pour trackpad sans souris ───────────
-# AMC utilise GTK3. Ces paramètres améliorent l'ergonomie au trackpad :
-#   - double_click_time élevé     → double-tap moins exigeant
-#   - dnd_drag_threshold élevé    → évite les drags accidentels en tapant
-#   - primary_button_warps_slider → clic simple sur scrollbar = aller à la position
-#   - overlay_scrolling = false   → scrollbars toujours visibles (pas de survol requis)
-echo -e "${GREEN}→ Configuration GTK3 (trackpad)...${NC}"
+# ── 3. Configuration GTK ─────────────────────────────────────
 mkdir -p /root/.config/gtk-3.0
 cat > /root/.config/gtk-3.0/settings.ini << 'GTK_EOF'
 [Settings]
-# Double-tap plus tolérant (défaut 250 ms → 400 ms)
 gtk-double-click-time=400
-# Distance tolérée pour le double-clic (défaut 5 → 8 px)
 gtk-double-click-distance=8
-# Seuil avant qu'un appui soit considéré comme un drag (évite les drags accidentels)
 gtk-dnd-drag-threshold=12
-# Clic sur la scrollbar = aller directement à la position cliquée
 gtk-primary-button-warps-slider=true
-# Scrollbars toujours visibles (pas de scroll "overlay" qui disparaît)
 gtk-overlay-scrolling=false
-# Curseur visible et clignotant
-gtk-cursor-blink=true
-gtk-cursor-blink-time=1200
-# Menus et tooltips réactifs
-gtk-tooltip-timeout=800
-gtk-menu-popup-delay=200
 GTK_EOF
-echo -e "${GREEN}✓ GTK3 configuré pour trackpad${NC}"
 
-# GTK2 (AMC utilise peut-être encore quelques widgets GTK2)
 mkdir -p /root/.config/gtk-2.0
 cat > /root/.config/gtk-2.0/gtkrc << 'GTK2_EOF'
 gtk-double-click-time = 400
 gtk-double-click-distance = 8
 gtk-dnd-drag-threshold = 12
-# Thème Raleigh : pas de visuels ARGB/compositing → corrige le fond noir
-gtk-theme-name = "Raleigh"
 GTK2_EOF
 
-# ── 6. Lancement d'AMC ──────────────────────────────────────
+# ── 4. Lancement d'AMC ──────────────────────────────────────
 echo -e "${GREEN}→ Lancement de Auto-Multiple-Choice...${NC}"
 echo ""
 exec "$@"

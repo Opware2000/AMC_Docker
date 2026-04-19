@@ -1,6 +1,7 @@
 #!/bin/bash
 # ============================================================
 # launch.sh — Lance AMC Docker sur MacBook Air Apple Silicon
+#             Mode VNC (pas besoin de XQuartz)
 # ============================================================
 
 set -e
@@ -30,108 +31,11 @@ if ! docker info &>/dev/null; then
 fi
 echo -e "${GREEN}✓ Docker opérationnel${NC}"
 
-# ── 2. Vérification XQuartz ─────────────────────────────────
-XQUARTZ_APP="/Applications/Utilities/XQuartz.app"
-if [ ! -d "$XQUARTZ_APP" ]; then
-    echo -e "${RED}✗ XQuartz n'est pas installé${NC}"
-    echo "  brew install --cask xquartz  ou  https://www.xquartz.org/"
-    exit 1
-fi
-echo -e "${GREEN}✓ XQuartz trouvé${NC}"
-
-# ── 3. Lancement de XQuartz ─────────────────────────────────
-if ! pgrep -x "Xquartz" &>/dev/null && ! pgrep -f "XQuartz" &>/dev/null; then
-    echo -e "${YELLOW}→ Démarrage de XQuartz...${NC}"
-    open -a XQuartz
-    echo "  Attente du démarrage (15 secondes max)..."
-    for i in {1..15}; do
-        sleep 1
-        if xdpyinfo -display :0 &>/dev/null 2>&1; then
-            break
-        fi
-    done
-else
-    echo -e "${GREEN}✓ XQuartz déjà lancé${NC}"
-fi
-
-# ── 4. Vérification des préférences XQuartz pour le trackpad ─
-# XQuartz doit avoir "Emulate three button mouse" activé pour le clic droit
-# et "Follow system keyboard" pour le clavier Mac.
-# On affiche un rappel si c'est la première fois.
-XQUARTZ_PREFS="$HOME/Library/Preferences/org.xquartz.X11.plist"
-XQUARTZ_CHECKED="$HOME/.amc_xquartz_checked"
-
-if [ ! -f "$XQUARTZ_CHECKED" ]; then
-    echo ""
-    echo -e "${YELLOW}╔══════════════════════════════════════════════════════╗${NC}"
-    echo -e "${YELLOW}║  PREMIÈRE UTILISATION — Vérifiez XQuartz (trackpad)  ║${NC}"
-    echo -e "${YELLOW}╠══════════════════════════════════════════════════════╣${NC}"
-    echo -e "${YELLOW}║  Dans XQuartz > Réglages :                           ║${NC}"
-    echo -e "${YELLOW}║                                                      ║${NC}"
-    echo -e "${YELLOW}║  Onglet « Entrée » :                                 ║${NC}"
-    echo -e "${YELLOW}║  ☑ Émuler une souris à 3 boutons                     ║${NC}"
-    echo -e "${YELLOW}║    → Clic droit = deux doigts sur le trackpad        ║${NC}"
-    echo -e "${YELLOW}║    → Clic milieu = Option + clic                     ║${NC}"
-    echo -e "${YELLOW}║  ☑ Utiliser le réglage OSX de vitesse souris         ║${NC}"
-    echo -e "${YELLOW}║                                                      ║${NC}"
-    echo -e "${YELLOW}║  Onglet « Sécurité » :                               ║${NC}"
-    echo -e "${YELLOW}║  ☑ Autoriser les connexions réseau                   ║${NC}"
-    echo -e "${YELLOW}╚══════════════════════════════════════════════════════╝${NC}"
-    echo ""
-    echo "  Appuyez sur Entrée une fois XQuartz configuré..."
-    read -r
-    touch "$XQUARTZ_CHECKED"
-fi
-
-# ── 4b. Forcer nolisten_tcp=0 (XQuartz doit écouter en TCP) ──
-if defaults read org.xquartz.X11 nolisten_tcp 2>/dev/null | grep -q 1; then
-    echo -e "${YELLOW}→ Correction nolisten_tcp (XQuartz doit redémarrer)...${NC}"
-    defaults write org.xquartz.X11 nolisten_tcp 0
-    pkill -x Xquartz 2>/dev/null || true
-    sleep 2
-    open -a XQuartz
-    sleep 5
-fi
-
-# ── 4c. Désactiver RENDER extension (fond noir sur Apple Silicon) ──
-_RENDER=$(defaults read org.xquartz.X11 enable_render_extension 2>/dev/null || echo "1")
-if [ "$_RENDER" != "0" ]; then
-    echo -e "${YELLOW}→ Désactivation RENDER extension XQuartz (fond noir Apple Silicon)...${NC}"
-    defaults write org.xquartz.X11 enable_render_extension -bool false
-    pkill -x Xquartz 2>/dev/null || true
-    sleep 2
-    open -a XQuartz
-    sleep 5
-    echo -e "${GREEN}✓ RENDER extension désactivée${NC}"
-fi
-
-# ── 5. Vérification TCP XQuartz (port 6000) ─────────────────
-if ! nc -z 127.0.0.1 6000 2>/dev/null; then
-    echo -e "${RED}✗ XQuartz n'écoute pas sur TCP (port 6000)${NC}"
-    echo ""
-    echo -e "${YELLOW}  Action requise :${NC}"
-    echo "  1. Ouvrez XQuartz > Réglages > onglet « Sécurité »"
-    echo "  2. Cochez ☑ « Autoriser les connexions réseau »"
-    echo "  3. Quittez XQuartz complètement (⌘Q)"
-    echo "  4. Relancez : open -a XQuartz"
-    echo "  5. Relancez ce script"
-    echo ""
-    # Réinitialise le flag pour forcer l'affichage du guide au prochain lancement
-    rm -f "$XQUARTZ_CHECKED"
-    exit 1
-fi
-
-# ── 6. Configuration xhost ──────────────────────────────────
-# xhost + nécessaire car Docker connecte via l'IP du gateway VM (pas 127.0.0.1)
-echo -e "${YELLOW}→ Autorisation X11 depuis Docker...${NC}"
-xhost + 2>/dev/null || true
-echo -e "${GREEN}✓ Accès X11 configuré${NC}"
-
-# ── 7. Construction de l'image si nécessaire ────────────────
+# ── 2. Construction de l'image si nécessaire ────────────────
 if ! docker image inspect amc-nqcm:latest &>/dev/null; then
     echo ""
     echo -e "${YELLOW}→ Première utilisation : construction de l'image Docker...${NC}"
-    echo -e "${YELLOW}  texlive-full ≈ 4 Go — comptez 20 à 40 minutes${NC}"
+    echo -e "${YELLOW}  Cela peut prendre 10 à 20 minutes...${NC}"
     echo ""
     docker compose build
     echo -e "${GREEN}✓ Image construite${NC}"
@@ -139,12 +43,38 @@ else
     echo -e "${GREEN}✓ Image déjà construite${NC}"
 fi
 
-# ── 8. Lancement d'AMC ──────────────────────────────────────
+# ── 3. Lancement d'AMC ──────────────────────────────────────
 echo ""
-echo -e "${GREEN}→ Lancement d'AMC...${NC}"
+echo -e "${GREEN}→ Lancement d'AMC (mode VNC)...${NC}"
 echo ""
 
-DISPLAY=docker.for.mac.host.internal:0 docker compose up --remove-orphans
+docker compose up --remove-orphans -d
+
+# Attendre que x11vnc soit prêt
+echo -e "${YELLOW}→ Attente du serveur VNC...${NC}"
+for i in {1..20}; do
+    sleep 1
+    if curl -sf http://localhost:6080/vnc.html -o /dev/null 2>/dev/null; then
+        break
+    fi
+done
+
+if curl -sf http://localhost:6080/vnc.html -o /dev/null 2>/dev/null; then
+    echo -e "${GREEN}✓ noVNC disponible${NC}"
+    echo ""
+    echo -e "${BLUE}→ Connexion à AMC :${NC}"
+    echo -e "   ${YELLOW}http://localhost:6080/vnc.html${NC}"
+    echo ""
+    open "http://localhost:6080/vnc.html"
+    echo -e "${YELLOW}  (Appuyez sur Entrée pour arrêter AMC)${NC}"
+    read -r
+    docker compose down
+else
+    echo -e "${RED}✗ Le serveur noVNC n'a pas démarré${NC}"
+    docker compose logs
+    docker compose down
+    exit 1
+fi
 
 echo ""
 echo -e "${BLUE}AMC terminé.${NC}"
