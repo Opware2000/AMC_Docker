@@ -83,13 +83,29 @@ if [ ! -f "$XQUARTZ_CHECKED" ]; then
     touch "$XQUARTZ_CHECKED"
 fi
 
-# ── 5. Configuration xhost ──────────────────────────────────
+# ── 5. Vérification TCP XQuartz (port 6000) ─────────────────
+if ! nc -z 127.0.0.1 6000 2>/dev/null; then
+    echo -e "${RED}✗ XQuartz n'écoute pas sur TCP (port 6000)${NC}"
+    echo ""
+    echo -e "${YELLOW}  Action requise :${NC}"
+    echo "  1. Ouvrez XQuartz > Réglages > onglet « Sécurité »"
+    echo "  2. Cochez ☑ « Autoriser les connexions réseau »"
+    echo "  3. Quittez XQuartz complètement (⌘Q)"
+    echo "  4. Relancez : open -a XQuartz"
+    echo "  5. Relancez ce script"
+    echo ""
+    # Réinitialise le flag pour forcer l'affichage du guide au prochain lancement
+    rm -f "$XQUARTZ_CHECKED"
+    exit 1
+fi
+
+# ── 6. Configuration xhost ──────────────────────────────────
 echo -e "${YELLOW}→ Autorisation X11 depuis Docker...${NC}"
 xhost +127.0.0.1 2>/dev/null || true
 xhost +localhost  2>/dev/null || true
 echo -e "${GREEN}✓ Accès X11 configuré${NC}"
 
-# ── 6. Construction de l'image si nécessaire ────────────────
+# ── 7. Construction de l'image si nécessaire ────────────────
 if ! docker image inspect amc-nqcm:latest &>/dev/null; then
     echo ""
     echo -e "${YELLOW}→ Première utilisation : construction de l'image Docker...${NC}"
@@ -101,7 +117,7 @@ else
     echo -e "${GREEN}✓ Image déjà construite${NC}"
 fi
 
-# ── 7. Lancement d'AMC ──────────────────────────────────────
+# ── 8. Lancement d'AMC ──────────────────────────────────────
 echo ""
 echo -e "${GREEN}→ Lancement d'AMC...${NC}"
 echo ""
