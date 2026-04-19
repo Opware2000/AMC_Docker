@@ -29,6 +29,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     unzip \
     rsync \
+    # Notifications bureau
+    libnotify-bin \
     # X11 — affichage et clavier
     x11-xserver-utils \
     x11-utils \
