@@ -19,7 +19,7 @@ echo -e "${GREEN}=== AMC Docker — Démarrage (mode VNC) ===${NC}"
 # ── 0. Démarrage Xvfb + x11vnc ──────────────────────────────
 VNC_DISPLAY=:99
 VNC_PORT=5900
-VNC_GEOMETRY="${VNC_GEOMETRY:-1280x900}"
+VNC_GEOMETRY="${VNC_GEOMETRY:-2560x1600}"
 
 echo -e "${GREEN}→ Démarrage Xvfb ($VNC_GEOMETRY)...${NC}"
 Xvfb "$VNC_DISPLAY" -screen 0 "${VNC_GEOMETRY}x24" -ac &

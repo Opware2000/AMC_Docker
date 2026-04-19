@@ -63,9 +63,12 @@ if curl -sf http://localhost:6080/vnc.html -o /dev/null 2>/dev/null; then
     echo -e "${GREEN}✓ noVNC disponible${NC}"
     echo ""
     echo -e "${BLUE}→ Connexion à AMC :${NC}"
-    echo -e "   ${YELLOW}http://localhost:6080/vnc.html${NC}"
+    echo -e "   ${YELLOW}http://localhost:6080/vnc.html?resize=scale${NC}"
     echo ""
-    open "http://localhost:6080/vnc.html"
+    open -a Safari "http://localhost:6080/vnc.html?resize=scale"
+    sleep 1
+    osascript -e 'tell application "Safari" to activate' \
+              -e 'tell application "System Events" to keystroke "f" using {command down, control down}'
     echo -e "${YELLOW}  (Appuyez sur Entrée pour arrêter AMC)${NC}"
     read -r
     docker compose down
