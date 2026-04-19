@@ -37,6 +37,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Notifications bureau (module Perl + binaire notify-send)
     libdesktop-notify-perl \
     libnotify-bin \
+    # Modules Perl pour l'export AMC (notes, PDF)
+    libpango-perl \
+    libgtk3-perl \
     # X11 — affichage et clavier
     x11-xserver-utils \
     x11-utils \
@@ -49,6 +52,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # noVNC — client VNC dans le navigateur
     novnc \
     websockify \
+    # gnumeric/ssconvert (conversion ODS→PDF pour l'export AMC, ~30 Mo)
+    gnumeric \
     && echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen \
     && locale-gen \
     && printf 'LANG=fr_FR.UTF-8\nLC_ALL=fr_FR.UTF-8\nLANGUAGE=fr_FR:fr\n' > /etc/default/locale \
@@ -60,8 +65,23 @@ RUN apt-get update \
     && apt-get install --reinstall -y auto-multiple-choice-common \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# ── 2b. Module Perl OpenOffice::OODoc (export OpenDocument depuis AMC) ───────
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    cpanminus \
+    libarchive-zip-perl \
+    libxml-parser-perl \
+    libxml-twig-perl \
+    && cpanm --notest OpenOffice::OODoc \
+    && apt-get purge -y cpanminus \
+    && apt-get autoremove -y \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # ── 3. Stubs pour commandes optionnelles signalées manquantes par AMC ────────
-RUN for cmd in texmaker libreoffice gnome-text-editor gnumeric papers eog; do \
+# libreoffice — AMC l'appelle avec --convert-to pdf ; ssconvert fait la conversion
+COPY libreoffice-stub.sh /usr/local/bin/libreoffice
+RUN chmod +x /usr/local/bin/libreoffice
+RUN for cmd in texmaker gnome-text-editor papers eog; do \
     printf '#!/bin/sh\ncurl -sf "http://host.docker.internal:6081/open?file=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "${1:-}" 2>/dev/null)&app=%s" || true\n' "$cmd" \
     > "/usr/local/bin/$cmd" && chmod +x "/usr/local/bin/$cmd"; \
     done && \
