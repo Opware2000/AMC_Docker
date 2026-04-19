@@ -29,8 +29,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     unzip \
     rsync \
-    # Notifications bureau (module Perl Desktop::Notify)
+    # Notifications bureau (module Perl + binaire notify-send)
     libdesktop-notify-perl \
+    libnotify-bin \
     # X11 — affichage et clavier
     x11-xserver-utils \
     x11-utils \
@@ -60,4 +61,4 @@ RUN chmod +x /entrypoint.sh
 
 WORKDIR /amc/projets
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["auto-multiple-choice"]
+CMD ["auto-multiple-choice", "gui"]
