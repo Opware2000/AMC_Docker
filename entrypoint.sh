@@ -120,6 +120,8 @@ cat > /root/.config/gtk-2.0/gtkrc << 'GTK2_EOF'
 gtk-double-click-time = 400
 gtk-double-click-distance = 8
 gtk-dnd-drag-threshold = 12
+# Thème Raleigh : pas de visuels ARGB/compositing → corrige le fond noir
+gtk-theme-name = "Raleigh"
 GTK2_EOF
 
 # ── 6. Lancement d'AMC ──────────────────────────────────────

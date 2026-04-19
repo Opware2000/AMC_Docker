@@ -29,8 +29,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     unzip \
     rsync \
-    # Notifications bureau
-    libnotify-bin \
+    # Notifications bureau (module Perl Desktop::Notify)
+    libdesktop-notify-perl \
     # X11 — affichage et clavier
     x11-xserver-utils \
     x11-utils \
