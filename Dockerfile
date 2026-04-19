@@ -76,6 +76,6 @@ RUN printf '#!/bin/sh\nexit 0\n' > /usr/local/bin/notify-send && \
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-WORKDIR /amc/projets
+WORKDIR /amc/controles
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["auto-multiple-choice", "gui"]

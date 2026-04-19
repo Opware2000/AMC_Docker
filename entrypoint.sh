@@ -92,7 +92,13 @@ gtk-double-click-distance = 8
 gtk-dnd-drag-threshold = 12
 GTK2_EOF
 
+# Favoris GTK (visibles dans la barre latérale des dialogues Ouvrir/Enregistrer)
+cat > /root/.config/gtk-3.0/bookmarks << 'BOOKMARKS_EOF'
+file:///amc/controles Contrôles
+file:///amc/scan SCAN
+BOOKMARKS_EOF
+
 # ── 4. Lancement d'AMC ──────────────────────────────────────
 echo -e "${GREEN}→ Lancement de Auto-Multiple-Choice...${NC}"
 echo ""
-exec "$@"
+exec "$@" --projects "${AMC_PROJECTS_DIR:-/amc/controles}"
