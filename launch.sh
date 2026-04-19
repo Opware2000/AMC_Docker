@@ -43,7 +43,53 @@ else
     echo -e "${GREEN}✓ Image déjà construite${NC}"
 fi
 
-# ── 3. Lancement d'AMC ──────────────────────────────────────
+# ── 3. Pont Mac-bridge (ouvre les fichiers avec les apps Mac) ──────────────
+BRIDGE_PID=""
+if command -v python3 &>/dev/null; then
+    python3 - <<'BRIDGE_EOF' &
+import http.server, urllib.parse, subprocess
+
+PATH_MAP = {
+    "/amc/controles": "/Users/nicolasogier/Library/CloudStorage/Dropbox/COURS/CONTROLES",
+    "/amc/scan":      "/Users/nicolasogier/Library/CloudStorage/Dropbox/COURS/CONTROLES/SCAN",
+    "/nqcm":          "/Users/nicolasogier/workspaces/Latex/nQcm",
+}
+APP_MAP = {
+    "texmaker":          None,
+    "libreoffice":       "LibreOffice",
+    "gnome-text-editor": "TextEdit",
+    "nautilus":          "Finder",
+    "gnumeric":          "Numbers",
+    "papers":            "Preview",
+    "eog":               "Preview",
+}
+
+class Handler(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        params = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        file = params.get("file", [""])[0]
+        app  = params.get("app",  [""])[0]
+        mac_path = file
+        for cp, mp in PATH_MAP.items():
+            if file.startswith(cp):
+                mac_path = mp + file[len(cp):]
+                break
+        cmd = ["open"]
+        mac_app = APP_MAP.get(app)
+        if mac_app:
+            cmd += ["-a", mac_app]
+        cmd.append(mac_path)
+        subprocess.Popen(cmd)
+        self.send_response(200); self.end_headers()
+    def log_message(self, *a): pass
+
+http.server.HTTPServer(("127.0.0.1", 6081), Handler).serve_forever()
+BRIDGE_EOF
+    BRIDGE_PID=$!
+    echo -e "${GREEN}✓ Pont Mac-bridge démarré (port 6081)${NC}"
+fi
+
+# ── 4. Lancement d'AMC ──────────────────────────────────────
 echo ""
 echo -e "${GREEN}→ Lancement d'AMC (mode VNC)...${NC}"
 echo ""
@@ -70,6 +116,7 @@ if curl -sf http://localhost:6080/vnc.html -o /dev/null 2>/dev/null; then
     echo -e "${YELLOW}  (Appuyez sur Entrée pour arrêter AMC)${NC}"
     read -r
     docker compose down
+    [ -n "$BRIDGE_PID" ] && kill "$BRIDGE_PID" 2>/dev/null || true
 else
     echo -e "${RED}✗ Le serveur noVNC n'a pas démarré${NC}"
     docker compose logs

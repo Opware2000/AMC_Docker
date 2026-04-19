@@ -62,10 +62,10 @@ RUN apt-get update \
 
 # ── 3. Stubs pour commandes optionnelles signalées manquantes par AMC ────────
 RUN for cmd in texmaker libreoffice gnome-text-editor gnumeric papers eog; do \
-    printf '#!/bin/sh\necho "[Docker] %s non disponible dans ce conteneur" >&2\nexit 1\n' "$cmd" \
+    printf '#!/bin/sh\ncurl -sf "http://host.docker.internal:6081/open?file=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "${1:-}" 2>/dev/null)&app=%s" || true\n' "$cmd" \
     > "/usr/local/bin/$cmd" && chmod +x "/usr/local/bin/$cmd"; \
     done && \
-    printf '#!/bin/sh\necho "[Docker] nautilus non disponible" >&2\nexit 1\n' \
+    printf '#!/bin/sh\n# nautilus reçoit file:///chemin\npath="${1#file://}"\ncurl -sf "http://host.docker.internal:6081/open?file=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$path" 2>/dev/null)&app=nautilus" || true\n' \
     > /usr/local/bin/nautilus && chmod +x /usr/local/bin/nautilus
 
 # ── 4. Politique ImageMagick (autorise PDF) ──────────────────
