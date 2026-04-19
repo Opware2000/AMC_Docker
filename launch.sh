@@ -125,7 +125,10 @@ if [ "$XPRA_READY" -eq 1 ]; then
     echo -e "${YELLOW}  (Fermez la fenêtre AMC ou appuyez sur Ctrl+C pour arrêter)${NC}"
 
     # Arrêt propre sur Ctrl+C ou fermeture de la fenêtre AMC
+    _CLEANUP_DONE=0
     cleanup() {
+        [ "$_CLEANUP_DONE" -eq 1 ] && return
+        _CLEANUP_DONE=1
         echo ""
         echo -e "${BLUE}→ Arrêt d'AMC...${NC}"
         kill "$XPRA_CLIENT_PID" 2>/dev/null || true
@@ -134,8 +137,14 @@ if [ "$XPRA_READY" -eq 1 ]; then
     }
     trap cleanup INT TERM
 
-    # Attendre la fin du client Xpra (fenêtre fermée) ou un signal
-    wait "$XPRA_CLIENT_PID" 2>/dev/null || true
+    # Attendre la fin du client Xpra (fenêtre fermée = plus aucune fenêtre active)
+    # ou un signal Ctrl+C. On surveille les logs Docker pour détecter "server shutdown"
+    while kill -0 "$XPRA_CLIENT_PID" 2>/dev/null; do
+        if docker logs amc_docker-amc-1 2>&1 | grep -q "server shutdown\|Exiting"; then
+            break
+        fi
+        sleep 1
+    done
     cleanup
 else
     echo -e "${RED}✗ Le serveur Xpra n'a pas démarré${NC}"
