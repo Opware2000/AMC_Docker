@@ -42,6 +42,14 @@ if [ -z "$DISPLAY" ]; then
     exit 1
 fi
 
+# Force IPv4 : getent hosts peut retourner une IPv6 inaccessible depuis Docker
+_DISP_HOST=$(echo "$DISPLAY" | cut -d: -f1)
+_DISP_NUM=$(echo "$DISPLAY" | cut -d: -f2-)
+_DISP_IPV4=$(getent ahostsv4 "$_DISP_HOST" 2>/dev/null | head -1 | awk '{print $1}')
+if [ -n "$_DISP_IPV4" ]; then
+    export DISPLAY="$_DISP_IPV4:$_DISP_NUM"
+fi
+
 echo -e "${GREEN}→ DISPLAY = $DISPLAY${NC}"
 
 if ! xdpyinfo -display "$DISPLAY" >/dev/null 2>&1; then
