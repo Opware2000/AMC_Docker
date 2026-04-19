@@ -22,6 +22,7 @@ VNC_PORT=5900
 VNC_GEOMETRY="${VNC_GEOMETRY:-2560x1600}"
 
 echo -e "${GREEN}→ Démarrage Xvfb ($VNC_GEOMETRY)...${NC}"
+rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 2>/dev/null || true
 Xvfb "$VNC_DISPLAY" -screen 0 "${VNC_GEOMETRY}x24" -ac &
 XVFB_PID=$!
 sleep 1
