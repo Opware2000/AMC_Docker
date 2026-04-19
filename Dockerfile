@@ -14,6 +14,18 @@ ENV LANGUAGE=fr_FR:fr
 RUN echo 'path-include /usr/share/locale/fr/*' \
     >> /etc/dpkg/dpkg.cfg.d/docker
 
+# ── 0b. Dépôt officiel Xpra (xpra n'est pas dans Debian) ────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gnupg \
+    ca-certificates \
+    curl \
+    && mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://xpra.org/xpra.asc \
+    | gpg --dearmor -o /etc/apt/keyrings/xpra.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/xpra.gpg] https://xpra.org/deb/bookworm/ bookworm main" \
+    > /etc/apt/sources.list.d/xpra.list \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # ── 1. Dépendances système ───────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
     # AMC et ses dépendances Perl/système
