@@ -36,6 +36,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     x11-xkb-utils \
     xkb-data \
     && locale-gen fr_FR.UTF-8 \
+    && update-locale LANG=fr_FR.UTF-8 LC_ALL=fr_FR.UTF-8 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
