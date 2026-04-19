@@ -1,8 +1,8 @@
 # ============================================================
 # Auto-Multiple-Choice — Docker image pour Apple Silicon (ARM64)
-# Base : Debian Bookworm (native arm64, pas d'émulation)
+# Base : texlive/texlive (Debian + TeX Live upstream complet, arm64)
 # ============================================================
-FROM debian:bookworm-slim
+FROM texlive/texlive:latest
 
 # Évite les questions interactives pendant apt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -13,8 +13,6 @@ ENV LC_ALL=fr_FR.UTF-8
 RUN apt-get update && apt-get install -y --no-install-recommends \
     # AMC et ses dépendances Perl/système
     auto-multiple-choice \
-    # TeX Live complet (long à télécharger, ~4 Go — une seule fois)
-    texlive-full \
     # Polices requises par AMC
     fonts-linuxlibertine \
     fonts-dejavu \
