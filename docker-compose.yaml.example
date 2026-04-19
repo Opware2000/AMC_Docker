@@ -1,7 +1,7 @@
 # ============================================================
 # Auto-Multiple-Choice — docker-compose pour Mac Apple Silicon
 # ============================================================
-# Prérequis : aucun (mode VNC — pas besoin de XQuartz)
+# Prérequis : Xpra installé sur Mac (https://xpra.org/downloads/)
 # Usage     : Copiez ce fichier en docker-compose.yml
 #             Adaptez les chemins des volumes ci-dessous
 #             puis lancez : ./launch.sh
@@ -21,11 +21,10 @@ services:
     environment:
       - LANG=fr_FR.UTF-8
       - LC_ALL=fr_FR.UTF-8
-      - VNC_GEOMETRY=1440x900    # Résolution VNC (ex: 1920x1200)
 
-    # ── Port noVNC (navigateur) ────────────────────────────
+    # ── Port Xpra (client natif Mac) ──────────────────────
     ports:
-      - "6080:6080"
+      - "14500:14500"
 
     # ── Volumes — ADAPTEZ CES CHEMINS ─────────────────────
     volumes:
