@@ -68,7 +68,7 @@ AMC_CMD="${*:-auto-multiple-choice gui}"
 rm -f "/tmp/.X${XPRA_DISPLAY#:}-lock" "/tmp/.X11-unix/X${XPRA_DISPLAY#:}" 2>/dev/null || true
 
 echo -e "${GREEN}→ Démarrage xpra (port $XPRA_PORT)...${NC}"
-echo -e "${YELLOW}  Sur Mac : xpra attach tcp://localhost:$XPRA_PORT/${NC}"
+echo -e "${YELLOW}  Sur Mac : xpra attach tcp://127.0.0.1:$XPRA_PORT/${NC}"
 echo ""
 
 # setxkbmap sera appelé par xpra via env DISPLAY une fois qu'il est prêt
@@ -76,7 +76,8 @@ export XPRA_KEYBOARD_LAYOUT="fr"
 export XPRA_KEYBOARD_MODEL="apple"
 
 exec xpra start "$XPRA_DISPLAY" \
-    --bind-tcp=0.0.0.0:$XPRA_PORT,auth=none \
+    --bind-tcp=0.0.0.0:$XPRA_PORT \
+    --tcp-auth=none \
     --html=off \
     --daemon=no \
     --exit-with-children=yes \
@@ -86,5 +87,4 @@ exec xpra start "$XPRA_DISPLAY" \
     --notifications=no \
     --mdns=no \
     --keyboard-layout=fr \
-    --keyboard-model=apple \
-    --log-file=/tmp/xpra.log
+    --keyboard-model=apple

@@ -44,6 +44,8 @@ else
 fi
 
 # ── 3. Pont Mac-bridge (ouvre les fichiers avec les apps Mac) ──────────────
+# Tuer tout process qui occuperait déjà le port 6081
+lsof -ti tcp:6081 | xargs kill -9 2>/dev/null || true
 BRIDGE_PID=""
 if command -v python3 &>/dev/null; then
     python3 - <<'BRIDGE_EOF' &
@@ -99,23 +101,26 @@ echo ""
 
 docker compose up --remove-orphans -d
 
-# Attendre que xpra soit prêt (port 14500 ouvert)
+# Attendre que xpra ait réellement ouvert le TCP socket (pas juste le port Docker)
+# nc -z retourne vrai dès que Docker mappe le port, avant que xpra le bind — on attend "xpra is ready"
 echo -e "${YELLOW}→ Attente du serveur Xpra...${NC}"
-for i in {1..20}; do
+XPRA_READY=0
+for i in {1..30}; do
     sleep 1
-    if nc -z localhost 14500 2>/dev/null; then
+    # xpra écrit sur stderr (capturé par docker logs) depuis que --log-file a été retiré
+    if docker logs amc_docker-amc-1 2>&1 | grep -q "xpra is ready"; then
+        XPRA_READY=1
         break
     fi
 done
 
-if nc -z localhost 14500 2>/dev/null; then
+if [ "$XPRA_READY" -eq 1 ]; then
     echo -e "${GREEN}✓ Xpra disponible${NC}"
-    # Laisser le temps à xpra de finir son initialisation avant que le client se connecte
-    sleep 3
     echo ""
     echo -e "${BLUE}→ Ouverture de la fenêtre AMC...${NC}"
     # Lance xpra attach en arrière-plan (ouvre la fenêtre native Mac)
-    /Applications/Xpra.app/Contents/MacOS/Xpra attach tcp://localhost:14500/ &
+    # 127.0.0.1 force IPv4 — Docker n'écoute pas sur IPv6
+    /Applications/Xpra.app/Contents/MacOS/Xpra attach --username=root tcp://127.0.0.1:14500/ &
     XPRA_CLIENT_PID=$!
     echo -e "${YELLOW}  (Appuyez sur Entrée pour arrêter AMC)${NC}"
     read -r
