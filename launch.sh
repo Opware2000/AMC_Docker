@@ -122,11 +122,21 @@ if [ "$XPRA_READY" -eq 1 ]; then
     # 127.0.0.1 force IPv4 — Docker n'écoute pas sur IPv6
     /Applications/Xpra.app/Contents/MacOS/Xpra attach --username=root tcp://127.0.0.1:14500/ &
     XPRA_CLIENT_PID=$!
-    echo -e "${YELLOW}  (Appuyez sur Entrée pour arrêter AMC)${NC}"
-    read -r
-    kill "$XPRA_CLIENT_PID" 2>/dev/null || true
-    docker compose down
-    [ -n "$BRIDGE_PID" ] && kill "$BRIDGE_PID" 2>/dev/null || true
+    echo -e "${YELLOW}  (Fermez la fenêtre AMC ou appuyez sur Ctrl+C pour arrêter)${NC}"
+
+    # Arrêt propre sur Ctrl+C ou fermeture de la fenêtre AMC
+    cleanup() {
+        echo ""
+        echo -e "${BLUE}→ Arrêt d'AMC...${NC}"
+        kill "$XPRA_CLIENT_PID" 2>/dev/null || true
+        docker compose down
+        [ -n "$BRIDGE_PID" ] && kill "$BRIDGE_PID" 2>/dev/null || true
+    }
+    trap cleanup INT TERM
+
+    # Attendre la fin du client Xpra (fenêtre fermée) ou un signal
+    wait "$XPRA_CLIENT_PID" 2>/dev/null || true
+    cleanup
 else
     echo -e "${RED}✗ Le serveur Xpra n'a pas démarré${NC}"
     docker compose logs
