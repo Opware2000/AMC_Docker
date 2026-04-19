@@ -93,6 +93,18 @@ if defaults read org.xquartz.X11 nolisten_tcp 2>/dev/null | grep -q 1; then
     sleep 5
 fi
 
+# ── 4c. Désactiver RENDER extension (fond noir sur Apple Silicon) ──
+_RENDER=$(defaults read org.xquartz.X11 enable_render_extension 2>/dev/null || echo "1")
+if [ "$_RENDER" != "0" ]; then
+    echo -e "${YELLOW}→ Désactivation RENDER extension XQuartz (fond noir Apple Silicon)...${NC}"
+    defaults write org.xquartz.X11 enable_render_extension -bool false
+    pkill -x Xquartz 2>/dev/null || true
+    sleep 2
+    open -a XQuartz
+    sleep 5
+    echo -e "${GREEN}✓ RENDER extension désactivée${NC}"
+fi
+
 # ── 5. Vérification TCP XQuartz (port 6000) ─────────────────
 if ! nc -z 127.0.0.1 6000 2>/dev/null; then
     echo -e "${RED}✗ XQuartz n'écoute pas sur TCP (port 6000)${NC}"
