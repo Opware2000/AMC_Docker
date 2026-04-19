@@ -16,14 +16,11 @@ RUN echo 'path-include /usr/share/locale/fr/*' \
 
 # ── 0b. Dépôt officiel Xpra (xpra n'est pas dans Debian) ────
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gnupg \
-    ca-certificates \
-    curl \
-    && mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://xpra.org/xpra.asc \
-    | gpg --dearmor -o /etc/apt/keyrings/xpra.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/xpra.gpg] https://xpra.org/deb/bookworm/ bookworm main" \
-    > /etc/apt/sources.list.d/xpra.list \
+        ca-certificates \
+        curl \
+    && curl -fsSL https://xpra.org/xpra.asc -o /usr/share/keyrings/xpra.asc \
+    && printf 'Types: deb\nURIs: https://xpra.org\nSuites: forky\nComponents: main\nSigned-By: /usr/share/keyrings/xpra.asc\nArchitectures: arm64\n' \
+       > /etc/apt/sources.list.d/xpra.sources \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # ── 1. Dépendances système ───────────────────────────────────
