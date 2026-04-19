@@ -8,6 +8,11 @@ FROM texlive/texlive:latest
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=fr_FR.UTF-8
 ENV LC_ALL=fr_FR.UTF-8
+ENV LANGUAGE=fr_FR:fr
+
+# ── 0. Autoriser les fichiers de locale française (filtrés par l'image slim) ─
+RUN echo 'path-include /usr/share/locale/fr/*' \
+    >> /etc/dpkg/dpkg.cfg.d/docker
 
 # ── 1. Dépendances système ───────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -46,11 +51,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     websockify \
     && echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen \
     && locale-gen \
-    && printf 'LANG=fr_FR.UTF-8\nLC_ALL=fr_FR.UTF-8\n' > /etc/default/locale \
+    && printf 'LANG=fr_FR.UTF-8\nLC_ALL=fr_FR.UTF-8\nLANGUAGE=fr_FR:fr\n' > /etc/default/locale \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# ── 2. Politique ImageMagick (autorise PDF) ──────────────────
+# ── 2. Réinstaller le paquet de traductions AMC (locales filtrées au départ) ─
+RUN apt-get update \
+    && apt-get install --reinstall -y auto-multiple-choice-common \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# ── 3. Stubs pour commandes optionnelles signalées manquantes par AMC ────────
+RUN for cmd in texmaker libreoffice gnome-text-editor gnumeric papers eog; do \
+    printf '#!/bin/sh\necho "[Docker] %s non disponible dans ce conteneur" >&2\nexit 1\n' "$cmd" \
+    > "/usr/local/bin/$cmd" && chmod +x "/usr/local/bin/$cmd"; \
+    done && \
+    printf '#!/bin/sh\necho "[Docker] nautilus non disponible" >&2\nexit 1\n' \
+    > /usr/local/bin/nautilus && chmod +x /usr/local/bin/nautilus
+
+# ── 4. Politique ImageMagick (autorise PDF) ──────────────────
 RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' \
     /etc/ImageMagick-6/policy.xml || true
 
