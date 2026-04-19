@@ -83,6 +83,16 @@ if [ ! -f "$XQUARTZ_CHECKED" ]; then
     touch "$XQUARTZ_CHECKED"
 fi
 
+# ── 4b. Forcer nolisten_tcp=0 (XQuartz doit écouter en TCP) ──
+if defaults read org.macosforge.xquartz.X11 nolisten_tcp 2>/dev/null | grep -q 1; then
+    echo -e "${YELLOW}→ Correction nolisten_tcp (XQuartz doit redémarrer)...${NC}"
+    defaults write org.macosforge.xquartz.X11 nolisten_tcp 0
+    pkill -x Xquartz 2>/dev/null || true
+    sleep 2
+    open -a XQuartz
+    sleep 5
+fi
+
 # ── 5. Vérification TCP XQuartz (port 6000) ─────────────────
 if ! nc -z 127.0.0.1 6000 2>/dev/null; then
     echo -e "${RED}✗ XQuartz n'écoute pas sur TCP (port 6000)${NC}"
