@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rsync \
     # X11 — affichage et clavier
     x11-xserver-utils \
+    x11-utils \
     x11-xkb-utils \
     xkb-data \
     && echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen \
