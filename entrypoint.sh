@@ -99,6 +99,9 @@ file:///amc/scan SCAN
 BOOKMARKS_EOF
 
 # ── 4. Lancement d'AMC ──────────────────────────────────────
+# Pointer le dossier projets par défaut d'AMC vers /amc/controles
+ln -sfn /amc/controles /root/MC-Projects
+
 echo -e "${GREEN}→ Lancement de Auto-Multiple-Choice...${NC}"
 echo ""
-exec "$@" --projects "${AMC_PROJECTS_DIR:-/amc/controles}"
+exec "$@"
