@@ -16,8 +16,8 @@ RUN echo 'path-include /usr/share/locale/fr/*' \
 
 # ── 0b. Clé GPG Xpra (dépôt ajouté séparément après les paquets Debian) ─────
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        curl \
+    ca-certificates \
+    curl \
     && curl -fsSL https://xpra.org/xpra.asc -o /usr/share/keyrings/xpra.asc \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -64,11 +64,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ── 1b. Xpra server (dépôt trixie — RUN séparé pour isoler les conflits) ────
 # Le dépôt xpra trixie est ajouté ici seulement, après les paquets Debian
 RUN printf 'Types: deb\nURIs: https://xpra.org\nSuites: trixie\nComponents: main\nSigned-By: /usr/share/keyrings/xpra.asc\nArchitectures: arm64\n' \
-       > /etc/apt/sources.list.d/xpra.sources \
+    > /etc/apt/sources.list.d/xpra.sources \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
-        xpra-server \
-        xpra-client-gtk3 \
+    xpra-server \
+    xpra-client-gtk3 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # ── 2. Réinstaller le paquet de traductions AMC (locales filtrées au départ) ─
