@@ -1,8 +1,10 @@
 # ============================================================
 # Auto-Multiple-Choice — docker-compose pour Mac Apple Silicon
 # ============================================================
-# Prérequis : XQuartz installé et configuré (voir README)
-# Usage     : ./launch.sh
+# Prérequis : aucun (mode VNC — pas besoin de XQuartz)
+# Usage     : Copiez ce fichier en docker-compose.yml
+#             Adaptez les chemins des volumes ci-dessous
+#             puis lancez : ./launch.sh
 # ============================================================
 
 services:
@@ -15,37 +17,42 @@ services:
     # Force arm64 natif (pas d'émulation x86 lente)
     platform: linux/arm64
 
-    # ── Affichage X11 via XQuartz ──────────────────────────
+    # ── Variables d'environnement ──────────────────────────
     environment:
-      - DISPLAY=docker.for.mac.host.internal:0
       - LANG=fr_FR.UTF-8
       - LC_ALL=fr_FR.UTF-8
-      # Chemin des projets AMC par défaut
-      - AMC_PROJECTS_DIR=/amc/projets
+      - VNC_GEOMETRY=1440x900    # Résolution VNC (ex: 1920x1200)
 
-    # ── Volumes ────────────────────────────────────────────
+    # ── Port noVNC (navigateur) ────────────────────────────
+    ports:
+      - "6080:6080"
+
+    # ── Volumes — ADAPTEZ CES CHEMINS ─────────────────────
     volumes:
       # Classe LaTeX personnalisée nQCM (lecture seule)
-      - nQcm:/nqcm:ro
+      - /chemin/vers/nQcm:/nqcm:ro
 
       # Dossier SCAN (lecture/écriture — AMC y écrit ses résultats)
-      - scan:/amc/scan
+      - /chemin/vers/SCAN:/amc/scan
 
-      # Dossier CONTROLES (accès complet)
-      - controles:/amc/controles
+      # Dossier CONTROLES contenant vos projets AMC (accès complet)
+      - /chemin/vers/CONTROLES:/amc/controles
 
-      # Données persistantes AMC (projets, configuration)
+      # Données persistantes AMC (configuration, préférences)
       - amc-data:/root/.AMC.d
-
-      # Cookie d'authentification X11 (nécessaire sur macOS/M1)
-      - ~/.Xauthority:/root/.Xauthority:ro
-
-    # ── Accès réseau au host (pour X11 TCP) ───────────────
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
     # Permet d'éviter certains problèmes de rendu GTK/Cairo
     shm_size: '256mb'
+
+    # ── Limites de ressources ──────────────────────────────
+    deploy:
+      resources:
+        limits:
+          cpus: '4'       # 4 cœurs max (ajustez selon votre Mac)
+          memory: 2G      # 2 Go max (LaTeX + scans)
+        reservations:
+          cpus: '1'
+          memory: 512M
 
     # Redémarre jamais automatiquement (c'est une appli GUI)
     restart: "no"
