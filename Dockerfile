@@ -68,6 +68,7 @@ RUN printf 'Types: deb\nURIs: https://xpra.org\nSuites: trixie\nComponents: main
     && apt-get update \
     && apt-get install -y --no-install-recommends \
     xpra-server \
+    xpra-x11 \
     xpra-client-gtk3 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
