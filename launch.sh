@@ -91,34 +91,34 @@ fi
 
 # ── 4. Lancement d'AMC ──────────────────────────────────────
 echo ""
-echo -e "${GREEN}→ Lancement d'AMC (mode VNC)...${NC}"
+echo -e "${GREEN}→ Lancement d'AMC (mode Xpra)...${NC}"
 echo ""
 
 docker compose up --remove-orphans -d
 
-# Attendre que x11vnc soit prêt
-echo -e "${YELLOW}→ Attente du serveur VNC...${NC}"
+# Attendre que xpra soit prêt (port 14500 ouvert)
+echo -e "${YELLOW}→ Attente du serveur Xpra...${NC}"
 for i in {1..20}; do
     sleep 1
-    if curl -sf http://localhost:6080/vnc.html -o /dev/null 2>/dev/null; then
+    if nc -z localhost 14500 2>/dev/null; then
         break
     fi
 done
 
-if curl -sf http://localhost:6080/vnc.html -o /dev/null 2>/dev/null; then
-    echo -e "${GREEN}✓ noVNC disponible${NC}"
+if nc -z localhost 14500 2>/dev/null; then
+    echo -e "${GREEN}✓ Xpra disponible${NC}"
     echo ""
-    echo -e "${BLUE}→ Connexion à AMC :${NC}"
-    echo -e "   ${YELLOW}http://localhost:6080/vnc.html?resize=scale${NC}"
-    echo ""
-    open -a Safari "http://localhost:6080/vnc.html?resize=scale"
-    echo -e "${YELLOW}  (Astuce : ⌘+Ctrl+F pour passer en plein écran)${NC}"
+    echo -e "${BLUE}→ Ouverture de la fenêtre AMC...${NC}"
+    # Lance xpra attach en arrière-plan (ouvre la fenêtre native Mac)
+    /Applications/Xpra.app/Contents/MacOS/Xpra attach tcp://localhost:14500/ &
+    XPRA_CLIENT_PID=$!
     echo -e "${YELLOW}  (Appuyez sur Entrée pour arrêter AMC)${NC}"
     read -r
+    kill "$XPRA_CLIENT_PID" 2>/dev/null || true
     docker compose down
     [ -n "$BRIDGE_PID" ] && kill "$BRIDGE_PID" 2>/dev/null || true
 else
-    echo -e "${RED}✗ Le serveur noVNC n'a pas démarré${NC}"
+    echo -e "${RED}✗ Le serveur Xpra n'a pas démarré${NC}"
     docker compose logs
     docker compose down
     exit 1

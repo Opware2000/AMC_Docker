@@ -1,10 +1,10 @@
 #!/bin/bash
 # ============================================================
-# Entrypoint AMC Docker — Mode VNC (contournement fond noir XQuartz)
-# - Démarre Xvfb (framebuffer virtuel :99)
-# - Démarre x11vnc sur le port 5900
+# Entrypoint AMC Docker — Mode Xpra (fenêtre native Mac)
+# - Démarre xpra en mode TCP sur le port 14500
 # - Installe la classe nQCM dans TEXMFLOCAL si présente
-# - Lance AMC sur l'affichage virtuel
+# - Lance AMC via xpra ; le client Mac se connecte avec :
+#     xpra attach tcp://localhost:14500/
 # ============================================================
 
 set -e
@@ -14,43 +14,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-echo -e "${GREEN}=== AMC Docker — Démarrage (mode VNC) ===${NC}"
-
-# ── 0. Démarrage Xvfb + x11vnc ──────────────────────────────
-VNC_DISPLAY=:99
-VNC_PORT=5900
-VNC_GEOMETRY="${VNC_GEOMETRY:-2560x1600}"
-
-echo -e "${GREEN}→ Démarrage Xvfb ($VNC_GEOMETRY)...${NC}"
-rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 2>/dev/null || true
-Xvfb "$VNC_DISPLAY" -screen 0 "${VNC_GEOMETRY}x24" -ac &
-XVFB_PID=$!
-sleep 1
-
-export DISPLAY="$VNC_DISPLAY"
-
-# Gestionnaire de fenêtres léger (nécessaire pour GTK)
-fluxbox &>/dev/null &
-
-echo -e "${GREEN}→ Démarrage x11vnc (port 5900)...${NC}"
-x11vnc -display "$VNC_DISPLAY" -forever -nopw -quiet \
-       -rfbport 5900 -bg -o /tmp/x11vnc.log
-
-echo -e "${GREEN}→ Démarrage noVNC (port 6080)...${NC}"
-websockify --web /usr/share/novnc 6080 localhost:5900 &>/tmp/novnc.log &
-
-echo -e "${GREEN}✓ Interface disponible sur : http://localhost:6080/vnc.html${NC}"
-echo ""
-
-# Nettoyage au exit
-trap "kill $XVFB_PID 2>/dev/null; true" EXIT
-
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-echo -e "${GREEN}=== AMC Docker — Démarrage ===${NC}"
+echo -e "${GREEN}=== AMC Docker — Démarrage (mode Xpra) ===${NC}"
 
 # ── 1. Installation de la classe LaTeX nQCM ─────────────────
 NQCM_SRC="/nqcm"
@@ -69,12 +33,7 @@ else
     echo "  Vérifiez le volume dans docker-compose.yml"
 fi
 
-# ── 2. Configuration du clavier Mac français ─────────────────
-if command -v setxkbmap &>/dev/null; then
-    setxkbmap -model apple -layout fr -variant mac -display "$DISPLAY" 2>/dev/null || true
-fi
-
-# ── 3. Configuration GTK ─────────────────────────────────────
+# ── 2. Configuration GTK ─────────────────────────────────────
 mkdir -p /root/.config/gtk-3.0
 cat > /root/.config/gtk-3.0/settings.ini << 'GTK_EOF'
 [Settings]
@@ -98,10 +57,34 @@ file:///amc/controles Contrôles
 file:///amc/scan SCAN
 BOOKMARKS_EOF
 
-# ── 4. Lancement d'AMC ──────────────────────────────────────
-# Pointer le dossier projets par défaut d'AMC vers /amc/controles
+# ── 3. Symlink projets AMC ───────────────────────────────────
 ln -sfn /amc/controles /root/MC-Projects
 
-echo -e "${GREEN}→ Lancement de Auto-Multiple-Choice...${NC}"
+# ── 4. Démarrage Xpra ───────────────────────────────────────
+XPRA_DISPLAY=:10
+XPRA_PORT=14500
+AMC_CMD="${*:-auto-multiple-choice gui}"
+
+rm -f "/tmp/.X${XPRA_DISPLAY#:}-lock" "/tmp/.X11-unix/X${XPRA_DISPLAY#:}" 2>/dev/null || true
+
+echo -e "${GREEN}→ Démarrage xpra (port $XPRA_PORT)...${NC}"
+echo -e "${YELLOW}  Sur Mac : xpra attach tcp://localhost:$XPRA_PORT/${NC}"
 echo ""
-exec "$@"
+
+# setxkbmap sera appelé par xpra via env DISPLAY une fois qu'il est prêt
+export XPRA_KEYBOARD_LAYOUT="fr"
+export XPRA_KEYBOARD_MODEL="apple"
+
+exec xpra start "$XPRA_DISPLAY" \
+    --bind-tcp=0.0.0.0:$XPRA_PORT \
+    --html=off \
+    --daemon=no \
+    --exit-with-children=yes \
+    --start-child="$AMC_CMD" \
+    --xvfb="Xvfb +extension Composite -screen 0 1920x1080x24+32 -nolisten tcp -noreset" \
+    --pulseaudio=no \
+    --notifications=no \
+    --mdns=no \
+    --keyboard-layout=fr \
+    --keyboard-model=apple \
+    --log-file=/tmp/xpra.log
