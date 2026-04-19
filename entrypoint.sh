@@ -52,7 +52,7 @@ fi
 
 echo -e "${GREEN}→ DISPLAY = $DISPLAY${NC}"
 
-if ! xdpyinfo -display "$DISPLAY" >/dev/null 2>&1; then
+if ! xset -display "$DISPLAY" q >/dev/null 2>&1; then
     echo -e "${RED}✗ Impossible de se connecter au serveur X ($DISPLAY)${NC}"
     echo "  Vérifiez que XQuartz est lancé et que xhost +127.0.0.1 a été exécuté."
     exit 1
