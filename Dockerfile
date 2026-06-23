@@ -2,7 +2,22 @@
 # Auto-Multiple-Choice — Docker image pour Apple Silicon (ARM64)
 # Base : texlive/texlive (Debian + TeX Live upstream complet, arm64)
 # ============================================================
+
+# Version de l'image — surchargez avec : --build-arg AMC_VERSION=1.2.0
+ARG AMC_VERSION=dev
+ARG AMC_BUILD_DATE
+ARG AMC_VCS_REF
+
 FROM texlive/texlive:latest
+
+# Labels OCI (https://github.com/opencontainers/image-spec/blob/master/annotations.md)
+LABEL org.opencontainers.image.title="AMC Docker (nQCM)" \
+      org.opencontainers.image.description="Auto-Multiple-Chance + classe LaTeX nQCM pour Apple Silicon" \
+      org.opencontainers.image.source="https://github.com/nicolasogier/AMC_docker" \
+      org.opencontainers.image.licenses="GPL-3.0-or-later" \
+      org.opencontainers.image.version="${AMC_VERSION}" \
+      org.opencontainers.image.created="${AMC_BUILD_DATE}" \
+      org.opencontainers.image.revision="${AMC_VCS_REF}"
 
 # Évite les questions interactives pendant apt
 ENV DEBIAN_FRONTEND=noninteractive

@@ -4,8 +4,8 @@ Configuration Docker pour **Auto-Multiple-Choice** sur MacBook Air Apple Silicon
 - Classe LaTeX `nQCM` intégrée automatiquement
 - `texlive-full`
 - Accès aux dossiers Dropbox CONTROLES et SCAN
-- Interface graphique via XQuartz
-- Clavier Mac français (Apple AZERTY) et trackpad configurés
+- Affichage distant natif via **Xpra** (fenêtre Mac, pas d'émulation)
+- Ouvrir les fichiers depuis AMC directement dans les apps Mac (TextEdit, Preview, Finder…)
 
 ---
 
@@ -15,74 +15,19 @@ Configuration Docker pour **Auto-Multiple-Choice** sur MacBook Air Apple Silicon
 
 Téléchargez et installez [Docker Desktop pour Mac](https://www.docker.com/products/docker-desktop/) (version Apple Silicon).
 
-### 2. XQuartz
+### 2. Xpra (client Mac)
 
-AMC utilise une interface graphique GTK qui nécessite un serveur X11.
+AMC tourne dans le conteneur, mais son interface graphique est exportée vers votre Mac via **Xpra**.
+Seul le **client** est nécessaire côté Mac.
 
 ```bash
-# Via Homebrew (recommandé)
-brew install --cask xquartz
+# Téléchargez et installez Xpra for macOS
+# https://xpra.org/downloads/
+brew install --cask xpra
 ```
 
-Ou téléchargement direct sur [xquartz.org](https://www.xquartz.org/).
-
-> ⚠️ Après l'installation, **déconnectez-vous et reconnectez-vous** à votre session macOS
-> (ou redémarrez). XQuartz ne sera correctement initialisé qu'après cette étape.
-
----
-
-## Configuration de XQuartz
-
-C'est l'étape la plus importante — à faire **une seule fois** après l'installation.
-
-Lancez XQuartz, puis ouvrez **XQuartz > Réglages** dans la barre de menus.
-
----
-
-### Onglet « Sécurité »
-
-| Réglage                                            | Valeur   | Pourquoi                                                           |
-| -------------------------------------------------- | -------- | ------------------------------------------------------------------ |
-| Autoriser les connexions depuis les clients réseau | ☑ Activé | **Indispensable** — permet à Docker de se connecter au serveur X11 |
-
-> Sans ce réglage, AMC ne pourra jamais s'afficher depuis Docker.
-
----
-
-### Onglet « Entrée »
-
-| Réglage                                   | Valeur   | Pourquoi                                                                                                                 |
-| ----------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Émuler une souris à 3 boutons             | ☑ Activé | Permet le **clic droit** (deux doigts sur le trackpad) et le clic du milieu (Option + clic) — indispensable sans souris  |
-| Utiliser le réglage OSX de vitesse souris | ☑ Activé | Reprend la vitesse/accélération réglée dans les Préférences Système — sans ça le curseur est trop lent dans AMC          |
-| Suivre le clavier système                 | ☑ Activé | Laisse XQuartz gérer la disposition clavier depuis macOS (en complément de notre configuration AZERTY dans le conteneur) |
-
----
-
-### Après avoir modifié les réglages
-
-**Quittez complètement XQuartz et relancez-le.** Les réglages de Sécurité et d'Entrée
-ne sont pris en compte qu'au redémarrage de l'application.
-
-```
-XQuartz > Quitter X11   (ou Cmd+Q depuis la fenêtre XQuartz)
-```
-
-Puis relancez XQuartz depuis le Finder ou via `open -a XQuartz` dans le Terminal.
-
----
-
-### Récapitulatif des gestes trackpad dans AMC
-
-Une fois XQuartz configuré comme ci-dessus :
-
-| Geste                         | Équivalent souris                |
-| ----------------------------- | -------------------------------- |
-| Tap un doigt                  | Clic gauche                      |
-| Tap deux doigts               | Clic droit (menus contextuels)   |
-| Option + clic                 | Clic du milieu                   |
-| Glisser deux doigts           | Défilement vertical / horizontal |
-| Tap deux doigts sur scrollbar | Aller directement à la position  |
+> Xpra est préférable à XQuartz : pas de serveur X à configurer, fenêtre native,
+> meilleure prise en charge du clavier français et du trackpad.
 
 ---
 
@@ -90,21 +35,27 @@ Une fois XQuartz configuré comme ci-dessus :
 
 ```
 amc-docker/
-├── Dockerfile          # Image Debian + AMC + texlive-full
-├── entrypoint.sh       # Installe nQCM, configure clavier et trackpad, lance AMC
-├── docker-compose.yml  # Volumes et configuration de l'affichage
-├── launch.sh           # Script de lancement (vérifie XQuartz, configure xhost)
-└── README.md           # Ce fichier
+├── Dockerfile                  # Image Debian + texlive-full + AMC + Xpra
+├── entrypoint.sh               # Installe nQCM, configure GTK, démarre xpra:14500
+├── docker-compose.yml          # Volumes et configuration (non versionné)
+├── docker-compose.yaml.example # Template à copier/adapter
+├── launch.sh                   # Lanceur Mac : vérifie Docker, pont HTTP, démarre le conteneur, attache Xpra
+├── create-app.sh               # Crée « Auto Multiple Choice.app » pour le Dock
+├── libreoffice-stub.sh         # Stub libreoffice (ssconvert + pont HTTP)
+└── README.md                   # Ce fichier
 ```
 
 ### Volumes montés dans le conteneur
 
-| Chemin sur le Mac              | Chemin dans Docker | Usage                             |
-| ------------------------------ | ------------------ | --------------------------------- |
-| `~/workspaces/Latex/nQcm`      | `/nqcm`            | Classe LaTeX nQCM (lecture seule) |
-| `Dropbox/COURS/CONTROLES/SCAN` | `/amc/scan`        | Scans des copies                  |
-| `Dropbox/COURS/CONTROLES`      | `/amc/controles`   | Sujets et données                 |
-| Volume Docker `amc-data`       | `/root/.AMC.d`     | Configuration et projets AMC      |
+| Chemin sur le Mac             | Chemin dans Docker | Usage                            |
+| ----------------------------- | ------------------ | -------------------------------- |
+| `~/workspaces/Latex/nQcm`     | `/nqcm`            | Classe LaTeX nQCM (lecture seule)|
+| `Dropbox/COURS/CONTROLES/SCAN`| `/amc/scan`        | Scans des copies                 |
+| `Dropbox/COURS/CONTROLES`     | `/amc/controles`   | Sujets et données                |
+| Volume Docker `amc-data`      | `/root/.AMC.d`     | Configuration et projets AMC     |
+
+> Le fichier `docker-compose.yml` (gitignored) contient vos chemins personnels.
+> Pour une autre machine, copiez `docker-compose.yaml.example` et adaptez les chemins.
 
 ---
 
@@ -122,20 +73,50 @@ chmod +x launch.sh entrypoint.sh
 ./launch.sh
 ```
 
-La **première fois**, Docker télécharge et construit l'image.
-`texlive-full` représente ~4 Go — comptez **20 à 40 minutes** selon votre connexion.
-Les fois suivantes, AMC se lance en quelques secondes.
+Le script `launch.sh` fait tout automatiquement :
+
+1. Vérifie que Docker Desktop est lancé
+2. Construit l'image `amc-nqcm:latest` au premier lancement
+   (texlive-full représente ~4 Go — comptez **20 à 40 minutes** la première fois)
+3. Démarre un **pont Mac-bridge** sur le port 6081 (pour ouvrir les fichiers dans les apps Mac)
+4. Lance le conteneur avec Xpra (serveur X virtuel sur le port 14500)
+5. Attend que Xpra soit prêt, puis attache le client Mac natif
+6. La fenêtre AMC s'ouvre comme une application Mac normale
+
+Pour lancer plus tard, un simple `./launch.sh` suffit — l'image existant déjà, le démarrage prend quelques secondes.
+
+### 3. Arrêter AMC
+
+Fermez la fenêtre AMC ou faites `Ctrl+C` dans le Terminal — le script arrête proprement le conteneur et le pont.
 
 ---
 
-## Ce qui est configuré automatiquement au lancement
+## Ouvrir des fichiers Mac depuis AMC
 
-À chaque démarrage du conteneur, `entrypoint.sh` effectue automatiquement :
+Lancer un éditeur depuis AMC (« Ouvrir le sujet », « Ouvrir le PDF »…) ouvre en réalité l'application Mac native :
+
+| Commande appelée par AMC      | Application Mac ouverte |
+| ----------------------------- | ----------------------- |
+| `texmaker`                    | TexMaker (si installé)  |
+| `gnome-text-editor`          | TextEdit                |
+| `papers` / `eog`             | Preview                 |
+| `nautilus`                    | Finder                  |
+| `libreoffice`                 | LibreOffice             |
+| `gnumeric`                    | Numbers                 |
+
+C'est le pont HTTP du `launch.sh` qui transporte la demande. Les conversions de fichiers
+(libreoffice → PDF) restent dans le conteneur via `ssconvert`.
+
+---
+
+## Ce qui est configuré automatiquement au démarrage
+
+À chaque lancement, `entrypoint.sh` effectue :
 
 - **Classe nQCM** — copiée dans `TEXMFLOCAL` et `mktexlsr` relancé
-- **Clavier** — `setxkbmap -model apple -layout fr -variant mac`
-- **Pointeur** — accélération adaptée au trackpad (`xset m 2/1 4`)
-- **GTK3** — scrollbars toujours visibles, double-tap tolérant, pas de drag accidentel
+- **GTK3** — scrollbars toujours visibles, double-tap tolérant, signets pour `/amc/controles` et `/amc/scan`
+- **Symlink projets** — `/root/MC-Projects` pointe vers `/amc/controles`
+- **Xpra** — serveur X virtuel, clavier français / Apple
 
 ---
 
@@ -146,6 +127,7 @@ AMC stocke ses projets dans `/root/.AMC.d` (volume Docker persistant `amc-data`)
 Pour accéder à vos fichiers depuis AMC :
 - **Scans** → naviguer vers `/amc/scan`
 - **Sujets LaTeX** → naviguer vers `/amc/controles`
+- **Signets GTK** → accès rapide à ces dossiers depuis la barre latérale des dialogues Ouvrir/Enregistrer
 
 ---
 
@@ -154,54 +136,42 @@ Pour accéder à vos fichiers depuis AMC :
 ### La fenêtre AMC n'apparaît pas
 
 ```bash
-# 1. Vérifiez que XQuartz est lancé
-open -a XQuartz
+# 1. Vérifiez que Xpra est installé sur le Mac
+ls /Applications/Xpra.app
 
-# 2. Autorisez les connexions
-xhost +127.0.0.1
-xhost +localhost
+# 2. Vérifiez les logs du conteneur
+docker compose logs
 
-# 3. Testez la connexion X11
-DISPLAY=:0 xdpyinfo | head -3
+# 3. Attachez manuellement le client Xpra
+/Applications/Xpra.app/Contents/MacOS/Xpra attach tcp://127.0.0.1:14500/
 ```
 
-### Erreur "cannot open display"
+### Erreur "xpra is ready" attendue mais absente des logs
 
-Cause la plus fréquente : l'option **"Autoriser les connexions depuis les clients réseau"**
-n'est pas cochée dans XQuartz > Réglages > Sécurité, ou XQuartz n'a pas été redémarré
-après la modification.
-
-### Le clic droit ne fonctionne pas
-
-Vérifiez que **"Émuler une souris à 3 boutons"** est coché dans XQuartz > Réglages > Entrée,
-puis redémarrez XQuartz.
-
-### Le curseur est trop lent
-
-Vérifiez que **"Utiliser le réglage OSX de vitesse souris"** est coché dans XQuartz > Réglages > Entrée.
-Ajustez aussi la vitesse du trackpad dans Réglages Système macOS > Trackpad.
+Le serveur Xpra met ~5 s à démarrer. `launch.sh` attend jusqu'à 30 s.
+Si le délai est dépassé, lancez `docker compose logs` pour voir le message d'erreur.
 
 ### La classe nQCM n'est pas trouvée par LaTeX
 
 ```bash
 # Vérifiez que le chemin dans docker-compose.yml est correct :
-ls /Users/nicolasogier/workspaces/Latex/nQcm
+ls ~/workspaces/Latex/nQcm
 
 # Vérifiez dans le conteneur :
-DISPLAY=host.docker.internal:0 docker compose run --entrypoint bash amc \
+docker compose run --entrypoint bash amc \
   -c "kpsewhich nQCM.cls 2>/dev/null || echo 'non trouvé'"
 ```
 
-### Reconstruire l'image (après une mise à jour)
+### Reconstruire l'image (après mise à jour)
 
 ```bash
 docker compose build --no-cache
 ```
 
-### Accéder au shell du conteneur
+### Accéder au shell du conteneur (sans lancer AMC)
 
 ```bash
-DISPLAY=host.docker.internal:0 docker compose run --entrypoint bash amc
+docker compose run --entrypoint bash amc
 ```
 
 ---
@@ -209,30 +179,27 @@ DISPLAY=host.docker.internal:0 docker compose run --entrypoint bash amc
 ## Mettre à jour la classe nQCM
 
 La classe nQCM est montée en lecture seule depuis votre Mac. Toute modification
-dans `~/workspaces/Latex/nQcm` sera prise en compte **au prochain lancement** 
+dans `~/workspaces/Latex/nQcm` sera prise en compte **au prochain lancement**
 d'AMC (l'entrypoint copie les fichiers dans TEXMFLOCAL et relance `mktexlsr`).
 
 ---
 
-## Commandes utiles
+## Suivi de version de l'image
+
+Le Dockerfile expose des **labels OCI**. Pour les valoriser au build :
 
 ```bash
-# Lancer AMC
-./launch.sh
+docker compose build \
+  --build-arg AMC_VERSION=1.2.0 \
+  --build-arg AMC_BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  --build-arg AMC_VCS_REF="$(git rev-parse --short HEAD)"
+```
 
-# Shell dans le conteneur (pour déboguer)
-DISPLAY=host.docker.internal:0 docker compose run --entrypoint bash amc
+Inspectez ensuite les labels :
 
-# Voir les logs du dernier lancement
-docker compose logs
-
-# Arrêter le conteneur
-docker compose down
-
-# Supprimer les projets AMC stockés dans Docker (irréversible)
-docker volume rm amc-docker_amc-data
-# Vérifier la classe nQCM dans le conteneur
-docker compose run --entrypoint bash amc -c "kpsewhich -all nQCM.cls 2>/dev/null || echo 'non trouvé'"
+```bash
+docker image inspect amc-nqcm:latest \
+  --format '{{ json .Config.Labels }}' | jq
 ```
 
 ---
@@ -271,3 +238,30 @@ Vous voyez les messages de démarrage (utile pour diagnostiquer un problème).
 L'application contient le chemin absolu vers `launch.sh`. Si vous déplacez
 le dossier `amc-docker`, relancez simplement `./create-app.sh` pour mettre
 à jour l'application.
+
+---
+
+## Commandes utiles
+
+```bash
+# Lancer AMC
+./launch.sh
+
+# Shell dans le conteneur (pour déboguer)
+docker compose run --entrypoint bash amc
+
+# Voir les logs du dernier lancement
+docker compose logs
+
+# Arrêter le conteneur
+docker compose down
+
+# Supprimer les projets AMC stockés dans Docker (irréversible)
+docker volume rm amc-docker_amc-data
+
+# Vérifier la classe nQCM dans le conteneur
+docker compose run --entrypoint bash amc -c "kpsewhich -all nQCM.cls 2>/dev/null || echo 'non trouvé'"
+
+# Reconstruire l'image
+docker compose build --no-cache
+```
