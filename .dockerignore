@@ -1,0 +1,32 @@
+# Fichiers de contrôle Git
+.git
+.gitignore
+.gitattributes
+
+# Dossiers de données (montés en volumes, pas dans l'image)
+controles/
+scans/
+nQcm/
+
+# Docker
+docker-compose.yml
+docker-compose.yaml.example
+.dockerignore
+
+# Scripts / docs non nécessaires dans l'image
+launch.sh
+create-app.sh
+README.md
+LICENSE
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
