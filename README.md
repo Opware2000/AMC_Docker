@@ -72,6 +72,34 @@ amc-docker/
 > Le fichier `docker-compose.yml` (gitignored) contient vos chemins personnels.
 > Pour une autre machine, copiez `docker-compose.yaml.example` et adaptez les chemins.
 
+### Personnalisation des chemins
+
+Avant de lancer AMC, adaptez les chemins dans **deux fichiers** :
+
+**1. `docker-compose.yml`** — définir les volumes montés dans le conteneur
+
+```yaml
+volumes:
+  - /votre/chemin/vers/nQcm:/nqcm:ro
+  - /votre/chemin/vers/SCAN:/amc/scan
+  - /votre/chemin/vers/CONTROLES:/amc/controles
+```
+
+**2. `launch.sh`** — mapper ces chemins dans le pont Mac-bridge (pour ouvrir les fichiers dans les apps Mac)
+
+Recherchez le bloc `PATH_MAP` dans `launch.sh` (vers la ligne 54) et adaptez :
+
+```python
+PATH_MAP = {
+    "/amc/controles": "/votre/chemin/vers/CONTROLES",
+    "/amc/scan":      "/votre/chemin/vers/SCAN",
+    "/nqcm":          "/votre/chemin/vers/nQcm",
+}
+```
+
+> Les deux fichiers doivent pointer vers les **mêmes dossiers** sur votre Mac.
+> `docker-compose.yml` est gitignoré, mais `launch.sh` est versionné — ses changements persisteront.
+
 ---
 
 ## Première utilisation
