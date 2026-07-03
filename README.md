@@ -1,8 +1,8 @@
 # AMC Docker — Apple Silicon (M1/M2/M3/M4)
 
-Configuration Docker pour **Auto-Multiple-Choice** sur MacBook Air Apple Silicon avec :
+Configuration Docker pour **Auto-Multiple-Choice** sur Mac Apple Silicon avec :
 - Classe LaTeX `nQCM` intégrée automatiquement
-- `texlive-full`
+- `texlive/texlive` (TeX Live upstream complet, arm64)
 - Accès aux dossiers Dropbox CONTROLES et SCAN
 - Affichage distant natif via **Xpra** (fenêtre Mac, pas d'émulation)
 - Ouvrir les fichiers depuis AMC directement dans les apps Mac (TextEdit, Preview, Finder…)
@@ -17,17 +17,30 @@ Téléchargez et installez [Docker Desktop pour Mac](https://www.docker.com/prod
 
 ### 2. Xpra (client Mac)
 
-AMC tourne dans le conteneur, mais son interface graphique est exportée vers votre Mac via **Xpra**.
-Seul le **client** est nécessaire côté Mac.
+AMC est une application **GTK3/X11** — elle a besoin d'un serveur X pour afficher son interface.
+Dans le conteneur, **Xvfb** (X virtual framebuffer) fournit cet affichage, et **Xpra** encapsule
+le flux X11 dans une connexion TCP. Sur le Mac, le client Xpra décode ce flux en **fenêtre native**
+(sans aucun X11 côté Mac).
+
+```
+┌─ Conteneur Docker ──────────────────────────────┐
+│  AMC (GTK3) → X11 → Xvfb → Xpra server → TCP:14500 │
+└──────────────────────────────────────────────────┘
+                        ↕
+┌─ Mac ────────────────────────────────────────────┐
+│  Xpra client (fenêtre native, pas de X11)           │
+└──────────────────────────────────────────────────┘
+```
+
+**Côté Mac, seul le client Xpra est nécessaire.**
 
 ```bash
-# Téléchargez et installez Xpra for macOS
-# https://xpra.org/downloads/
 brew install --cask xpra
 ```
 
-> Xpra est préférable à XQuartz : pas de serveur X à configurer, fenêtre native,
-> meilleure prise en charge du clavier français et du trackpad.
+> Avantage de Xpra vs XQuartz : pas de serveur X à installer sur le Mac, fenêtre native
+> (pas d'émulation X11), meilleur clavier français et trackpad.
+> Tout le X11 reste confiné dans le conteneur.
 
 ---
 
@@ -35,13 +48,15 @@ brew install --cask xpra
 
 ```
 amc-docker/
-├── Dockerfile                  # Image Debian + texlive-full + AMC + Xpra
+├── .dockerignore               # Fichiers ignorés par Docker
+├── Dockerfile                  # Image texlive/texlive + AMC + Xpra (arm64)
 ├── entrypoint.sh               # Installe nQCM, configure GTK, démarre xpra:14500
 ├── docker-compose.yml          # Volumes et configuration (non versionné)
 ├── docker-compose.yaml.example # Template à copier/adapter
 ├── launch.sh                   # Lanceur Mac : vérifie Docker, pont HTTP, démarre le conteneur, attache Xpra
 ├── create-app.sh               # Crée « Auto Multiple Choice.app » pour le Dock
 ├── libreoffice-stub.sh         # Stub libreoffice (ssconvert + pont HTTP)
+├── logs/                       # Logs Docker (gitignoré)
 └── README.md                   # Ce fichier
 ```
 
@@ -77,9 +92,9 @@ Le script `launch.sh` fait tout automatiquement :
 
 1. Vérifie que Docker Desktop est lancé
 2. Construit l'image `amc-nqcm:latest` au premier lancement
-   (texlive-full représente ~4 Go — comptez **20 à 40 minutes** la première fois)
+   (comptez **5 à 15 minutes** — TeX Live est pré-installé dans l'image de base)
 3. Démarre un **pont Mac-bridge** sur le port 6081 (pour ouvrir les fichiers dans les apps Mac)
-4. Lance le conteneur avec Xpra (serveur X virtuel sur le port 14500)
+4. Lance le conteneur avec Xvfb (framebuffer X11) + Xpra (encapsule X11 → TCP:14500)
 5. Attend que Xpra soit prêt, puis attache le client Mac natif
 6. La fenêtre AMC s'ouvre comme une application Mac normale
 
@@ -181,6 +196,12 @@ docker compose run --entrypoint bash amc
 La classe nQCM est montée en lecture seule depuis votre Mac. Toute modification
 dans `~/workspaces/Latex/nQcm` sera prise en compte **au prochain lancement**
 d'AMC (l'entrypoint copie les fichiers dans TEXMFLOCAL et relance `mktexlsr`).
+
+---
+
+## Variables d'environnement
+
+Le conteneur est configuré en `fr_FR.UTF-8` — l'image `texlive/texlive` filtre les locales non‑anglaises, donc l'entrypoint force la réinstallation des locales françaises et du paquet `auto-multiple-choice-common` pour les traductions.
 
 ---
 
