@@ -31,6 +31,9 @@ services:
       # Classe LaTeX personnalisée nQCM (lecture seule)
       - /chemin/vers/nQcm:/nqcm:ro
 
+      # Dossier nQcm — copier automultiplechoice.sty depuis le container
+      - /chemin/vers/nQcm:/amc/latex
+
       # Dossier SCAN (lecture/écriture — AMC y écrit ses résultats)
       - /chemin/vers/SCAN:/amc/scan
 

@@ -33,7 +33,32 @@ else
     echo "  Vérifiez le volume dans docker-compose.yml"
 fi
 
-# ── 2. Configuration GTK ─────────────────────────────────────
+# ── 1b. Copie automultiplechoice.sty vers le volume local ────
+AMC_STY_SRC="/usr/share/texmf/tex/latex/AMC/automultiplechoice.sty"
+AMC_STY_DEST="/amc/latex"
+
+if [ -f "$AMC_STY_SRC" ] && [ -d "$AMC_STY_DEST" ]; then
+    echo -e "${GREEN}→ Copie de automultiplechoice.sty vers $AMC_STY_DEST${NC}"
+    cp -f "$AMC_STY_SRC" "$AMC_STY_DEST/"
+    echo -e "${GREEN}✓ Fichier automultiplechoice.sty copié${NC}"
+else
+    if [ ! -f "$AMC_STY_SRC" ]; then
+        echo -e "${YELLOW}⚠ Fichier $AMC_STY_SRC non trouvé${NC}"
+    fi
+    if [ ! -d "$AMC_STY_DEST" ]; then
+        echo -e "${YELLOW}⚠ Répertoire $AMC_STY_DEST non monté${NC}"
+    fi
+fi
+
+# ── 1c. Installation lucide-icons via tlmgr ─────────────────
+echo -e "${GREEN}→ Installation de lucide-icons via tlmgr...${NC}"
+if tlmgr init-usertree 2>/dev/null && tlmgr --usermode install lucide-icons 2>/dev/null; then
+    echo -e "${GREEN}✓ lucide-icons installé${NC}"
+else
+    echo -e "${YELLOW}⚠ Installation lucide-icons non disponible (possiblement en raison de la version TeX Live)${NC}"
+fi
+
+# ── 2. Configuration GTK ────────────────────────────────────────
 mkdir -p /root/.config/gtk-3.0
 cat > /root/.config/gtk-3.0/settings.ini << 'GTK_EOF'
 [Settings]

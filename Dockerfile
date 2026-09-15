@@ -1,6 +1,6 @@
 # ============================================================
 # Auto-Multiple-Choice — Docker image pour Apple Silicon (ARM64)
-# Base : texlive/texlive (Debian + TeX Live upstream complet, arm64)
+# Base : Debian bookworm + TeX Live upstream
 # ============================================================
 
 # Version de l'image — surchargez avec : --build-arg AMC_VERSION=1.2.0
@@ -8,7 +8,7 @@ ARG AMC_VERSION=dev
 ARG AMC_BUILD_DATE
 ARG AMC_VCS_REF
 
-FROM texlive/texlive:latest
+FROM debian:bookworm
 
 # Labels OCI (https://github.com/opencontainers/image-spec/blob/master/annotations.md)
 LABEL org.opencontainers.image.title="AMC Docker (nQCM)" \
@@ -25,20 +25,32 @@ ENV LANG=fr_FR.UTF-8
 ENV LC_ALL=fr_FR.UTF-8
 ENV LANGUAGE=fr_FR:fr
 
-# ── 0. Autoriser les fichiers de locale française (filtrés par l'image slim) ─
+# ── 0. Autoriser les fichiers de locale française ─
 RUN echo 'path-include /usr/share/locale/fr/*' \
     >> /etc/dpkg/dpkg.cfg.d/docker
 
-# ── 0b. Clé GPG Xpra (dépôt ajouté séparément après les paquets Debian) ─────
+# ── 0b. Clé GPG Xpra ─────
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     && curl -fsSL https://xpra.org/xpra.asc -o /usr/share/keyrings/xpra.asc \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# ── 1. Dépendances système (dépôt Debian uniquement — pas encore xpra) ───────
+# ── 1. TeX Live + dépendances système + lucide-icons ───────
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    # AMC et ses dépendances Perl/système
+    # TeX Live
+    texlive \
+    texlive-xetex \
+    texlive-fonts-recommended \
+    texlive-fonts-extra \
+    texlive-lang-french \
+    texlive-latex-extra \
+    texlive-pictures \
+    # Packages LaTeX manquants
+    texlive-latex-extra-doc \
+    # Terminal pour debuguer
+    xterm \
+    # AMC et ses dépendances
     auto-multiple-choice \
     # Polices requises par AMC
     fonts-linuxlibertine \
@@ -55,20 +67,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     unzip \
     rsync \
-    # Notifications bureau (module Perl + binaire notify-send)
+    # Notifications bureau
     libdesktop-notify-perl \
     libnotify-bin \
-    # Modules Perl pour l'export AMC (notes, PDF)
+    # Modules Perl pour l'export AMC
     libpango-perl \
     libgtk3-perl \
-    # X11 — affichage et clavier
+    # X11
     x11-xserver-utils \
     x11-utils \
     x11-xkb-utils \
     xkb-data \
-    # Framebuffer virtuel (requis par xpra-server)
     xvfb \
-    # gnumeric/ssconvert (conversion ODS→PDF pour l'export AMC, ~30 Mo)
+    # gnumeric
     gnumeric \
     && echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen \
     && locale-gen \
@@ -76,9 +87,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# ── 1b. Xpra server (dépôt trixie — RUN séparé pour isoler les conflits) ────
-# Le dépôt xpra trixie est ajouté ici seulement, après les paquets Debian
-RUN printf 'Types: deb\nURIs: https://xpra.org\nSuites: trixie\nComponents: main\nSigned-By: /usr/share/keyrings/xpra.asc\nArchitectures: arm64\n' \
+# ── 1b. Installer simplekv et lucide-icons via tlmgr sans les échecs silencieux ──
+RUN tlmgr update --self --all \
+    && tlmgr install simplekv lucide-icons \
+    && texhash
+
+# ── 1c. Xpra server (dépôt stable) ─────
+RUN printf 'Types: deb\nURIs: https://xpra.org\nSuites: bookworm\nComponents: main\nSigned-By: /usr/share/keyrings/xpra.asc\nArchitectures: arm64\n' \
     > /etc/apt/sources.list.d/xpra.sources \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -87,25 +102,25 @@ RUN printf 'Types: deb\nURIs: https://xpra.org\nSuites: trixie\nComponents: main
     xpra-client-gtk3 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# ── 2. Réinstaller le paquet de traductions AMC (locales filtrées au départ) ─
+# ── 2. Réinstaller le paquet de traductions AMC ─
 RUN apt-get update \
     && apt-get install --reinstall -y auto-multiple-choice-common \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# ── 2b. Module Perl OpenOffice::OODoc (export OpenDocument depuis AMC) ───────
+# ── 2b. Module Perl OpenOffice::OODoc ───────
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     cpanminus \
+    build-essential \
     libarchive-zip-perl \
     libxml-parser-perl \
     libxml-twig-perl \
     && cpanm --notest OpenOffice::OODoc \
-    && apt-get purge -y cpanminus \
+    && apt-get purge -y cpanminus build-essential \
     && apt-get autoremove -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# ── 3. Stubs pour commandes optionnelles signalées manquantes par AMC ────────
-# libreoffice — AMC l'appelle avec --convert-to pdf ; ssconvert fait la conversion
+# ── 3. Stubs pour commandes optionnelles ────────────
 COPY libreoffice-stub.sh /usr/local/bin/libreoffice
 RUN chmod +x /usr/local/bin/libreoffice
 RUN for cmd in texmaker gnome-text-editor papers eog; do \
@@ -115,29 +130,34 @@ RUN for cmd in texmaker gnome-text-editor papers eog; do \
     printf '#!/bin/sh\n# nautilus reçoit file:///chemin\npath="${1#file://}"\ncurl -sf "http://host.docker.internal:6081/open?file=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$path" 2>/dev/null)&app=nautilus" || true\n' \
     > /usr/local/bin/nautilus && chmod +x /usr/local/bin/nautilus
 
-# ── 4. Politique ImageMagick (autorise PDF) ──────────────────
+# ── 4. Politique ImageMagick ──────────────────────
 RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' \
     /etc/ImageMagick-6/policy.xml || true
 
-# ── 3. Répertoires de travail ────────────────────────────────
+# ── 5. Répertoires de travail ────────────────────
 RUN mkdir -p \
     /root/.AMC.d \
     /amc/projets \
     /amc/scan \
     /amc/controles \
-    /texmf-local/nQcm
+    /texmf-local/nQcm \
+    /usr/share/texmf-local/tex/latex/lucide-icons
 
-# ── 4. Config fluxbox minimale (pas de fond d'écran, pas de fbsetbg) ──
+# ── 5b. Copier lucide-icons.sty ──────────────────
+COPY lucide-icons.sty /usr/share/texmf-local/tex/latex/lucide-icons/
+RUN texhash
+
+# ── 6. Config fluxbox minimale ──
 RUN mkdir -p /root/.fluxbox && \
     printf 'session.styleFile: /usr/share/fluxbox/styles/bloe\n' > /root/.fluxbox/init && \
     printf '#!/bin/sh\n# no wallpaper\n' > /root/.fluxbox/startup && \
     chmod +x /root/.fluxbox/startup
 
-# ── 5. Remplacer notify-send par un no-op (silence libnotify) ─
+# ── 7. Remplacer notify-send par un no-op ─
 RUN printf '#!/bin/sh\nexit 0\n' > /usr/local/bin/notify-send && \
     chmod +x /usr/local/bin/notify-send
 
-# ── 6. Entrypoint ────────────────────────────────────────────
+# ── 8. Entrypoint ────────────────────────────────────────────
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
