@@ -50,13 +50,14 @@ else
     fi
 fi
 
-# ── 1c. Installation lucide-icons via tlmgr ─────────────────
-echo -e "${GREEN}→ Installation de lucide-icons via tlmgr...${NC}"
-if tlmgr init-usertree 2>/dev/null && tlmgr --usermode install lucide-icons 2>/dev/null; then
-    echo -e "${GREEN}✓ lucide-icons installé${NC}"
-else
-    echo -e "${YELLOW}⚠ Installation lucide-icons non disponible (possiblement en raison de la version TeX Live)${NC}"
-fi
+# ── 1c. Vérification des paquets LaTeX requis (fournis par TeX Live complet) ──
+for pkg in simplekv lucide-icons; do
+    if kpsewhich "$pkg.sty" >/dev/null 2>&1; then
+        echo -e "${GREEN}✓ $pkg disponible${NC}"
+    else
+        echo -e "${YELLOW}⚠ $pkg introuvable — vérifiez l'image de base TeX Live${NC}"
+    fi
+done
 
 # ── 2. Configuration GTK ────────────────────────────────────────
 mkdir -p /root/.config/gtk-3.0
