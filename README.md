@@ -2,7 +2,8 @@
 
 Configuration Docker pour **Auto-Multiple-Choice** sur Mac Apple Silicon avec :
 - Classe LaTeX `nQCM` intégrée automatiquement
-- `texlive/texlive` (TeX Live upstream complet, arm64)
+- `texlive/texlive` — **TeX Live 2026 complet** (upstream, arm64), avec tous les
+  paquets CTAN : `simplekv`, `lucide-icons`, `tabularray`, `tcolorbox`, etc.
 - Accès aux dossiers  CONTROLES et SCAN
 - Affichage distant natif via **Xpra** (fenêtre Mac, pas d'émulation)
 - Ouvrir les fichiers depuis AMC directement dans les apps Mac (TextEdit, Preview, Finder…)
@@ -120,7 +121,8 @@ Le script `launch.sh` fait tout automatiquement :
 
 1. Vérifie que Docker Desktop est lancé
 2. Construit l'image `amc-nqcm:latest` au premier lancement
-   (comptez **5 à 15 minutes** — TeX Live est pré-installé dans l'image de base)
+   (comptez **~3 Go à télécharger** — l'image de base contient déjà TeX Live 2026 complet ;
+   le build suivant sera instantané grâce au cache)
 3. Démarre un **pont Mac-bridge** sur le port 6081 (pour ouvrir les fichiers dans les apps Mac)
 4. Lance le conteneur avec Xvfb (framebuffer X11) + Xpra (encapsule X11 → TCP:14500)
 5. Attend que Xpra soit prêt, puis attache le client Mac natif
@@ -209,6 +211,23 @@ docker compose run --entrypoint bash amc \
 
 ```bash
 docker compose build --no-cache
+```
+
+### Un paquet LaTeX manque encore
+
+L'image embarque **TeX Live 2026 complet** : tous les paquets CTAN sont présents
+(inclus `simplekv`, `lucide-icons`, `tabularray`, `tcolorbox`…). Pour vérifier :
+
+```bash
+docker compose run --rm --entrypoint bash amc \
+  -c "kpsewhich lucide-icons.sty simplekv.sty"
+```
+
+Si un paquet est réellement absent (rare), `tlmgr` fonctionne (contrairement à
+l'ancienne base Debian 2022) :
+
+```bash
+docker compose run --rm --entrypoint bash amc -c "tlmgr install <paquet>"
 ```
 
 ### Accéder au shell du conteneur (sans lancer AMC)
