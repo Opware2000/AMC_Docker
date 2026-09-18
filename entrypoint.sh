@@ -80,7 +80,10 @@ GTK2_EOF
 # Favoris GTK (visibles dans la barre latérale des dialogues Ouvrir/Enregistrer)
 cat > /root/.config/gtk-3.0/bookmarks << 'BOOKMARKS_EOF'
 file:///amc/controles Contrôles
-file:///amc/scan SCAN
+file:///LISTES LISTES
+file:///SCAN SCAN
+file:///SUJETS SUJETS
+file:///QCM QCM
 BOOKMARKS_EOF
 
 # ── 3. Symlink projets AMC ───────────────────────────────────
