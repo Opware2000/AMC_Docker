@@ -31,16 +31,25 @@ if ! docker info &>/dev/null; then
 fi
 echo -e "${GREEN}✓ Docker opérationnel${NC}"
 
-# ── 2. Construction de l'image si nécessaire ────────────────
-if ! docker image inspect amc-nqcm:latest &>/dev/null; then
+# ── 2. (Re)construction de l'image si les fichiers de build ont changé ──
+# Empreinte du contexte de build, comparée au label amc.build.hash de l'image.
+BUILD_FILES="Dockerfile entrypoint.sh libreoffice-stub.sh .dockerignore"
+BUILD_HASH=$(cat $BUILD_FILES 2>/dev/null | shasum -a 256 | awk '{print $1}')
+IMAGE_HASH=$(docker image inspect amc-nqcm:latest \
+    --format '{{ index .Config.Labels "amc.build.hash" }}' 2>/dev/null || true)
+
+if [ "$IMAGE_HASH" != "$BUILD_HASH" ]; then
+    if docker image inspect amc-nqcm:latest &>/dev/null; then
+        echo -e "${YELLOW}→ Fichiers de build modifiés : reconstruction de l'image...${NC}"
+    else
+        echo -e "${YELLOW}→ Première utilisation : construction de l'image Docker...${NC}"
+        echo -e "${YELLOW}  Cela peut prendre 10 à 20 minutes...${NC}"
+    fi
     echo ""
-    echo -e "${YELLOW}→ Première utilisation : construction de l'image Docker...${NC}"
-    echo -e "${YELLOW}  Cela peut prendre 10 à 20 minutes...${NC}"
-    echo ""
-    docker compose build
+    docker compose build --build-arg AMC_BUILD_HASH="$BUILD_HASH"
     echo -e "${GREEN}✓ Image construite${NC}"
 else
-    echo -e "${GREEN}✓ Image déjà construite${NC}"
+    echo -e "${GREEN}✓ Image à jour${NC}"
 fi
 
 # ── 3. Pont Mac-bridge (ouvre les fichiers avec les apps Mac) ──────────────
@@ -54,6 +63,10 @@ import http.server, urllib.parse, subprocess
 PATH_MAP = {
     "/amc/controles": "/chemin/vers/CONTROLES",
     "/amc/scan":      "/chemin/vers/CONTROLES/SCAN",
+    "/LISTES":        "/chemin/vers/CONTROLES/LISTES",
+    "/SCAN":          "/chemin/vers/CONTROLES/SCAN",
+    "/SUJETS":        "/chemin/vers/CONTROLES/SUJETS",
+    "/QCM":      "/chemin/vers/QCM",
     "/nqcm":          "/chemin/vers/nQcm",
 }
 APP_MAP = {
