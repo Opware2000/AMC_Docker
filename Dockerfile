@@ -10,12 +10,16 @@ ARG AMC_VERSION=dev
 ARG AMC_BUILD_DATE
 ARG AMC_VCS_REF
 
+# Série Ubuntu du PPA AMC « test » à utiliser (binaires ABI-compatibles forky)
+ARG AMC_PPA_SUITE=stonking
+
 FROM texlive/texlive:latest
 
 # Ré-exposé dans le stage pour les LABEL (sinon variable non définie)
 ARG AMC_VERSION
 ARG AMC_BUILD_DATE
 ARG AMC_VCS_REF
+ARG AMC_PPA_SUITE
 
 # Labels OCI (https://github.com/opencontainers/image-spec/blob/master/annotations.md)
 LABEL org.opencontainers.image.title="AMC Docker (nQCM)" \
@@ -43,12 +47,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && curl -fsSL https://xpra.org/xpra.asc -o /usr/share/keyrings/xpra.asc \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# ── 0c. Dépôt PPA AMC « test » (Alexis Bienvenüe, développeur d'AMC) ─
+# La base est Debian : le PPA ne publie que des paquets Ubuntu. On utilise la
+# série « stonking » (Ubuntu 26.10), dont les binaires sont ABI-compatibles
+# avec Debian forky (libopencv-*-410, libpoppler-glib8t64, glibc ≥ 2.43).
+# Le pinning empêche tout autre paquet Ubuntu de polluer la base Debian.
+ARG AMC_PPA_SUITE
+RUN curl -fsSL \
+      "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xF4ADAFE459DDDD6AE795434D5BEA485C346753E7" \
+      -o /usr/share/keyrings/amc-ppa.asc \
+    && printf 'Types: deb\nURIs: https://ppa.launchpadcontent.net/alexis.bienvenue/test/ubuntu\nSuites: %s\nComponents: main\nArchitectures: arm64\nSigned-By: /usr/share/keyrings/amc-ppa.asc\n' \
+       "$AMC_PPA_SUITE" > /etc/apt/sources.list.d/amc-ppa.sources \
+    && printf 'Package: *\nPin: release o=LP-PPA-alexis.bienvenue-test\nPin-Priority: 100\n\nPackage: auto-multiple-choice auto-multiple-choice-common\nPin: release o=LP-PPA-alexis.bienvenue-test\nPin-Priority: 990\n' \
+       > /etc/apt/preferences.d/amc-ppa
+
 # ── 1. Dépendances système + AMC + locales ──────────────────
 # NB : aucun paquet apt « texlive-* » — TeX Live est déjà complet dans
 #      l'image de base, et un paquet fictif (texlive-local) satisfait les
 #      dépendances texlive d'AMC sans installer un second TeX Live.
+# NB : auto-multiple-choice provient du PPA « test » (section 0c), pas de
+#      Debian — le pinning garantit la sélection du PPA.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    # AMC et ses dépendances
+    # AMC (version PPA « test ») et ses dépendances
     auto-multiple-choice \
     # Polices requises par AMC
     fonts-linuxlibertine \
@@ -152,6 +172,13 @@ RUN printf '#!/bin/sh\nexit 0\n' > /usr/local/bin/notify-send && \
 # ── 8. Entrypoint ────────────────────────────────────────────
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+# ── 9. Empreinte des fichiers de build ───────────────────────
+# launch.sh compare ce label au hachage local pour décider d'un rebuild.
+# Déclaré en fin de Dockerfile : un changement de hash n'invalide que les
+# dernières couches (pas les apt/TeX déjà en cache).
+ARG AMC_BUILD_HASH
+LABEL amc.build.hash="${AMC_BUILD_HASH}"
 
 WORKDIR /amc/controles
 ENTRYPOINT ["/entrypoint.sh"]
