@@ -40,6 +40,13 @@ services:
       # Dossier CONTROLES contenant vos projets AMC (accès complet)
       - /chemin/vers/CONTROLES:/amc/controles
 
+      # Dossiers montés directement à la racine du conteneur
+      # (accès rapide + signets dans les dialogues Ouvrir/Enregistrer d'AMC)
+      - /chemin/vers/CONTROLES/LISTES:/LISTES
+      - /chemin/vers/CONTROLES/SCAN:/SCAN
+      - /chemin/vers/CONTROLES/SUJETS:/SUJETS
+      - /chemin/vers/QCM:/QCM
+
       # Données persistantes AMC (configuration, préférences)
       - amc-data:/root/.AMC.d
 
