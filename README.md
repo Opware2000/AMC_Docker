@@ -4,7 +4,9 @@ Configuration Docker pour **Auto-Multiple-Choice** sur Mac Apple Silicon avec :
 - Classe LaTeX `nQCM` intégrée automatiquement
 - `texlive/texlive` — **TeX Live 2026 complet** (upstream, arm64), avec tous les
   paquets CTAN : `simplekv`, `lucide-icons`, `tabularray`, `tcolorbox`, etc.
-- Accès aux dossiers  CONTROLES et SCAN
+- **AMC 1.7.0** — dernières corrections issues du **PPA officiel « test »**
+  d'Alexis Bienvenüe, auteur d'AMC
+- Accès aux dossiers  `CONTROLES` (dont `LISTES`, `SCAN`, `SUJETS`) et au dépôt QCM 
 - Affichage distant natif via **Xpra** (fenêtre Mac, pas d'émulation)
 - Ouvrir les fichiers depuis AMC directement dans les apps Mac (TextEdit, Preview, Finder…)
 
@@ -63,12 +65,21 @@ amc-docker/
 
 ### Volumes montés dans le conteneur
 
-| Chemin sur le Mac             | Chemin dans Docker | Usage                            |
-| ----------------------------- | ------------------ | -------------------------------- |
-| `~/chemin/vers/nQcm`     | `/nqcm`            | Classe LaTeX nQCM (lecture seule)|
-| `chemin/vers/CONTROLES/SCAN`| `/amc/scan`        | Scans des copies                 |
-| `chemin/vers/CONTROLES`     | `/amc/controles`   | Sujets et données                |
-| Volume Docker `amc-data`      | `/root/.AMC.d`     | Configuration et projets AMC     |
+| Chemin sur le Mac                               | Chemin dans Docker | Usage                             |
+| ----------------------------------------------- | ------------------ | --------------------------------- |
+| `~/chemin/vers/nQcm`                        | `/nqcm`            | Classe LaTeX nQCM (lecture seule) |
+| `chemin/vers/CONTROLES`                        | `/amc/controles`   | Sujets et données                 |
+| `chemin/vers/CONTROLES/LISTES`                 | `/LISTES`          | Listes des élèves                 |
+| `chemin/vers/CONTROLES/SCAN`                   | `/SCAN`            | Scans des copies                  |
+| `chemin/vers/CONTROLES/SUJETS`                 | `/SUJETS`          | Sujets d'évaluation               |
+| `chemin/vers/QCM`  | `/QCM`        | Dépôt QCM                  |
+| `chemin/vers/CONTROLES/SCAN`                   | `/amc/scan`        | Alias historique de `/SCAN`       |
+| Volume Docker `amc-data`                         | `/root/.AMC.d`     | Configuration et projets AMC      |
+
+> Les dossiers `LISTES`, `SCAN`, `SUJETS` et `QCM` sont montés **directement
+> à la racine** du conteneur : ils apparaissent comme signets dans les dialogues
+> Ouvrir/Enregistrer d'AMC (voir `entrypoint.sh`). Toute modification sur le Mac
+> est visible **immédiatement** dans le conteneur, et inversement.
 
 > Le fichier `docker-compose.yml` (gitignored) contient vos chemins personnels.
 > Pour une autre machine, copiez `docker-compose.yaml.example` et adaptez les chemins.
@@ -82,8 +93,11 @@ Avant de lancer AMC, adaptez les chemins dans **deux fichiers** :
 ```yaml
 volumes:
   - /votre/chemin/vers/nQcm:/nqcm:ro
-  - /votre/chemin/vers/SCAN:/amc/scan
   - /votre/chemin/vers/CONTROLES:/amc/controles
+  - /votre/chemin/vers/CONTROLES/LISTES:/LISTES
+  - /votre/chemin/vers/CONTROLES/SCAN:/SCAN
+  - /votre/chemin/vers/CONTROLES/SUJETS:/SUJETS
+  - /votre/chemin/vers/QCM:/QCM
 ```
 
 **2. `launch.sh`** — mapper ces chemins dans le pont Mac-bridge (pour ouvrir les fichiers dans les apps Mac)
@@ -93,7 +107,11 @@ Recherchez le bloc `PATH_MAP` dans `launch.sh` (vers la ligne 54) et adaptez :
 ```python
 PATH_MAP = {
     "/amc/controles": "/votre/chemin/vers/CONTROLES",
-    "/amc/scan":      "/votre/chemin/vers/SCAN",
+    "/amc/scan":      "/votre/chemin/vers/CONTROLES/SCAN",
+    "/LISTES":        "/votre/chemin/vers/CONTROLES/LISTES",
+    "/SCAN":          "/votre/chemin/vers/CONTROLES/SCAN",
+    "/SUJETS":        "/votre/chemin/vers/CONTROLES/SUJETS",
+    "/QCM":      "/votre/chemin/vers/QCM",
     "/nqcm":          "/votre/chemin/vers/nQcm",
 }
 ```
@@ -120,9 +138,11 @@ chmod +x launch.sh entrypoint.sh
 Le script `launch.sh` fait tout automatiquement :
 
 1. Vérifie que Docker Desktop est lancé
-2. Construit l'image `amc-nqcm:latest` au premier lancement
-   (comptez **~3 Go à télécharger** — l'image de base contient déjà TeX Live 2026 complet ;
-   le build suivant sera instantané grâce au cache)
+2. Construit **ou reconstruit** l'image `amc-nqcm:latest` :
+   - au premier lancement (**~3 Go à télécharger** — l'image de base contient déjà TeX Live 2026 complet) ;
+   - ensuite **uniquement si** `Dockerfile`, `entrypoint.sh`, `libreoffice-stub.sh` ou `.dockerignore`
+     ont changé (empreinte `amc.build.hash` comparée à l'image). Le build est alors quasi instantané
+     grâce au cache, seul le dernier étage étant régénéré.
 3. Démarre un **pont Mac-bridge** sur le port 6081 (pour ouvrir les fichiers dans les apps Mac)
 4. Lance le conteneur avec Xvfb (framebuffer X11) + Xpra (encapsule X11 → TCP:14500)
 5. Attend que Xpra soit prêt, puis attache le client Mac natif
@@ -159,9 +179,41 @@ C'est le pont HTTP du `launch.sh` qui transporte la demande. Les conversions de 
 À chaque lancement, `entrypoint.sh` effectue :
 
 - **Classe nQCM** — copiée dans `TEXMFLOCAL` et `mktexlsr` relancé
-- **GTK3** — scrollbars toujours visibles, double-tap tolérant, signets pour `/amc/controles` et `/amc/scan`
+- **GTK3** — scrollbars toujours visibles, double-tap tolérant, signets pour `/amc/controles`, `/LISTES`, `/SCAN`, `/SUJETS` et `/QCM`
 - **Symlink projets** — `/root/MC-Projects` pointe vers `/amc/controles`
 - **Xpra** — serveur X virtuel, clavier français / Apple
+
+---
+
+## Version d'Auto-Multiple-Choice (PPA « test »)
+
+L'image n'utilise **pas** le paquet AMC de Debian, mais le **PPA officiel
+« test »** d'Alexis Bienvenüe, auteur d'AMC :
+
+- Dépôt : `ppa:alexis.bienvenue/test`
+- Série Ubuntu utilisée : **stonking** (binaires Ubuntu 26.10)
+- Version embarquée : `1.7.0+git20260914164232-1~stonking1`
+
+> **Pourquoi la série *stonking* ?** La base de l'image est Debian forky. Les
+> binaires Ubuntu *noble*/*jammy* réclament OpenCV 4.6 (`libopencv-core406`),
+> absent de Debian. La série *stonking* utilise OpenCV 4.10
+> (`libopencv-*-410`), **la même ABI que Debian forky**, et s'exécute donc
+> nativement. Le dépôt est épinglé (`Pin-Priority: 100` global, `990` pour les
+> paquets AMC) : aucun autre paquet Ubuntu n'entre dans l'image.
+
+Vérifier la version installée :
+
+```bash
+docker compose run --rm --entrypoint bash amc \
+  -c "dpkg -l auto-multiple-choice | tail -1"
+```
+
+Changer de série Ubuntu (seulement si *stonking* n'est plus publiée, **en
+vérifiant que la série cible embarque bien OpenCV 4.10**) :
+
+```bash
+docker compose build --build-arg AMC_PPA_SUITE=resolute
+```
 
 ---
 
@@ -170,9 +222,11 @@ C'est le pont HTTP du `launch.sh` qui transporte la demande. Les conversions de 
 AMC stocke ses projets dans `/root/.AMC.d` (volume Docker persistant `amc-data`).
 
 Pour accéder à vos fichiers depuis AMC :
-- **Scans** → naviguer vers `/amc/scan`
-- **Sujets LaTeX** → naviguer vers `/amc/controles`
-- **Signets GTK** → accès rapide à ces dossiers depuis la barre latérale des dialogues Ouvrir/Enregistrer
+- **Signets GTK** → barre latérale des dialogues Ouvrir/Enregistrer : `Contrôles`,
+  `LISTES`, `SCAN`, `SUJETS`, `QCM`
+- **Scans** → `/SCAN` (alias historique `/amc/scan`)
+- **Listes / Sujets** → `/LISTES`, `/SUJETS`
+- **Projets complets** → `/amc/controles`
 
 ---
 
