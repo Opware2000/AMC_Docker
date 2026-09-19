@@ -1878,6 +1878,14 @@ function update_export_module(e) {
     }
 }
 
+function range_to_config(range, id) {
+    var n = document.getElementById(id);
+    if(n) {
+        n.value = range.value;
+        change_config_value(n);
+    }
+}
+
 function change_config_value(e) {
     var value;
     if(e.type == "checkbox")
@@ -1910,6 +1918,9 @@ socket.on("selected-config", function(data) {
                 console.log("Unknown type: " + e.type);
             if(!e.getAttribute("onchange"))
                 e.setAttribute("onchange", "change_config_value(this);");
+
+            var r = document.querySelector('[data-range-for="' + k + '"]');
+            if(r) r.value = data[k];
 
             if(k=="format_export") update_export_module(e);
             if(k=="app_public_marks") update_public_marks(e);

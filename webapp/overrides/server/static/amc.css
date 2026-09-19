@@ -2030,3 +2030,12 @@ input.one-way:checked ~ label.way .way-title { color: var(--primary); }
     border-color: var(--ok);
     box-shadow: 0 0 0 2px var(--ok);
 }
+
+/* Configuration : curseurs pour les seuils */
+.config-body .range-row {
+    display: grid;
+    grid-template-columns: 1fr 5rem;
+    gap: 8px;
+    align-items: center;
+}
+.config-body input[type="range"] { width: 100%; accent-color: var(--primary); }
