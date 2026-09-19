@@ -1,0 +1,29 @@
+<div id="scans">
+  <div id="failed-pages">
+    <div class="distrib">
+      <span class="btn btn-ok btn-grow"
+            onclick="tab_scans();"
+            >{{ _('failed.close') }}</span>
+    </div>
+    <div class="distrib">
+      <span class="btn btn-neutral"
+            title="{{ _('failed.preproc') }}"
+            onclick="failed_pre_process();"
+            >⚙️</span>
+      <span class="btn btn-danger"
+            title="{{ _('failed.delete') }}"
+            onclick="failed_delete();"
+            >❌</span>
+    </div>
+    <div id="failed-report">
+    </div>
+  </div>
+  <div id="failed-images">
+    <div id="failed-orig">
+      <img id="failed-orig-img" src=""/>
+    </div>
+    <div id="failed-pp">
+      <img id="failed-pp-img" src=""/>
+    </div>
+  </div>
+</div>

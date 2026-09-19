@@ -1,0 +1,28 @@
+<h1>{{ _('print.title') }}</h1>
+<div>
+  {{ _('print.desc') }}
+  {{ _('print.from') }}
+  <input type="number" min="{{ student_min }}" max="{{ student_max }}" id="student1" name="student1" value="{{ student_min }}"/>
+  {{ _('print.to') }}
+  <input type="number" min="{{ student_min }}" max="{{ student_max }}" id="student2" name="student2" value="{{ student_max }}"/>.<br/>
+  {{ _('print.choose') }}
+  <span id="print-cancel-btn" class="btn btn-warning" onclick="doc_print_finished();">{{ _('btn.cancel') }}</span>
+</div>
+{% if printers %}
+<h2>{{ _('print.print') }}</h2>
+<div>
+  Printer:
+  <select id="printer" name="printer">
+    {% for p in printers %}
+    <option value="{{ p['id'] }}">{{ p['name'] }}</option>
+    {% endfor %}
+  </select><br/>
+</div>
+<div class="bandeau">
+  <span id="print-printer-btn" class="btn btn-ok" onclick="print_to_printer();">{{ _('print.print.btn') }}</span>
+</div>
+{% endif %}
+<h2>{{ _('print.files') }}</h2>
+<div class="bandeau">
+  <span id="print-files-btn" class="btn btn-ok" onclick="print_to_files();" href="">{{ _('print.files.btn') }}</span>
+</div>

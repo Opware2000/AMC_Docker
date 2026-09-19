@@ -1,0 +1,11 @@
+{% if path %}
+{% if path.startswith("text:") %}
+<div class="sheetnum"><div>{{ path.replace("text:", "", 1) }}</div></div>
+{% else %}
+<div class="namefield-ext">
+  <img src="{{path}}" class="namefield"/>
+</div>
+{% endif %}
+{% else %}
+<div class="sheetnum"><div>Sheet {{ student }}{% if copy %}:{{ copy }}{% endif %}</div></div>
+{% endif %}

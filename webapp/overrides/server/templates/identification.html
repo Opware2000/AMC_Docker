@@ -1,0 +1,79 @@
+<div class="part-title">
+  {{ _('students.title') }}
+</div>
+{% if filename %}
+<div>
+  {{ _('students.filename') }}
+  <span class="filename">{{ filename }}</span><br/>
+  <span class="btn btn-danger btn-small"
+        onclick="students_list_delete({% if n_id %}true{% else %}false{% endif %});"
+        >{{ _('btn.delete') }}</span>
+</div>
+  {% if ukeys %}
+<div>
+  {{ _('students.listkey') }}
+  <select id="lkey"
+          onchange="change_lkey(this, '{% if n_id %}{{ lkey }}{% endif %}');"
+          >
+    {% for k in ukeys %}
+    <option value="{{ k }}"
+            {% if k==lkey %}selected{% endif %}
+            >{{ k }}</option>
+    {% endfor %}
+  </select>
+</div>
+  {% else %}
+<div>
+  {{ _('students.listkey.none') }}
+</div>
+  {% endif %}
+  {% if codes %}
+<div>
+  {{ _('assoc.code') }}
+  <select id="acode" onchange="change_acode(this);">
+    {% for k in codes %}
+    <option value="{{ k }}"
+            {% if k==acode %}selected{% endif %}
+            >{% if k=="<preassoc>" %}{{ _('assoc.preassoc') }}{% else %}{{ k }}{% endif %}</option>
+    {% endfor %}
+  </select>
+</div>
+  {% else %}
+<div>
+  {{ _('assoc.code.none') }}
+</div>
+  {% endif %}
+<div class="part-title">
+  {{ _('assoc.title') }}
+</div>
+<div id="n-identifications" n-ok="{{ n_id }}" n-total="{{ n_students }}">
+  {{ n_id }} / {{ n_students }}
+</div>
+<div class="bandeau">
+  <span id="do-association-clear" class="btn btn-danger" onclick="association_clear();">{{ _('assoc.clear') }}</span>
+  {% if ukeys and codes %}
+  <span id="do-association-auto" class="btn btn-ok" onclick="association_auto();">{{ _('assoc.auto') }}</span>
+  {% endif %}
+  <span id="do-association-manual" class="btn btn-ok" onclick="association_manual();">{{ _('assoc.manual') }}</span>
+</div>
+{% else %}
+<div>
+  {{ _('students.none') }}
+</div>
+<div class="bandeau {%if not students_shared %}hidden{% endif %}">
+  <select id="students-shared">
+    <option value="" selected>{{ _('students.upload') }}</option>
+    {% for sl in students_shared %}
+    <option value="{{ sl }}">{{ sl }}</option>
+    {% endfor %}
+  </select>
+</div>
+<div class="bandeau">
+  <input type="file" id="students-upload" name="file" class="hidden"
+         accept=".csv,.txt,text/csv"
+         onchange="upload_students();" />
+  <label class="btn btn-ok" for="students-upload"
+         onclick="return students_install();"
+         >{% if students_shared %}{{ _('students.install') }}{% else %}{{ _('students.upload') }}{% endif %}</label>
+</div>
+{% endif %}

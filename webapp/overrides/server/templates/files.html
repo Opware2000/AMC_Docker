@@ -1,0 +1,23 @@
+<div class="files">
+  {% if files %}
+  <ul class="selectable">
+    {% for f, url, recent in files %}
+    <li class="file-name selectable short direct
+               {% if recent %}recent{% endif %}
+               "
+        onclick="open_file('{{ url }}')">
+      <a class="filename">{{ f }}</a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  {{ _('files.none') }}
+  {% endif %}
+</div>
+{% if zip_text %}
+<div class="bandeau">
+  <a class="btn btn-neutral"
+     href="{{ fsdir_url }}"
+     >{{ zip_text }}</a>
+</div>
+{% endif %}

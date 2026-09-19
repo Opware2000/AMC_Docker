@@ -1,0 +1,28 @@
+{% if marks %}
+<div>
+  {{ _('marks.mean') }} {{ mean | round(1) }}
+{% if full %}
+/ {{ full | round(1) }}
+{% endif %}
+({{ ngettext('num.student', 'num.students', nmarks) }})
+</div>
+{% if classes %}
+<div class="hist">
+<table class="hist">
+  <tbody>
+    {% for c in classes %}
+    <tr class="hist-level">
+      <td class="hist-base"><div>{{ c["low"] }}<div></td>
+      <td class="hist-level">
+        <div class="hist-n">{{ c["n"] }}</div>
+        <div class="hist-bar" style="width: {{ c["pc"] }}%"></div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% else %}
+{{ _('marks.none') }}
+{% endif %}

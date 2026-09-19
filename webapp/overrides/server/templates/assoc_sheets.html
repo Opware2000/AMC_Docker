@@ -1,0 +1,19 @@
+<table class="lock-header">
+  <thead>
+    <tr>
+      <th>Sheet</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in sheets %}
+    <tr amc-student="{{ s[0] }}" amc-copy="{{ s[1] }}"
+        amc-manual="{{ s[2] }}" amc-auto="{{ s[3] }}"
+        onclick="select_assoc_sheet(this,{{ s[0] }},{{ s[1] }});"
+        >
+      <td>
+        {{ s[0] }}{% if s[1] %}:{{ s[1] }}{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

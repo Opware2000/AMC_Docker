@@ -1,0 +1,16 @@
+<ul class="selectable">
+  {% for level,f in files %}
+  <li class="file-name selectable short">
+    <span class="filename
+                 {% if level==2 %}dirname{% endif %}
+                 ">{{ f }}</span>
+    {% if level<=0 %}
+    <span class="subbtn subbtn-green" onclick="select_file('{{f}}');"><i class="iconoir-edit-pencil"></i></span>
+    {% endif %}
+    <a class="subbtn subbtn-blue" href="{{ base_url }}/{{ f }}{{ suffix }}"><i class="iconoir-download-circle"></i><a>
+    {% if level in (0,1) %}
+    <span class="subbtn subbtn-red" onclick="delete_project_file('{{f}}');"><i class="iconoir-xmark-circle"></i></span>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>

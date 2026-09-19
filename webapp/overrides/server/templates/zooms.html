@@ -1,0 +1,14 @@
+{% for z in zooms %}
+<div class="zoom-one"
+     amc-prop="{{ z["prop"] }}"
+     amc-question="{{ z["id_a"] }}" amc-answer="{{ z["id_b"] }}"
+     >
+  <div>
+    <img src="{{ z["image"] }}" class="zoom-image"
+         onclick="clickBox({{ z["id_a"] }},{{ z["id_b"] }});"/>
+  </div>
+  <div class="zoom-prop">
+    {{ z["prop"] | round(2) }}
+  </div>
+</div>
+{% endfor %}

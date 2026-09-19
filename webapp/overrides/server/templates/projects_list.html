@@ -1,0 +1,32 @@
+{% if projects %}
+<div id="projects-action" class="bandeau">
+  <div id="project-open" class="project-action ok selected" onclick="select_action(this);">{{ _('project.open') }}</div>
+  <div id="project-rename" class="project-action neutral" onclick="select_action(this);">{{ _('project.rename') }}</div>
+  <div id="project-clone" class="project-action neutral" onclick="select_action(this);">{{ _('project.clone') }}</div>
+  <div id="project-download" class="project-action neutral" onclick="select_action(this);">{{ _('project.download') }}</div>
+  <div id="project-delete" class="project-action danger" onclick="select_action(this);">{{ _('project.delete') }}</div>
+</div>
+<div class="overy">
+  {% for user,plist in projects %}
+  {% if user %}
+  <div class="espace">
+    <span class="user-name selectable"
+          amc-user="{{ user }}"
+          onclick="select_project(this, null, '{{ user }}');"
+          >{{ user }}</span>
+  </div>
+  {% endif %}
+  {% if plist %}
+  <ul amc-user="{% if user %}{{user}}{% endif %}" class="projects-ul espace projects-list selectable">
+    {% for p in plist %}
+    <li class="selectable direct"
+        amc-url="/fs/{{ p }}{% if user %}?user={{ user }}{% endif %}"
+        onclick="select_project(this, '{{p}}' {% if user %}, '{{user}}'{% endif %});">{{ p }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% endfor %}
+</div>
+{% else %}
+<ul amc-user=""/>
+{% endif %}
