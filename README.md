@@ -57,6 +57,7 @@ amc-docker/
 ├── entrypoint.sh               # Installe nQCM, configure GTK, démarre xpra:14500
 ├── Dockerfile.webapp           # Couche serveur web (Flask amc-webapp + gunicorn)
 ├── entrypoint-webapp.sh        # Installe nQCM puis lance le serveur web
+├── webapp/                     # Surcharges de la GUI du serveur web (overlay)
 ├── docker-compose.yml          # Volumes et configuration (non versionné)
 ├── docker-compose.yaml.example # Template à copier/adapter
 ├── launch.sh                   # Lanceur Mac : vérifie Docker, pont HTTP, démarre le conteneur, attache Xpra
@@ -244,6 +245,11 @@ Le service `amc-web` vit dans le même `docker-compose.yml`, sous le profil
 avec la GUI les **projets** (`CONTROLES` → `/amc/controles`, via
 `AMC_PROJECTSDIR`), la **configuration AMC** (volume `amc-data` → `/root/.AMC.d`)
 et le dossier nQCM (`/nqcm`).
+
+Pour **personnaliser la GUI** (templates HTML, CSS, JS), déposez vos fichiers
+dans `webapp/overrides/` en reproduisant l'arborescence cible (`/amc-web/`) :
+ils écraseront ceux du serveur au moment du build. Détails dans
+`webapp/README.md`.
 
 Arrêter le serveur web :
 

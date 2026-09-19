@@ -47,6 +47,10 @@ RUN mkdir -p /amc-web \
 # Version affichée dans l'interface (dépôt cloné sans .git → on l'écrit ici)
 RUN printf 'APP_VERSION="%s"\n' "$AMC_WEBAPP_REV" > /amc-web/server/version.py
 
+# ── 4b. Surcharges locales de la GUI (voir webapp/README.md) ─
+# Copiées après le clone : tout fichier présent écrase l'original.
+COPY webapp/overrides/ /amc-web/
+
 ENV PATH=/venv/bin:$PATH
 ENV FLASK_APP=amc
 # Les projets AMC sont les dossiers montés (CONTROLES) — mêmes que la GUI
