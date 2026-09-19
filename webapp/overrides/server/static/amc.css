@@ -1897,3 +1897,25 @@ li.selectable.direct:hover {
     margin: 14px 0 8px;
 }
 .project-change-name { width: 100%; }
+
+/* Source : indicateur « non enregistré » + panneaux encadrés */
+.dirty {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--warn);
+    margin-left: 6px;
+    vertical-align: middle;
+}
+.dirty.hidden { display: none; }
+#source #code, #source #document { min-width: 0; }
+#document-view {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    padding: 0;
+    margin: 8px;
+}
+#code-code-a { border-top: 1px solid var(--border); }
+#files-list { margin: 8px; }

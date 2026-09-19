@@ -635,6 +635,11 @@ function source_modified(t) {
             else b.classList.add("disabled");
         }
     }
+    var d = document.getElementById("source-dirty");
+    if(d) {
+        if(t) d.classList.remove("hidden");
+        else d.classList.add("hidden");
+    }
 }
 
 socket.on("source-saved", function() {
