@@ -9,6 +9,7 @@ Configuration Docker pour **Auto-Multiple-Choice** sur Mac Apple Silicon avec :
 - Accès à vos dossiers de travail (projets, listes, scans, sujets) via des volumes
 - Affichage distant natif via **Xpra** (fenêtre Mac, pas d'émulation)
 - Ouvrir les fichiers depuis AMC directement dans les apps Mac (TextEdit, Preview, Finder…)
+- Alternative **navigateur** : le même AMC servi par [amc-webapp](https://gitlab.com/auto-multiple-choice/amc-webapp), via le profil Docker `webapp`
 
 ---
 
@@ -54,6 +55,8 @@ amc-docker/
 ├── .dockerignore               # Fichiers ignorés par Docker
 ├── Dockerfile                  # Image texlive/texlive + AMC + Xpra (arm64)
 ├── entrypoint.sh               # Installe nQCM, configure GTK, démarre xpra:14500
+├── Dockerfile.webapp           # Couche serveur web (Flask amc-webapp + gunicorn)
+├── entrypoint-webapp.sh        # Installe nQCM puis lance le serveur web
 ├── docker-compose.yml          # Volumes et configuration (non versionné)
 ├── docker-compose.yaml.example # Template à copier/adapter
 ├── launch.sh                   # Lanceur Mac : vérifie Docker, pont HTTP, démarre le conteneur, attache Xpra
@@ -216,6 +219,42 @@ Pour accéder à vos fichiers depuis AMC :
 - **Scans** → `/SCAN` (alias historique `/amc/scan`)
 - **Listes / Sujets** → `/LISTES`, `/SUJETS`
 - **Projets complets** → `/amc/controles`
+
+---
+
+## Alternative navigateur (AMC webapp)
+
+En plus de l'interface GTK, le même AMC peut être utilisé **dans le navigateur**
+grâce au serveur officiel [amc-webapp](https://gitlab.com/auto-multiple-choice/amc-webapp).
+La couche web est construite **par-dessus l'image existante** (`amc-nqcm:latest`) :
+même AMC, même TeX Live, même classe nQCM — seuls Flask et gunicorn sont ajoutés.
+
+```bash
+# 1) Image de base (une seule fois — ou un premier ./launch.sh)
+docker compose build amc
+
+# 2) Construire et lancer uniquement le serveur web
+docker compose --profile webapp up -d --build amc-web
+
+# 3) Ouvrir http://localhost:8080
+```
+
+Le service `amc-web` vit dans le même `docker-compose.yml`, sous le profil
+`webapp` : `./launch.sh` (profil par défaut) ne le lance donc jamais. Il partage
+avec la GUI les **projets** (`CONTROLES` → `/amc/controles`, via
+`AMC_PROJECTSDIR`), la **configuration AMC** (volume `amc-data` → `/root/.AMC.d`)
+et le dossier nQCM (`/nqcm`).
+
+Arrêter le serveur web :
+
+```bash
+docker compose --profile webapp stop amc-web
+```
+
+> **Mono-utilisateur.** Le serveur n'a **aucune authentification** : il est
+> destiné à `localhost`. Pour un accès distant, placez-le derrière un
+> reverse-proxy avec authentification (voir la doc officielle pour le mode
+> multi-utilisateurs ; l'isolation landrun nécessite un noyau Linux ≥ 6.7).
 
 ---
 

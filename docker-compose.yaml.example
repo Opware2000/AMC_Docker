@@ -70,6 +70,38 @@ services:
     security_opt:
       - seccomp:unconfined
 
+  # ── Serveur web (navigateur) ────────────────────────────────
+  # Optionnel, profil « webapp ». Nécessite l'image de base amc-nqcm:latest
+  # (docker compose build amc, ou un premier ./launch.sh).
+  #   docker compose --profile webapp up -d --build amc-web
+  #   → http://localhost:8080
+  amc-web:
+    profiles: ["webapp"]
+    build:
+      context: .
+      dockerfile: Dockerfile.webapp
+    image: amc-nqcm-web:latest
+    platform: linux/arm64
+
+    # ── Port du serveur web ─────────────────────────────────
+    ports:
+      - "8080:8080"
+
+    environment:
+      - LANG=fr_FR.UTF-8
+      - LC_ALL=fr_FR.UTF-8
+      # Les projets AMC sont les dossiers de CONTROLES (mêmes que la GUI)
+      - AMC_PROJECTSDIR=/amc/controles
+
+    # Mêmes dossiers que le service `amc` (source unique : ce fichier)
+    volumes:
+      - /chemin/vers/nQcm:/nqcm:ro
+      - /chemin/vers/CONTROLES:/amc/controles
+      - amc-data:/root/.AMC.d
+
+    shm_size: '256mb'
+    restart: "no"
+
 # ── Volumes nommés ─────────────────────────────────────────
 volumes:
   amc-data:
