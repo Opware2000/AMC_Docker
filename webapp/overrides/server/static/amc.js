@@ -427,6 +427,13 @@ function u_projects_list() {
 }
 socket.on("u-projects-list", u_projects_list);
 
+function filter_projects(e) {
+    var q = e.value.toLowerCase();
+    for(var li of document.querySelectorAll("#projects-list li.selectable")) {
+        li.style.display = li.textContent.toLowerCase().includes(q) ? "" : "none";
+    }
+}
+
 function tab_main() {
     show_tab("main").then(() => {
         u_projects_list();

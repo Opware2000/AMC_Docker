@@ -1743,3 +1743,103 @@ input, select, textarea { border-radius: 7px; }
 .zoom-prop {
     font-size: .8rem;
 }
+
+/* ============================================================
+   Écran Configuration — cartes par section
+   ============================================================ */
+#project-config {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+    padding: 16px;
+    align-content: start;
+    height: 100%;
+    overflow-y: auto;
+}
+.config-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+.config-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    font-weight: 650;
+    border-bottom: 1px solid var(--border);
+    border-left: 4px solid var(--info-soft);
+}
+.config-card.project .config-head { border-left-color: var(--ok-soft); }
+.config-card.global .config-head { border-left-color: var(--danger-soft); }
+.config-badge {
+    margin-left: auto;
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--text-muted);
+}
+.config-card.project .config-badge { background: var(--tint-ok); color: var(--ok); }
+.config-card.global .config-badge { background: var(--tint-danger); color: var(--danger); }
+.config-body { padding: 12px; }
+.config-body .field { margin-bottom: 12px; }
+.config-body .field:last-child { margin-bottom: 0; }
+.config-body .field > label { display: block; font-size: .86rem; font-weight: 550; margin-bottom: 4px; }
+.config-body .check { display: flex; align-items: flex-start; gap: 8px; font-size: .9rem; margin-bottom: 8px; }
+.config-body .check input { margin-top: 3px; }
+.config-body input, .config-body select, .config-body textarea { max-width: 100%; }
+.config-body input[type="number"] { width: 6rem; }
+
+/* ============================================================
+   Écran Projets — recherche + cartes
+   ============================================================ */
+.projects-filter { width: min(24rem, 100%); }
+li.selectable.direct {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    box-shadow: var(--shadow);
+    font-weight: 550;
+}
+li.selectable.direct:hover {
+    border-color: var(--primary);
+    background: var(--tint-info);
+}
+.user-name { border-width: 1px; }
+
+/* Nouveau projet : cartes de point de départ */
+.one-way {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.one-way .way-title { font-weight: 600; }
+
+/* ============================================================
+   Écran Source — barres d'outils et aperçu
+   ============================================================ */
+#source #code { border-right: 1px solid var(--border); }
+#source .bandeau {
+    margin: 0;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+#document-view { background: var(--surface-2); padding: 10px; }
+#print { border-radius: 10px; }
+
+/* ============================================================
+   Identification
+   ============================================================ */
+#identification .part-title { margin-top: 0; }
+#n-identifications { font-size: 1.3rem; font-weight: 700; }
+#identification .filename { color: var(--text); }

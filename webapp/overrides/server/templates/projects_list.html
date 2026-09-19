@@ -6,6 +6,11 @@
   <div id="project-download" class="project-action neutral" onclick="select_action(this);">{{ _('project.download') }}</div>
   <div id="project-delete" class="project-action danger" onclick="select_action(this);">{{ _('project.delete') }}</div>
 </div>
+<div class="bandeau">
+  <!-- ponytail: libellé littéral faute de clé i18n amont -->
+  <input type="search" id="projects-filter" class="projects-filter"
+         placeholder="Rechercher un projet…" oninput="filter_projects(this);">
+</div>
 <div class="overy">
   {% for user,plist in projects %}
   {% if user %}

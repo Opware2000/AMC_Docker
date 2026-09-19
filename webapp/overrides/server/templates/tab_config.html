@@ -1,154 +1,163 @@
 <div id="tab-config">
   <div id="project-config">
-    
-    <div>
-      <div class="part-title project">
-        {{ _('config.project') }}
-      </div>
-      <div class="part-title">
-        {{ _('config.external') }}
-      </div>
-      <div>
-        <label for="moteur_latex_b">{{ _('config.latex_engine') }}</label>
-        {% if latex_engines %}
-        <select id="moteur_latex_b" name="moteur_latex_b">
-          {% for engine in latex_engines %}
-          <option value="{{ engine['code'] }}"
-                  {% if engine['selected'] %}selected{% endif %}
-                  >{{ engine['code'] }}
-            {%- if not engine['available'] %} ({{ _('not.available') }}){% endif -%}
-          </option>
-          {% endfor %}
-        </select>
-        {% else %}
-        <input id="moteur_latex_b" name="moteur_latex_b"
-               type="text" size="25"/>
-        {% endif %}
-      </div>
-    </div>
 
-    <div>
-      <div class="part-title">
-        {{ _('config.grading') }}
+    <section class="config-card project">
+      <div class="config-head">{{ _('config.project') }} — {{ _('config.latex_engine') }}
+        <span class="config-badge">projet</span></div>
+      <div class="config-body">
+        <div class="field">
+          <label for="moteur_latex_b">{{ _('config.latex_engine') }}</label>
+          {% if latex_engines %}
+          <select id="moteur_latex_b" name="moteur_latex_b">
+            {% for engine in latex_engines %}
+            <option value="{{ engine['code'] }}"
+                    {% if engine['selected'] %}selected{% endif %}
+                    >{{ engine['code'] }}
+              {%- if not engine['available'] %} ({{ _('not.available') }}){% endif -%}
+            </option>
+            {% endfor %}
+          </select>
+          {% else %}
+          <input id="moteur_latex_b" name="moteur_latex_b"
+                 type="text" size="25"/>
+          {% endif %}
+        </div>
       </div>
-      <div>
-        <label for="note_null">{{ _('config.mark.null') }}</label>
-        <input id="note_null" name="note_null"
-               type="number" size="3"/>
-        <br/>
-        <label for="note_max">{{ _('config.mark.max') }}</label>
-        <input id="note_max" name="note_max"
-               type="number" size="3" min="0"/>
-        <br/>
-        <label for="note_grain">{{ _('config.mark.grain') }}</label>
-        <input id="note_grain" name="note_grain"
-               type="number" size="3" min="0"/>
-        <br/>
-        <label for="note_arrondi">{{ _('config.mark.rounding') }}</label>
-        <select id="note_arrondi" name="note_arrondi">
-          <option value="normal">{{ _('config.mark.round') }}</option>
-          <option value="inf">{{ _('config.mark.floor') }}</option>
-          <option value="sup">{{ _('config.mark.ceil') }}</option>
-        </select>
-      </div>
-    </div>
+    </section>
 
-    <div>
-      <div class="part-title">
-        {{ _('config.annotation') }}
+    <section class="config-card project">
+      <div class="config-head">{{ _('config.grading') }}
+        <span class="config-badge">projet</span></div>
+      <div class="config-body">
+        <div class="field">
+          <label for="note_null">{{ _('config.mark.null') }}</label>
+          <input id="note_null" name="note_null" type="number" size="3"/>
+        </div>
+        <div class="field">
+          <label for="note_max">{{ _('config.mark.max') }}</label>
+          <input id="note_max" name="note_max" type="number" size="3" min="0"/>
+        </div>
+        <div class="field">
+          <label for="note_grain">{{ _('config.mark.grain') }}</label>
+          <input id="note_grain" name="note_grain" type="number" size="3" min="0"/>
+        </div>
+        <div class="field">
+          <label for="note_arrondi">{{ _('config.mark.rounding') }}</label>
+          <select id="note_arrondi" name="note_arrondi">
+            <option value="normal">{{ _('config.mark.round') }}</option>
+            <option value="inf">{{ _('config.mark.floor') }}</option>
+            <option value="sup">{{ _('config.mark.ceil') }}</option>
+          </select>
+        </div>
       </div>
-      <div>
-        <label for="annote_position">{{ _('config.annotation.pos') }}</label><br/>
-        <select id="annote_position" name="annote_position">
-          <option value="none">{{ _('config.annotation.pos.none') }}</option>
-          <option value="marge">{{ _('config.annotation.pos.margin') }}</option>
-          <option value="marges">{{ _('config.annotation.pos.margins') }}</option>
-          <option value="case">{{ _('config.annotation.pos.boxes') }}</option>
-          <option value="zones">{{ _('config.annotation.pos.source') }}</option>
-        </select>
-        <br/>
-        <label for="verdict">{{ _('config.annotation.header') }}</label><br/>
-        <textarea id="verdict" name="verdict" cols="40" rows="3"></textarea>
-      </div>
-    </div>
+    </section>
 
-    <div>
-      <div class="part-title">
-        {{ _('assoc.title') }}
+    <section class="config-card project">
+      <div class="config-head">{{ _('config.annotation') }}
+        <span class="config-badge">projet</span></div>
+      <div class="config-body">
+        <div class="field">
+          <label for="annote_position">{{ _('config.annotation.pos') }}</label>
+          <select id="annote_position" name="annote_position">
+            <option value="none">{{ _('config.annotation.pos.none') }}</option>
+            <option value="marge">{{ _('config.annotation.pos.margin') }}</option>
+            <option value="marges">{{ _('config.annotation.pos.margins') }}</option>
+            <option value="case">{{ _('config.annotation.pos.boxes') }}</option>
+            <option value="zones">{{ _('config.annotation.pos.source') }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="verdict">{{ _('config.annotation.header') }}</label>
+          <textarea id="verdict" name="verdict" cols="40" rows="3"></textarea>
+        </div>
       </div>
-      <div>
-        <input type="checkbox" id="multiple_copies" name="multiple_copies"/>
-        <label for="multiple_copies">{{ _('config.association.mult_copies') }}</label>
-      </div>
-    </div>
-    
-    <div>
-      <div class="part-title global">
-        {{ _('config.global') }}
-      </div>
-      <div class="part-title">
-        {{ _('config.build') }}
-      </div>
-      <div>
-        <input type="checkbox" id="global:force_textpos" name="global:force_textpos" />
-        <label for="global:force_textpos">{{ _('config.force_textpos') }}</label>
-      </div>
-    </div>
-    <div>
-      <div class="part-title">
-        {{ _('config.scan') }}
-      </div>
-      <div>
-        <label for="global:bw_threshold">{{ _('config.scan.bwthreshold') }}</label>
-        <input id="global:bw_threshold" name="global:bw_threshold"
-               type="number" size="3" min="0" max="1"/>
-        <br/>
-        <label for="global:tolerance_marque_inf">{{ _('config.scan.msized') }}</label>
-        <input id="global:tolerance_marque_inf" name="global:tolerance_marque_inf"
-               type="number" size="3" min="0" max="1"/>
-        <br/>
-        <label for="global:tolerance_marque_sup">{{ _('config.scan.msizei') }}</label>
-        <input id="global:tolerance_marque_sup" name="global:tolerance_marque_sup"
-               type="number" size="3" min="0" max="1"/>
-        <br/>
-        <input type="checkbox" id="global:try_three" name="global:try_three"/>
-        <label for="global:try_three">{{ _('config.scan.3m') }}</label>
-      </div>
-    </div>
-    
-    <div>
-      <div class="part-title">
-        {{ _('config.i18n') }}
-      </div>
-      <div>
-        <input type="checkbox" id="global:ascii_filenames" name="global:ascii_filenames"/>
-        <label for="global:ascii_filenames">{{ _('config.i18n.ascii') }}</label>
-      </div>
-      <div>
-        <label for="global:csv_name_headers">{{ _('config.i18n.headers.name') }}</label>
-        <input id="global:csv_name_headers" name="global:csv_name_headers"
-               type="text" placeholder="{{ _('config.i18n.headers') }}"
-               size="20"/>
-        <br/>
-        <label for="global:csv_surname_headers">{{ _('config.i18n.headers.surname') }}</label>
-        <input id="global:csv_surname_headers" name="global:csv_surname_headers"
-               type="text" placeholder="{{ _('config.i18n.headers') }}"
-               size="20"/>
-      </div>
-    </div>
+    </section>
 
-    <div>
-      <div class="part-title">
-        {{ _('config.view') }}
+    <section class="config-card project">
+      <div class="config-head">{{ _('assoc.title') }}
+        <span class="config-badge">projet</span></div>
+      <div class="config-body">
+        <label class="check" for="multiple_copies">
+          <input type="checkbox" id="multiple_copies" name="multiple_copies"/>
+          {{ _('config.association.mult_copies') }}
+        </label>
       </div>
-      <div>
-        <input type="checkbox" id="global:view_histogram" name="global:view_histogram"/>
-        <label for="global:view_histogram">{{ _('config.view.histogram') }}</label>
-        <br/>
-        <input type="checkbox" id="global:activate_ahead" name="global:activate_ahead"/>
-        <label for="global:activate_ahead">{{ _('config.view.ahead') }}</label>
+    </section>
+
+    <section class="config-card global">
+      <div class="config-head">{{ _('config.global') }} — {{ _('config.build') }}
+        <span class="config-badge">global</span></div>
+      <div class="config-body">
+        <label class="check" for="global:force_textpos">
+          <input type="checkbox" id="global:force_textpos" name="global:force_textpos" />
+          {{ _('config.force_textpos') }}
+        </label>
       </div>
-    </div>
-    
+    </section>
+
+    <section class="config-card global">
+      <div class="config-head">{{ _('config.scan') }}
+        <span class="config-badge">global</span></div>
+      <div class="config-body">
+        <div class="field">
+          <label for="global:bw_threshold">{{ _('config.scan.bwthreshold') }}</label>
+          <input id="global:bw_threshold" name="global:bw_threshold"
+                 type="number" size="3" min="0" max="1"/>
+        </div>
+        <div class="field">
+          <label for="global:tolerance_marque_inf">{{ _('config.scan.msized') }}</label>
+          <input id="global:tolerance_marque_inf" name="global:tolerance_marque_inf"
+                 type="number" size="3" min="0" max="1"/>
+        </div>
+        <div class="field">
+          <label for="global:tolerance_marque_sup">{{ _('config.scan.msizei') }}</label>
+          <input id="global:tolerance_marque_sup" name="global:tolerance_marque_sup"
+                 type="number" size="3" min="0" max="1"/>
+        </div>
+        <label class="check" for="global:try_three">
+          <input type="checkbox" id="global:try_three" name="global:try_three"/>
+          {{ _('config.scan.3m') }}
+        </label>
+      </div>
+    </section>
+
+    <section class="config-card global">
+      <div class="config-head">{{ _('config.i18n') }}
+        <span class="config-badge">global</span></div>
+      <div class="config-body">
+        <label class="check" for="global:ascii_filenames">
+          <input type="checkbox" id="global:ascii_filenames" name="global:ascii_filenames"/>
+          {{ _('config.i18n.ascii') }}
+        </label>
+        <div class="field">
+          <label for="global:csv_name_headers">{{ _('config.i18n.headers.name') }}</label>
+          <input id="global:csv_name_headers" name="global:csv_name_headers"
+                 type="text" placeholder="{{ _('config.i18n.headers') }}"
+                 size="20"/>
+        </div>
+        <div class="field">
+          <label for="global:csv_surname_headers">{{ _('config.i18n.headers.surname') }}</label>
+          <input id="global:csv_surname_headers" name="global:csv_surname_headers"
+                 type="text" placeholder="{{ _('config.i18n.headers') }}"
+                 size="20"/>
+        </div>
+      </div>
+    </section>
+
+    <section class="config-card global">
+      <div class="config-head">{{ _('config.view') }}
+        <span class="config-badge">global</span></div>
+      <div class="config-body">
+        <label class="check" for="global:view_histogram">
+          <input type="checkbox" id="global:view_histogram" name="global:view_histogram"/>
+          {{ _('config.view.histogram') }}
+        </label>
+        <label class="check" for="global:activate_ahead">
+          <input type="checkbox" id="global:activate_ahead" name="global:activate_ahead"/>
+          {{ _('config.view.ahead') }}
+        </label>
+      </div>
+    </section>
+
   </div>
 </div>
