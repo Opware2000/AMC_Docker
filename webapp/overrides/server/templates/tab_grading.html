@@ -1,167 +1,180 @@
 <div id="grading-tab">
-  <div id="grading">
-    <div class="blockview">
-      <div class="part-title">
-        {{ _('grading.title') }}
-      </div>
-      <div>
-        <input type="checkbox" id="extract-scale" name="extract-scale"
-               checked/>
-        <label for="extract-scale">{{ _('grading.scale.update') }}</label>
-      </div>
-      <div class="bandeau">
-        <span id="do-mark" class="btn btn-ok" onclick="do_mark();">{{ _('grading.mark') }}</span>
-      </div>
-      <div id="marks-report">
-      </div>
-    </div>
-    <div class="blockview">
-      <div id="identification">
-      </div>
-    </div>
-    <div id="block-export" class="blockview">
-      <div class="part-title">
-        {{ _('export.title') }}
-      </div>
-      <div id="export-format">
-        <label for="format_export">{{ _('export.format') }}</label>
-        <select id="format_export" name="format_export"
-                onchange="change_export_module(this);">
-          <option value="ods">LibreOffice (ods)</option>
-          <option value="CSV">CSV</option>
-        </select>
-      </div>
-      <div id="export-main">
-        <input type="checkbox" id="export_include_abs" name="export_include_abs"/>
-        <label for="export_include_abs">{{ _('export.abs') }}</label>
-      </div>
-      <div id="export-ods">
+  <!-- ponytail: libellés littéraux faute de clés i18n amont -->
+  <div id="grading-switch" class="hidden">
+    <span id="view-results" class="view-btn current"
+          onclick="association_manual_done();">Résultats &amp; export</span>
+    <span id="view-assoc" class="view-btn"
+          onclick="association_manual();">Association manuelle</span>
+  </div>
+
+  <div id="grading-views">
+    <div id="grading">
+      <div class="blockview">
+        <div class="part-title">
+          {{ _('grading.title') }}
+        </div>
         <div>
-          <label for="export_ods_stats">{{ _('export.stats') }}</label>
-          <select id="export_ods_stats" name="export_ods_stats">
-            <option value="">{{ _('export.stats.none') }}</option>
-            <option value="h">{{ _('export.stats.horiz') }}</option>
-            <option value="v">{{ _('export.stats.vert') }}</option>
+          <input type="checkbox" id="extract-scale" name="extract-scale"
+                 checked/>
+          <label for="extract-scale">{{ _('grading.scale.update') }}</label>
+        </div>
+        <div class="bandeau">
+          <span id="do-mark" class="btn btn-ok" onclick="do_mark();">{{ _('grading.mark') }}</span>
+        </div>
+        <div id="marks-report">
+        </div>
+      </div>
+      <div class="blockview">
+        <div id="identification">
+        </div>
+      </div>
+      <div id="block-export" class="blockview">
+        <div class="part-title">
+          {{ _('export.title') }}
+        </div>
+        <div id="export-format">
+          <label for="format_export">{{ _('export.format') }}</label>
+          <select id="format_export" name="format_export"
+                  onchange="change_export_module(this);">
+            <option value="ods">LibreOffice (ods)</option>
+            <option value="CSV">CSV</option>
           </select>
         </div>
-        <div id="grading-indic" class="hidden">
-          <label for="export_ods_statsindic">{{ _('export.statsindic') }}</label>
-          <select id="export_ods_statsindic" name="export_ods_statsindic">
-            <option value="">{{ _('export.stats.none') }}</option>
-            <option value="h">{{ _('export.stats.horiz') }}</option>
-            <option value="v">{{ _('export.stats.vert') }}</option>
-          </select>
+        <div id="export-main">
+          <input type="checkbox" id="export_include_abs" name="export_include_abs"/>
+          <label for="export_include_abs">{{ _('export.abs') }}</label>
         </div>
-        <div id="grading-groups" class="hidden">
-          <label for="export_ods_group">{{ _('export.groups') }}</label>
-          <select id="export_ods_group" name="export_ods_group">
-            <option value="0">{{ _('export.groups.no') }}</option>
-            <option value="1">{{ _('export.groups.value') }}</option>
-            <option value="2">{{ _('export.groups.percent') }}</option>
+        <div id="export-ods">
+          <div>
+            <label for="export_ods_stats">{{ _('export.stats') }}</label>
+            <select id="export_ods_stats" name="export_ods_stats">
+              <option value="">{{ _('export.stats.none') }}</option>
+              <option value="h">{{ _('export.stats.horiz') }}</option>
+              <option value="v">{{ _('export.stats.vert') }}</option>
+            </select>
+          </div>
+          <div id="grading-indic" class="hidden">
+            <label for="export_ods_statsindic">{{ _('export.statsindic') }}</label>
+            <select id="export_ods_statsindic" name="export_ods_statsindic">
+              <option value="">{{ _('export.stats.none') }}</option>
+              <option value="h">{{ _('export.stats.horiz') }}</option>
+              <option value="v">{{ _('export.stats.vert') }}</option>
+            </select>
+          </div>
+          <div id="grading-groups" class="hidden">
+            <label for="export_ods_group">{{ _('export.groups') }}</label>
+            <select id="export_ods_group" name="export_ods_group">
+              <option value="0">{{ _('export.groups.no') }}</option>
+              <option value="1">{{ _('export.groups.value') }}</option>
+              <option value="2">{{ _('export.groups.percent') }}</option>
+            </select>
+            <br/>
+            <label for="export_ods_groupsep">{{ _('export.groupsep') }}</label>
+            <select id="export_ods_groupsep" name="export_ods_groupsep">
+              <option value=":">{{ _('export.groupsep.colon') }}</option>
+              <option value=".">{{ _('export.groupsep.dot') }}</option>
+            </select>
+          </div>
+        </div>
+        <div id="export-CSV">
+          <div>
+            <label for="export_csv_ticked">{{ _('export.ticked') }}</label>
+            <select id="export_csv_ticked" name="export_csv_ticked">
+              <option value="">{{ _('export.ticked.no') }}</option>
+              <option value="01">{{ _('export.ticked.01') }}</option>
+              <option value="AB">{{ _('export.ticked.ab') }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="bandeau">
+          <span id="do-export" class="btn btn-ok" onclick="do_export();">{{ _('export.btn') }}</span>
+        </div>
+        <div id="exported-files">
+        </div>
+        <div id="public-marks">
+          <div id="public-marks-option">
+            <input type="checkbox" id="app_public_marks" name="app_public_marks"
+                   onchange="change_public_marks(this);"/>
+            <label for="app_public_marks">{{ _('export.public') }}</label>
+          </div>
+          <div id="public-marks-links" class="hidden">
+            {{ _('export.public.marks') }}
+            <span id="public-marks-link-marks" class="btn btn-neutral"
+                  public-link="{{ public_marks_link }}#2"
+                  onclick="link_to_clipboard(this);"
+                  title="{{ _('clipboard.to') }}">📋</span>
+            {{ _('export.public.total') }}
+            <span id="public-marks-link-totals" class="btn btn-neutral"
+                  public-link="{{ public_marks_link }}#3"
+                  onclick="link_to_clipboard(this);"
+                  title="{{ _('clipboard.to') }}">📋</span>
+          </div>
+        </div>
+      </div>
+      <div id="block-annotate" class="blockview">
+        <div class="part-title">
+          {{ _('annotate.title') }}
+        </div>
+        <div>
+          <select id="regroupement_type">
+            <option value="STUDENTS">{{ _('annotate.students') }}</option>
+            <option value="ALL">{{ _('annotate.all') }}</option>
           </select>
           <br/>
-          <label for="export_ods_groupsep">{{ _('export.groupsep') }}</label>
-          <select id="export_ods_groupsep" name="export_ods_groupsep">
-            <option value=":">{{ _('export.groupsep.colon') }}</option>
-            <option value=".">{{ _('export.groupsep.dot') }}</option>
-          </select>
+          <input type="checkbox" id="regroupement_compose" name="regroupement_compose"/>
+          <label for="regroupement_compose">{{ _('annotate.compose') }}</label>
+          <br/>
+          <input type="checkbox" id="add_corrected" name="add_corrected"/>
+          <label for="add_corrected">{{ _('annotate.corrected') }}</label>
+          <br/>
+          <label for="modele_regroupement">{{ _('annotate.model') }}</label>
+          <input type="text" id="modele_regroupement" name="modele_regroupement"/>
+          <br/>
+          <input type="checkbox" id="annotate_dont_overwrite" name="annotate_dont_overwrite"/>
+          <label for="annotate_dont_overwrite">{{ _('annotate.dontoverwrite') }}</label>
         </div>
-      </div>
-      <div id="export-CSV">
-        <div>
-          <label for="export_csv_ticked">{{ _('export.ticked') }}</label>
-          <select id="export_csv_ticked" name="export_csv_ticked">
-            <option value="">{{ _('export.ticked.no') }}</option>
-            <option value="01">{{ _('export.ticked.01') }}</option>
-            <option value="AB">{{ _('export.ticked.ab') }}</option>
-          </select>
+        <div class="bandeau">
+          <span id="do-annotate" class="btn btn-ok" onclick="do_annotate();">{{ _('annotate.btn') }}</span>
         </div>
-      </div>
-      <div class="bandeau">
-        <span id="do-export" class="btn btn-ok" onclick="do_export();">{{ _('export.btn') }}</span>
-      </div>
-      <div id="exported-files">
-      </div>
-      <div id="public-marks">
-        <div id="public-marks-option">
-          <input type="checkbox" id="app_public_marks" name="app_public_marks"
-                 onchange="change_public_marks(this);"/>
-          <label for="app_public_marks">{{ _('export.public') }}</label>
-        </div>
-        <div id="public-marks-links" class="hidden">
-          {{ _('export.public.marks') }}
-          <span id="public-marks-link-marks" class="btn btn-neutral"
-                public-link="{{ public_marks_link }}#2"
-                onclick="link_to_clipboard(this);"
-                title="{{ _('clipboard.to') }}">📋</span>
-          {{ _('export.public.total') }}
-          <span id="public-marks-link-totals" class="btn btn-neutral"
-                public-link="{{ public_marks_link }}#3"
-                onclick="link_to_clipboard(this);"
-                title="{{ _('clipboard.to') }}">📋</span>
+        <div id="annotated-files">
         </div>
       </div>
     </div>
-    <div id="block-annotate" class="blockview">
-      <div class="part-title">
-        {{ _('annotate.title') }}
+
+    <div id="association" class="hidden">
+      <div id="assoc-left">
+        <div class="distrib">
+          <span id="assoc-manual-done"
+                class="btn btn-ok btn-grow"
+                onclick="association_manual_done();">{{ _('assoc.done') }}</span>
+        </div>
+        <div id="assoc-sheets">
+        </div>
       </div>
-      <div>
-        <select id="regroupement_type">
-          <option value="STUDENTS">{{ _('annotate.students') }}</option>
-          <option value="ALL">{{ _('annotate.all') }}</option>
-        </select>
-        <br/>
-        <input type="checkbox" id="regroupement_compose" name="regroupement_compose"/>
-        <label for="regroupement_compose">{{ _('annotate.compose') }}</label>
-        <br/>
-        <input type="checkbox" id="add_corrected" name="add_corrected"/>
-        <label for="add_corrected">{{ _('annotate.corrected') }}</label>
-        <br/>
-        <label for="modele_regroupement">{{ _('annotate.model') }}</label>
-        <input type="text" id="modele_regroupement" name="modele_regroupement"/>
-        <br/>
-        <input type="checkbox" id="annotate_dont_overwrite" name="annotate_dont_overwrite"/>
-        <label for="annotate_dont_overwrite">{{ _('annotate.dontoverwrite') }}</label>
+      <div id="assoc-center">
+        <div id="studentname">
+        </div>
       </div>
-      <div class="bandeau">
-        <span id="do-annotate" class="btn btn-ok" onclick="do_annotate();">{{ _('annotate.btn') }}</span>
-      </div>
-      <div id="annotated-files">
-      </div>
-    </div>
-  </div>
-  <div id="association" class="hidden">
-    <div id="assoc-left">
-      <div class="distrib">
-        <span id="assoc-manual-done"
-              class="btn btn-ok btn-grow"
-              onclick="association_manual_done();">{{ _('assoc.done') }}</span>
-      </div>
-      <div id="assoc-sheets">
-      </div>
-    </div>
-    <div id="assoc-choice">
-      <div id="studentname">
-      </div>
-      <div class="bandeau">
-        <input type="text" id="student-entry" tabindex="1"
-               placeholder="{{ _('student.type-to-select') }}"
-               oninput="select_students(this);"
-               onkeyup="select_students_keyup(this, event);"></input>
-        <input type="checkbox" id="global:filter_beginning" name="global:filter_beginning"
-               tabindex="10"
-               onchange="select_students();change_config_value(this);"/>
-        <label for="global:filter_beginning">{{ _('config.association.filter_beginning') }}</label>
-      </div>
-      <div id="create-student" class="bandeau hidden">
-        {{ _('assoc.new.id') }} <input type="text" id="create-student-id" size="12" tabindex="2"
-                                       onpaste="student_id_test_row(this, event);"/>
-        {{ _('assoc.new.surname') }} <input type="text" id="create-student-surname" size="12" tabindex="3"/>
-        {{ _('assoc.new.name') }} <input type="text" id="create-student-name" size="12" tabindex="4"/>
-        <span class="btn btn-ok" onclick="create_student();" tabindex="5">{{ _('assoc.new.go') }}</span>
-      </div>
-      <div id="students-list">
+      <div id="assoc-choice">
+        <div class="bandeau">
+          <input type="text" id="student-entry" tabindex="1"
+                 placeholder="{{ _('student.type-to-select') }}"
+                 oninput="select_students(this);"
+                 onkeyup="select_students_keyup(this, event);"></input>
+          <input type="checkbox" id="global:filter_beginning" name="global:filter_beginning"
+                 tabindex="10"
+                 onchange="select_students();change_config_value(this);"/>
+          <label for="global:filter_beginning">{{ _('config.association.filter_beginning') }}</label>
+        </div>
+        <div id="create-student" class="bandeau hidden">
+          {{ _('assoc.new.id') }} <input type="text" id="create-student-id" size="12" tabindex="2"
+                                         onpaste="student_id_test_row(this, event);"/>
+          {{ _('assoc.new.surname') }} <input type="text" id="create-student-surname" size="12" tabindex="3"/>
+          {{ _('assoc.new.name') }} <input type="text" id="create-student-name" size="12" tabindex="4"/>
+          <span class="btn btn-ok" onclick="create_student();" tabindex="5">{{ _('assoc.new.go') }}</span>
+        </div>
+        <div id="students-list">
+        </div>
       </div>
     </div>
   </div>

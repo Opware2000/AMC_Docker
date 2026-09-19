@@ -1519,6 +1519,12 @@ function u_identification() {
             var pm = document.getElementById("public-marks");
             if(n>0) pm.classList.remove("hidden");
             else pm.classList.add("hidden");
+            var sw = document.getElementById("grading-switch");
+            if(sw) {
+                var has_list = document.querySelector("#identification .filename") != null;
+                if(has_list) sw.classList.remove("hidden");
+                else sw.classList.add("hidden");
+            }
         });
 }
 socket.on("update-identification", u_identification);
@@ -1598,7 +1604,15 @@ function update_students_list() {
 
 socket.on("update-students-list", update_students_list);
 
+function grading_switch_update(view) {
+    var a = document.getElementById("view-results");
+    var b = document.getElementById("view-assoc");
+    if(a) a.classList.toggle("current", view == "results");
+    if(b) b.classList.toggle("current", view == "assoc");
+}
+
 function association_manual() {
+    grading_switch_update("assoc");
     document.getElementById("grading").classList.add("hidden");
     document.getElementById("association").classList.remove("hidden");
     clear_select_student(null);
@@ -1611,6 +1625,7 @@ function association_manual() {
 }
 
 function association_manual_done() {
+    grading_switch_update("results");
     document.getElementById("association").classList.add("hidden");
     document.getElementById("grading").classList.remove("hidden");
     u_identification();

@@ -1,4 +1,4 @@
-<div id="scans">
+<div id="scans" class="scans-failed">
   <div id="failed-pages">
     <div class="distrib">
       <span class="btn btn-ok btn-grow"
@@ -19,10 +19,13 @@
     </div>
   </div>
   <div id="failed-images">
-    <div id="failed-orig">
+    <!-- ponytail: libellés littéraux faute de clés i18n amont -->
+    <div id="failed-orig" class="img-pane">
+      <div class="img-head">Original</div>
       <img id="failed-orig-img" src=""/>
     </div>
-    <div id="failed-pp">
+    <div id="failed-pp" class="img-pane">
+      <div class="img-head">Après prétraitement</div>
       <img id="failed-pp-img" src=""/>
     </div>
   </div>
