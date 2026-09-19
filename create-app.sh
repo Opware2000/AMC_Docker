@@ -103,15 +103,26 @@ chmod +x "$APP_PATH/Contents/MacOS/launcher"
 echo -e "${GREEN}→ Création de l'icône...${NC}"
 
 # Télécharge l'icône officielle d'AMC si possible
-AMC_ICON_URL="https://gitlab.com/a10684/auto-multiple-choice/-/raw/master/doc/auto-multiple-choice.png"
+AMC_ICON_URL="https://gitlab.com/auto-multiple-choice/auto-multiple-choice/-/raw/master/icons/auto-multiple-choice.svg"
+TMP_SVG="/tmp/amc_icon.svg"
 TMP_PNG="/tmp/amc_icon.png"
 ICONSET_DIR="/tmp/amc.iconset"
 
 ICON_OK=false
 
-if curl -fsSL --max-time 10 "$AMC_ICON_URL" -o "$TMP_PNG" 2>/dev/null; then
+if curl -fsSL --max-time 15 "$AMC_ICON_URL" -o "$TMP_SVG" 2>/dev/null; then
+    if command -v magick &>/dev/null; then
+        # Rendu fidèle du SVG, redimensionné à ~80 % puis centré sur fond transparent
+        # (marge type icône macOS)
+        magick -background none "$TMP_SVG" -resize 820x820 \
+            -gravity center -extent 1024x1024 "$TMP_PNG" 2>/dev/null || true
+    else
+        # Repli : rendu QuickLook (cadrage du SVG moins fiable)
+        qlmanage -t -s 1024 -o /tmp "$TMP_SVG" >/dev/null 2>&1
+        [ -f "$TMP_SVG.png" ] && mv -f "$TMP_SVG.png" "$TMP_PNG"
+    fi
     # Vérifie que c'est bien une image PNG valide
-    if file "$TMP_PNG" | grep -q "PNG"; then
+    if file "$TMP_PNG" 2>/dev/null | grep -q "PNG"; then
         echo -e "${GREEN}  ✓ Icône AMC téléchargée${NC}"
 
         # Crée l'iconset avec toutes les résolutions requises par macOS
@@ -129,7 +140,7 @@ if curl -fsSL --max-time 10 "$AMC_ICON_URL" -o "$TMP_PNG" 2>/dev/null; then
             && ICON_OK=true \
             || echo -e "${YELLOW}  ⚠ iconutil a échoué — icône par défaut${NC}"
 
-        rm -rf "$ICONSET_DIR" "$TMP_PNG"
+        rm -rf "$ICONSET_DIR" "$TMP_SVG" "$TMP_PNG"
     fi
 fi
 
