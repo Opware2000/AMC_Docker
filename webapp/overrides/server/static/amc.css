@@ -1327,6 +1327,34 @@ img.menu { width: 1.6rem; height: 1.6rem; flex: none; }
 #theme-toggle { font-size: 1.15rem; }
 #connection-status, #menu-admin-search, #menu-admin-back { font-size: 1.05rem; }
 
+/* --- Stepper de progression --- */
+#workflow {
+    margin-top: 12px;
+    padding: 10px 8px 2px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+#workflow .step { display: flex; gap: 10px; align-items: flex-start; font-size: .86rem; }
+#workflow .pip {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    flex: none;
+    border: 2px solid var(--border);
+    color: var(--text-muted);
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    margin-top: 1px;
+}
+#workflow .step.done .pip { background: var(--ok); border-color: var(--ok); color: var(--on-ok); }
+#workflow .step.active .pip { border-color: var(--primary); color: var(--primary); }
+#workflow .t { color: var(--text-muted); }
+#workflow .step.done .t, #workflow .step.active .t { font-weight: 600; }
+#workflow .step.active .t { color: var(--text); }
+
 /* --- Barre haute --- */
 #topbar {
     display: flex;
@@ -1399,9 +1427,10 @@ input, select, textarea { border-radius: 7px; }
 /* --- Responsive --- */
 @media (max-width: 900px) {
     #menu { width: 64px; flex-basis: 64px; align-items: stretch; }
-    .menulabel, .brandname { display: none; }
+    .menulabel, .brandname, #workflow .t { display: none; }
     .menubtn { justify-content: center; padding: 9px 0; }
     .brand { justify-content: center; }
+    #workflow .step { justify-content: center; }
     .menu-foot { justify-content: center; flex-wrap: wrap; }
     #project-name { max-width: 45vw; }
 }

@@ -188,6 +188,47 @@ function toggle_theme() {
     set_theme(dark ? "light" : "dark");
 }
 
+// ----------------------- STEPPER
+
+// ponytail: libellés littéraux faute de clés i18n amont ; à extraire si besoin
+var workflow_steps = [
+    ["project", "Projet prêt"],
+    ["scans", "Copies scannées"],
+    ["marks", "Notes calculées"],
+    ["export", "Export"],
+];
+var workflow_state = { project: false, scans: false, marks: false, export: false };
+var workflow_project = undefined;
+
+function set_workflow(key, value) {
+    if(!(key in workflow_state)) return;
+    if(workflow_state[key] == value) return;
+    workflow_state[key] = value;
+    render_workflow();
+}
+
+function reset_workflow(project) {
+    workflow_state = { project: !!project, scans: false, marks: false, export: false };
+    render_workflow();
+}
+
+function render_workflow() {
+    var el = document.getElementById("workflow");
+    if(!el) return;
+    var active_set = false;
+    var html = "";
+    for(var i = 0; i < workflow_steps.length; i++) {
+        var key = workflow_steps[i][0];
+        var done = workflow_state[key];
+        var cls = done ? "done" : (active_set ? "" : "active");
+        if(!done) active_set = true;
+        html += '<div class="step ' + cls + '">'
+              + '<span class="pip">' + (done ? "✓" : (i + 1)) + '</span>'
+              + '<span class="t">' + workflow_steps[i][1] + '</span></div>';
+    }
+    el.innerHTML = html;
+}
+
 var projects_action = "project-open";
 
 function select_action(e) {
@@ -277,6 +318,12 @@ function project_open(data) {
         } else tab_main();
     }
     set_project_title();
+    if(name != workflow_project) {
+        workflow_project = name;
+        reset_workflow(name);
+    } else {
+        set_workflow("project", !!name);
+    }
 }
 socket.on("project-open", project_open );
 
@@ -860,8 +907,14 @@ function threshold_change() {
                  });
 }
 
+function update_scans_workflow() {
+    var ok = document.querySelector("#report-numbers > div.ok");
+    set_workflow("scans", ok ? parseInt(ok.textContent) > 0 : false);
+}
+
 function u_scans_report() {
-    return fetch_to_dom("scans-report", "/scans_report.html", {});
+    return fetch_to_dom("scans-report", "/scans_report.html", {})
+        .then(update_scans_workflow);
 }
 
 socket.on("scans-report", u_scans_report);
@@ -1322,6 +1375,7 @@ socket.on("n-marks", function(n) {
             else e.classList.add("hidden");
         }
     }
+    set_workflow("marks", n > 0);
 });
 
 function u_marks() {
@@ -1412,6 +1466,7 @@ function u_exported_files(t) {
         });
 }
 socket.on("update-exported-files", u_exported_files);
+socket.on("update-exported-files", function(t) { if(t) set_workflow("export", true); });
 
 function change_public_marks(e) {
     change_config_value(e);
@@ -1793,6 +1848,7 @@ function key_up(event) {
 
 document.addEventListener('DOMContentLoaded', function() {
     start_inactivity();
+    render_workflow();
     document.getElementById("app-body").addEventListener("keyup", key_up);
     connection_status(socket.connected ? "online" : "offline");
     if(!socket_creation)
