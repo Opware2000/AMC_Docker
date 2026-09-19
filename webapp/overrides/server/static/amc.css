@@ -1996,3 +1996,37 @@ input.one-way:checked ~ label.way .way-title { color: var(--primary); }
 .template-title { font-weight: 600; }
 .template-text { font-size: .78rem; color: var(--text-muted); }
 #do-create-project { width: 100%; text-align: center; justify-content: center; }
+
+/* ============================================================
+   Identification — compteur, statuts, actions
+   ============================================================ */
+#n-identifications {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    font-size: 1.35rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--tint-info);
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+#identification .bandeau { margin-top: 8px; }
+#identification .filename {
+    font-family: ui-monospace, Menlo, monospace;
+    background: var(--surface-2);
+    padding: 1px 6px;
+    border-radius: 6px;
+}
+#students-list li.student-name.associated::after {
+    content: "✓";
+    color: var(--ok);
+    font-weight: 700;
+    margin-left: 6px;
+}
+#students-list li.student-name.highlight {
+    border-color: var(--ok);
+    box-shadow: 0 0 0 2px var(--ok);
+}
