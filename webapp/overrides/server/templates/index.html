@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ request.accept_languages.best_match(['fr', 'en']) or 'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AMC</title>
+    <script>try{document.documentElement.dataset.theme=localStorage.getItem("amc-theme")||"light";}catch(e){}</script>
     <script src="{{ static_url_for('static', filename='socket.io.js') }}"></script>
     <script src="{{ static_url_for('static', filename='amc.js') }}"></script>
     <script src="/ace/ace.js"></script>
@@ -15,34 +16,46 @@
 <body id="app-body">
 
   <div id="app" version="{{ app_version }}">
-    
-    <div id="menu">
-      <div class="centered">
-        <span id="connection-status" class="offline" title="{{username}}"><i class="iconoir-cable-tag-solid"></i></span>
-        <span id="menu-admin-search" class="hidden admin-action adapt-menu"
-              onclick="admin_search();"><i class="iconoir-crown"></i></span>
-        <span id="menu-admin-back" class="hidden admin-action adapt-menu"
-              onclick="admin_back();"><i class="iconoir-profile-circle"></i></span>
+
+    <nav id="menu">
+      <div class="brand">
+        <span class="branddot"></span>
+        <span class="brandname">AMC</span>
       </div>
       <div id="menu-main" class="menubtn adapt-menu" onclick="tab_main();"
            title="{{ _('menu.main') }}"
-           ><img src="/static/menu-amc.svg" class="menu"></div>
+           ><img src="/static/menu-amc.svg" class="menu"><span class="menulabel">{{ _('menu.main') }}</span></div>
       <div id="menu-source" class="menubtn hidden adapt-menu" onclick="tab_source();"
            title="{{ _('menu.source') }}"
-           ><img src="/static/menu-source.svg" class="menu"></div>
+           ><img src="/static/menu-source.svg" class="menu"><span class="menulabel">{{ _('menu.source') }}</span></div>
       <div id="menu-scans" class="menubtn hidden adapt-menu" onclick="tab_scans();"
            title="{{ _('menu.scans') }}"
-           ><img src="/static/menu-scans.svg" class="menu"></div>
+           ><img src="/static/menu-scans.svg" class="menu"><span class="menulabel">{{ _('menu.scans') }}</span></div>
       <div id="menu-grading" class="menubtn hidden adapt-menu" onclick="tab_grading();"
            title="{{ _('menu.grading') }}"
-           ><img src="/static/menu-grading.svg" class="menu"></div>
+           ><img src="/static/menu-grading.svg" class="menu"><span class="menulabel">{{ _('menu.grading') }}</span></div>
       <div id="menu-config" class="menubtn hidden adapt-menu" onclick="tab_config();"
            title="{{ _('menu.config') }}"
-           ><img src="/static/menu-config.svg" class="menu"></div>
-      <div id="project-name" onclick="tab_main();"></div>
-    </div>
+           ><img src="/static/menu-config.svg" class="menu"><span class="menulabel">{{ _('menu.config') }}</span></div>
 
-    <div id="tab">
+      <div class="menu-foot">
+        <span id="connection-status" class="offline" title="{{username}}"><i class="iconoir-cable-tag-solid"></i></span>
+        <span id="menu-admin-search" class="hidden admin-action adapt-menu"
+              onclick="admin_search();" title="Recherche admin"><i class="iconoir-crown"></i></span>
+        <span id="menu-admin-back" class="hidden admin-action adapt-menu"
+              onclick="admin_back();"><i class="iconoir-profile-circle"></i></span>
+        <!-- ponytail: titre littéral faute de clé i18n amont ; à extraire si besoin -->
+        <span id="theme-toggle" class="admin-action" onclick="toggle_theme();"
+              title="Thème clair / sombre">◐</span>
+      </div>
+    </nav>
+
+    <div id="main">
+      <header id="topbar">
+        <div id="project-name" onclick="tab_main();"></div>
+      </header>
+      <div id="tab">
+      </div>
     </div>
 
   </div>

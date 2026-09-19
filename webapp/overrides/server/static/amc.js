@@ -178,6 +178,16 @@ function connection_status(s) {
     }
 }
 
+function set_theme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    try { localStorage.setItem("amc-theme", t); } catch(e) {}
+}
+
+function toggle_theme() {
+    var dark = document.documentElement.getAttribute("data-theme") == "dark";
+    set_theme(dark ? "light" : "dark");
+}
+
 var projects_action = "project-open";
 
 function select_action(e) {
