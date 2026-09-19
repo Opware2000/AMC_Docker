@@ -58,17 +58,18 @@ lsof -ti tcp:6081 | xargs kill -9 2>/dev/null || true
 BRIDGE_PID=""
 if command -v python3 &>/dev/null; then
     python3 - <<'BRIDGE_EOF' &
-import http.server, urllib.parse, subprocess
+import http.server, urllib.parse, subprocess, json
 
-PATH_MAP = {
-    "/amc/controles": "/chemin/vers/CONTROLES",
-    "/amc/scan":      "/chemin/vers/CONTROLES/SCAN",
-    "/LISTES":        "/chemin/vers/CONTROLES/LISTES",
-    "/SCAN":          "/chemin/vers/CONTROLES/SCAN",
-    "/SUJETS":        "/chemin/vers/CONTROLES/SUJETS",
-    "/QCM":      "/chemin/vers/QCM",
-    "/nqcm":          "/chemin/vers/nQcm",
-}
+# Les chemins macOS réels ne sont PAS versionnés : ils sont lus depuis les
+# volumes de docker-compose.yml (gitignoré), unique source de vérité.
+def _path_map():
+    cfg = json.loads(subprocess.check_output(
+        ["docker", "compose", "config", "--format", "json"], text=True))
+    return {v["target"]: v["source"]
+            for v in cfg["services"]["amc"]["volumes"]
+            if v.get("type") == "bind"}
+
+PATH_MAP = _path_map()
 APP_MAP = {
     "texmaker":          None,
     "libreoffice":       "LibreOffice",

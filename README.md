@@ -6,7 +6,7 @@ Configuration Docker pour **Auto-Multiple-Choice** sur Mac Apple Silicon avec :
   paquets CTAN : `simplekv`, `lucide-icons`, `tabularray`, `tcolorbox`, etc.
 - **AMC 1.7.0** — dernières corrections issues du **PPA officiel « test »**
   d'Alexis Bienvenüe, auteur d'AMC
-- Accès aux dossiers  `CONTROLES` (dont `LISTES`, `SCAN`, `SUJETS`) et au dépôt QCM 
+- Accès à vos dossiers de travail (projets, listes, scans, sujets) via des volumes
 - Affichage distant natif via **Xpra** (fenêtre Mac, pas d'émulation)
 - Ouvrir les fichiers depuis AMC directement dans les apps Mac (TextEdit, Preview, Finder…)
 
@@ -65,16 +65,16 @@ amc-docker/
 
 ### Volumes montés dans le conteneur
 
-| Chemin sur le Mac                               | Chemin dans Docker | Usage                             |
-| ----------------------------------------------- | ------------------ | --------------------------------- |
-| `~/chemin/vers/nQcm`                        | `/nqcm`            | Classe LaTeX nQCM (lecture seule) |
-| `chemin/vers/CONTROLES`                        | `/amc/controles`   | Sujets et données                 |
-| `chemin/vers/CONTROLES/LISTES`                 | `/LISTES`          | Listes des élèves                 |
-| `chemin/vers/CONTROLES/SCAN`                   | `/SCAN`            | Scans des copies                  |
-| `chemin/vers/CONTROLES/SUJETS`                 | `/SUJETS`          | Sujets d'évaluation               |
-| `chemin/vers/QCM`  | `/QCM`        | Dépôt QCM                  |
-| `chemin/vers/CONTROLES/SCAN`                   | `/amc/scan`        | Alias historique de `/SCAN`       |
-| Volume Docker `amc-data`                         | `/root/.AMC.d`     | Configuration et projets AMC      |
+| Chemin sur le Mac                    | Chemin dans Docker | Usage                             |
+| ------------------------------------ | ------------------ | --------------------------------- |
+| `~/chemin/vers/nQcm`                 | `/nqcm`            | Classe LaTeX nQCM (lecture seule) |
+| `/chemin/vers/CONTROLES`             | `/amc/controles`   | Sujets et données                 |
+| `/chemin/vers/CONTROLES/LISTES`      | `/LISTES`          | Listes des élèves                 |
+| `/chemin/vers/CONTROLES/SCAN`        | `/SCAN`            | Scans des copies                  |
+| `/chemin/vers/CONTROLES/SUJETS`      | `/SUJETS`          | Sujets d'évaluation               |
+| `/chemin/vers/QCM`                   | `/QCM`             | Dépôt QCM                         |
+| `/chemin/vers/CONTROLES/SCAN`        | `/amc/scan`        | Alias historique de `/SCAN`       |
+| Volume Docker `amc-data`             | `/root/.AMC.d`     | Configuration et projets AMC      |
 
 > Les dossiers `LISTES`, `SCAN`, `SUJETS` et `QCM` sont montés **directement
 > à la racine** du conteneur : ils apparaissent comme signets dans les dialogues
@@ -86,9 +86,12 @@ amc-docker/
 
 ### Personnalisation des chemins
 
-Avant de lancer AMC, adaptez les chemins dans **deux fichiers** :
+Tous les chemins sont définis dans **un seul fichier** : `docker-compose.yml`.
+Créez-le une fois à partir du modèle, puis adaptez les volumes :
 
-**1. `docker-compose.yml`** — définir les volumes montés dans le conteneur
+```bash
+cp docker-compose.yaml.example docker-compose.yml
+```
 
 ```yaml
 volumes:
@@ -100,24 +103,10 @@ volumes:
   - /votre/chemin/vers/QCM:/QCM
 ```
 
-**2. `launch.sh`** — mapper ces chemins dans le pont Mac-bridge (pour ouvrir les fichiers dans les apps Mac)
-
-Recherchez le bloc `PATH_MAP` dans `launch.sh` (vers la ligne 54) et adaptez :
-
-```python
-PATH_MAP = {
-    "/amc/controles": "/votre/chemin/vers/CONTROLES",
-    "/amc/scan":      "/votre/chemin/vers/CONTROLES/SCAN",
-    "/LISTES":        "/votre/chemin/vers/CONTROLES/LISTES",
-    "/SCAN":          "/votre/chemin/vers/CONTROLES/SCAN",
-    "/SUJETS":        "/votre/chemin/vers/CONTROLES/SUJETS",
-    "/QCM":      "/votre/chemin/vers/QCM",
-    "/nqcm":          "/votre/chemin/vers/nQcm",
-}
-```
-
-> Les deux fichiers doivent pointer vers les **mêmes dossiers** sur votre Mac.
-> `docker-compose.yml` est gitignoré, mais `launch.sh` est versionné — ses changements persisteront.
+> `docker-compose.yml` est **gitignoré** : vos chemins réels ne sont jamais
+> versionnés. `launch.sh` lit ces volumes via `docker compose config` — le pont
+> Mac-bridge pointe donc automatiquement vers les mêmes dossiers, sans aucun
+> chemin en dur dans le script.
 
 ---
 
