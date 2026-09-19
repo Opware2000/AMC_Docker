@@ -1420,6 +1420,53 @@ input, select, textarea { border-radius: 7px; }
 #warn-content { max-height: 85vh; }
 #info-prop { accent-color: var(--primary); }
 
+/* --- Notifications (toasts) --- */
+#toasts {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: min(360px, 90vw);
+}
+.toast {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-left-width: 4px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    padding: 11px 12px;
+}
+.toast.ok { border-left-color: var(--ok); }
+.toast.err { border-left-color: var(--danger); }
+.toast.warn { border-left-color: var(--warn); }
+.toast.info { border-left-color: var(--info); }
+.toast .msg { font-size: .9rem; }
+.toast .x {
+    margin-left: auto;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+/* --- Erreur de chargement d'une section --- */
+.load-error {
+    padding: 10px;
+    margin: 6px 0;
+    border: 1px dashed var(--danger);
+    border-radius: 8px;
+    background: var(--danger-soft);
+    color: var(--text);
+}
+.load-error p { margin: 0 0 6px; }
+
 /* --- Tables Scans : première colonne figée --- */
 #scans-pages tbody td:first-child { position: sticky; left: 0; background: inherit; }
 #scans-pages thead th:first-child { z-index: 3; }

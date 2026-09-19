@@ -102,12 +102,10 @@ function fetch_content(url, opts) {
 
 function fetch_to_dom(id, url, opts) {
     reset_inactivity();
+    var targets = (id instanceof Array) ? id : [ id ];
     return fetch_content(url, opts)
         .then(html => {
-            if(!( id instanceof Array )) {
-                id = [ id ];
-            }
-            for(i of id) {
+            for(i of targets) {
                 var e = document.getElementById(i);
                 if(e) {
                     e.innerHTML = html;
@@ -116,8 +114,48 @@ function fetch_to_dom(id, url, opts) {
             }
         })
         .catch(error => {
-            console.error(`Fetch ${url} faild: ${error}`);
+            console.error(`Fetch ${url} failed: ${error}`);
+            show_fetch_error(targets, url, opts);
         });
+}
+
+function show_fetch_error(targets, url, opts) {
+    for(var i of targets) {
+        var e = document.getElementById(i);
+        if(!e) continue;
+        e.textContent = "";
+        var box = document.createElement("div");
+        box.className = "load-error";
+        var p = document.createElement("p");
+        p.textContent = "Échec du chargement de cette section.";
+        var btn = document.createElement("span");
+        btn.className = "btn btn-neutral";
+        btn.textContent = "Réessayer";
+        btn.onclick = function() { fetch_to_dom(targets, url, opts); };
+        box.appendChild(p);
+        box.appendChild(btn);
+        e.appendChild(box);
+    }
+}
+
+function notify(kind, message, timeout) {
+    var box = document.getElementById("toasts");
+    if(!box) return;
+    var el = document.createElement("div");
+    el.className = "toast " + kind;
+    var msg = document.createElement("span");
+    msg.className = "msg";
+    msg.textContent = message;
+    var close = document.createElement("button");
+    close.className = "x";
+    close.setAttribute("aria-label", "Fermer");
+    close.textContent = "✕";
+    close.onclick = function() { el.remove(); };
+    el.appendChild(msg);
+    el.appendChild(close);
+    box.appendChild(el);
+    var t = (timeout === undefined) ? (kind === "err" ? 0 : 3500) : timeout;
+    if(t > 0) setTimeout(function() { el.remove(); }, t);
 }
 
 function link_to_clipboard(element) {
@@ -136,6 +174,13 @@ function link_to_clipboard(element) {
 // -----------------------------------------------------------------
 
 function show_tab(tab_name) {
+    if(current_tab == "source" && source_dirty
+       && tab_name.replace(/_.*/, "") != "source") {
+        // promesse jamais résolue : le .then() de l'appelant ne doit pas
+        // charger l'onglet suivant alors qu'on reste sur la source
+        if(!confirm("La source contient des modifications non enregistrées. Continuer ?"))
+            return new Promise(function() {});
+    }
     return fetch_to_dom('tab', `/tab/${tab_name}`, {})
         .then(()=> { set_current_tab(tab_name); });
 }
@@ -420,6 +465,7 @@ function upload_files(url, files,
         formData.append(k, params[k]);
     }
     const xhr = new XMLHttpRequest();
+    current_upload_xhr = xhr;
     xhr.open('POST', url, true);
     xhr.setRequestHeader("AMC-project", project_name);
     if(fake_user)
@@ -432,6 +478,8 @@ function upload_files(url, files,
     };
     xhr.onreadystatechange = () => {
         if (xhr.readyState == XMLHttpRequest.DONE) {
+            if (xhr._cancelled) return;
+            current_upload_xhr = null;
             if (xhr.status === 200) {
                 console.log("Upload response: " + xhr.responseText);
                 var r = JSON.parse(xhr.responseText);
@@ -441,11 +489,11 @@ function upload_files(url, files,
                     alert_msg(r["error"]);
                 }
             } else {
-                alert(`Error: upload failed (status ${xhr.status})`);
+                notify('err', `Échec de l'envoi (statut ${xhr.status}).`);
             }
         }
     };
-    begin_command(message);
+    begin_command(message, true);
     xhr.send(formData);
 }
 
@@ -544,7 +592,10 @@ socket.on("ncopies", function(n) {
     }
 });
 
+var source_dirty = false;
+
 function source_modified(t) {
+    source_dirty = !!t;
     for(const i of ["source-save", "source-revert"]) {
         var b = document.getElementById(i);
         if(b) {
@@ -556,6 +607,7 @@ function source_modified(t) {
 
 socket.on("source-saved", function() {
     source_modified(false);
+    notify('ok', "Source enregistrée.");
 });
 
 function select_file(f) {
@@ -742,16 +794,34 @@ socket.on("t", set_t);
 
 socket.on("p", set_p);
 
-function begin_command(message="") {
+var current_upload_xhr = null;
+
+function begin_command(message="", cancellable=false) {
     set_t(message);
     set_p(0);
+    var btn = document.getElementById('info-cancel');
+    if(btn) {
+        if(cancellable) btn.classList.remove('hidden');
+        else btn.classList.add('hidden');
+    }
     var panel = document.getElementById('info-panel');
     panel.classList.remove('hidden');
 }
 
-socket.on("begin-command", begin_command);
+socket.on("begin-command", function(m) { begin_command(m, false); });
+
+function cancel_command() {
+    if(current_upload_xhr) {
+        current_upload_xhr._cancelled = true;
+        current_upload_xhr.abort();
+        current_upload_xhr = null;
+        notify('warn', "Envoi annulé.");
+    }
+    end_command();
+}
 
 function end_command() {
+    current_upload_xhr = null;
     var panel = document.getElementById('info-panel');
     panel.classList.add('hidden');
 }
@@ -844,6 +914,7 @@ function open_file(url) {
 socket.on("print-to-files", function(url) {
     open_file(url);
     doc_print_finished();
+    notify('ok', "Fichiers d'impression générés.");
 });
 
 function show_multimode(ok) {
@@ -1466,7 +1537,12 @@ function u_exported_files(t) {
         });
 }
 socket.on("update-exported-files", u_exported_files);
-socket.on("update-exported-files", function(t) { if(t) set_workflow("export", true); });
+socket.on("update-exported-files", function(t) {
+    if(t) {
+        set_workflow("export", true);
+        notify('ok', "Export terminé.");
+    }
+});
 
 function change_public_marks(e) {
     change_config_value(e);
@@ -1832,6 +1908,9 @@ function u_annotated_files(t) {
         });
 }
 socket.on("update-annotated-files", u_annotated_files);
+socket.on("update-annotated-files", function(t) {
+    if(t) notify('ok', "Copies annotées générées.");
+});
 
 // ----------------------- keys
 
@@ -1850,6 +1929,18 @@ document.addEventListener('DOMContentLoaded', function() {
     start_inactivity();
     render_workflow();
     document.getElementById("app-body").addEventListener("keyup", key_up);
+    window.addEventListener("beforeunload", function(e) {
+        if(source_dirty) {
+            e.preventDefault();
+            e.returnValue = "";
+        }
+    });
+    document.addEventListener("keydown", function(event) {
+        if(event.key == "Escape") {
+            var wp = document.getElementById("warn-panel");
+            if(wp && !wp.classList.contains("hidden")) warn_ok();
+        }
+    });
     connection_status(socket.connected ? "online" : "offline");
     if(!socket_creation)
         restore_project();
