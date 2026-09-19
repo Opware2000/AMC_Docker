@@ -2039,3 +2039,30 @@ input.one-way:checked ~ label.way .way-title { color: var(--primary); }
     align-items: center;
 }
 .config-body input[type="range"] { width: 100%; accent-color: var(--primary); }
+
+/* ============================================================
+   Association — filtres de statut et marqueurs
+   ============================================================ */
+#assoc-filter { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 0; }
+#assoc-filter .fchip {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: .8rem;
+}
+#assoc-filter .fchip:hover { background: var(--surface-2); }
+#assoc-filter .fchip.current {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-fg);
+    font-weight: 600;
+}
+#assoc-filter .fc { opacity: .8; margin-left: 4px; }
+.assoc-status { display: inline-block; width: 1em; margin-right: .35em; font-weight: 700; }
+tr.assoc-manual .assoc-status::before { content: "✎"; color: var(--primary); }
+tr.assoc-auto .assoc-status::before { content: "✓"; color: var(--ok); }
+tr.assoc-none .assoc-status::before { content: "?"; color: var(--text-muted); }
+tr.assoc-none td { background: var(--tint-warn); }

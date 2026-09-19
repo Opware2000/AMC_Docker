@@ -1657,7 +1657,8 @@ function association_manual() {
         .then(() => {
             select_assoc_sheet(-1,-1);
             first_not_associated();
-        });
+        })
+        .then(assoc_refresh_all);
     update_students_list();
 }
 
@@ -1823,6 +1824,47 @@ function set_association(student, copy, student_id) {
     }
 }
 
+function assoc_status_of(tr) {
+    var manual = tr.getAttribute("amc-manual");
+    var auto = tr.getAttribute("amc-auto");
+    if(manual && manual != "None") return "manual";
+    if(auto && auto != "None") return "auto";
+    return "none";
+}
+
+function assoc_update_status(tr) {
+    var s = assoc_status_of(tr);
+    tr.classList.remove("assoc-manual", "assoc-auto", "assoc-none");
+    tr.classList.add("assoc-" + s);
+    return s;
+}
+
+function assoc_refresh_all() {
+    var counts = { auto: 0, manual: 0, none: 0 };
+    for(var tr of document.querySelectorAll("#assoc-sheets tbody tr")) {
+        counts[assoc_update_status(tr)]++;
+    }
+    counts.all = counts.auto + counts.manual + counts.none;
+    for(var chip of document.querySelectorAll("#assoc-filter .fchip")) {
+        var fc = chip.querySelector(".fc");
+        if(fc) fc.textContent = counts[chip.getAttribute("data-status")];
+    }
+}
+
+function filter_assoc(chip) {
+    for(var c of document.querySelectorAll("#assoc-filter .fchip")) c.classList.remove("current");
+    chip.classList.add("current");
+    var status = chip.getAttribute("data-status");
+    for(var tr of document.querySelectorAll("#assoc-sheets tbody tr")) {
+        tr.style.display = (status == "all" || assoc_status_of(tr) == status) ? "" : "none";
+    }
+}
+
+function reapply_assoc_filter() {
+    var c = document.querySelector("#assoc-filter .fchip.current");
+    if(c) filter_assoc(c);
+}
+
 function student_id_test_row(element, event) {
     var string = (event.clipboardData || window.clipboardData).getData("text");
     var row = string.split(/\s*[,;\t\n\r]+\s*/);
@@ -1860,6 +1902,8 @@ socket.on("update-association", function(data) {
         student_highlight(student_id);
     }
     first_not_associated();
+    assoc_refresh_all();
+    reapply_assoc_filter();
 });
 
 function change_export_module(e) {

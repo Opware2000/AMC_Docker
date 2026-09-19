@@ -148,6 +148,17 @@
                 class="btn btn-ok btn-grow"
                 onclick="association_manual_done();">{{ _('assoc.done') }}</span>
         </div>
+        <!-- ponytail: libellés littéraux faute de clés i18n amont -->
+        <div id="assoc-filter">
+          <span class="fchip current" data-status="all"
+                onclick="filter_assoc(this);">Toutes <span class="fc"></span></span>
+          <span class="fchip" data-status="auto"
+                onclick="filter_assoc(this);">Auto <span class="fc"></span></span>
+          <span class="fchip" data-status="manual"
+                onclick="filter_assoc(this);">Manuelles <span class="fc"></span></span>
+          <span class="fchip" data-status="none"
+                onclick="filter_assoc(this);">Non associées <span class="fc"></span></span>
+        </div>
         <div id="assoc-sheets">
         </div>
       </div>
