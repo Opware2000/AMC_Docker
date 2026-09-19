@@ -429,8 +429,33 @@ socket.on("u-projects-list", u_projects_list);
 
 function filter_projects(e) {
     var q = e.value.toLowerCase();
-    for(var li of document.querySelectorAll("#projects-list li.selectable")) {
-        li.style.display = li.textContent.toLowerCase().includes(q) ? "" : "none";
+    for(var c of document.querySelectorAll("#projects-list .project-card")) {
+        c.style.display = c.textContent.toLowerCase().includes(q) ? "" : "none";
+    }
+}
+
+function project_action(action, element, name, user=null) {
+    if(user) do_fake_user(user);
+    switch(action) {
+    case "open":
+        request_project(name, true);
+        break;
+    case "rename":
+        project_rename(element.closest(".project-card").querySelector(".pc-name"), name);
+        break;
+    case "clone":
+        socket_emit("project-clone", name);
+        break;
+    case "delete":
+        confirm_msg('confirm.deleteproject', [name],
+                    'continue:danger', 'cancel:neutral',
+                    'socket_emit', ["project-delete", name]);
+        break;
+    case "download":
+        window.location.href = element.closest(".project-card").getAttribute("amc-url");
+        break;
+    default:
+        console.log(`Unknown project action: ${action}.`);
     }
 }
 

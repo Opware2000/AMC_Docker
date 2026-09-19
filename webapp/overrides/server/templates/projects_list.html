@@ -1,11 +1,4 @@
 {% if projects %}
-<div id="projects-action" class="bandeau">
-  <div id="project-open" class="project-action ok selected" onclick="select_action(this);">{{ _('project.open') }}</div>
-  <div id="project-rename" class="project-action neutral" onclick="select_action(this);">{{ _('project.rename') }}</div>
-  <div id="project-clone" class="project-action neutral" onclick="select_action(this);">{{ _('project.clone') }}</div>
-  <div id="project-download" class="project-action neutral" onclick="select_action(this);">{{ _('project.download') }}</div>
-  <div id="project-delete" class="project-action danger" onclick="select_action(this);">{{ _('project.delete') }}</div>
-</div>
 <div class="bandeau">
   <!-- ponytail: libellé littéral faute de clé i18n amont -->
   <input type="search" id="projects-filter" class="projects-filter"
@@ -14,21 +7,30 @@
 <div class="overy">
   {% for user,plist in projects %}
   {% if user %}
-  <div class="espace">
-    <span class="user-name selectable"
-          amc-user="{{ user }}"
-          onclick="select_project(this, null, '{{ user }}');"
-          >{{ user }}</span>
-  </div>
+  <div class="userhead">{{ user }}</div>
   {% endif %}
   {% if plist %}
-  <ul amc-user="{% if user %}{{user}}{% endif %}" class="projects-ul espace projects-list selectable">
+  <div class="project-grid">
     {% for p in plist %}
-    <li class="selectable direct"
-        amc-url="/fs/{{ p }}{% if user %}?user={{ user }}{% endif %}"
-        onclick="select_project(this, '{{p}}' {% if user %}, '{{user}}'{% endif %});">{{ p }}</li>
+    <div class="project-card"
+         amc-url="/fs/{{ p }}{% if user %}?user={{ user }}{% endif %}"
+         onclick="project_action('open', this, '{{p}}'{% if user %}, '{{user}}'{% endif %});">
+      <span class="pc-name">{{ p }}</span>
+      <span class="pc-actions" onclick="event.stopPropagation();">
+        <span class="act" title="{{ _('project.open') }}"
+              onclick="project_action('open', this, '{{p}}'{% if user %}, '{{user}}'{% endif %});">↗</span>
+        <span class="act" title="{{ _('project.rename') }}"
+              onclick="project_action('rename', this, '{{p}}'{% if user %}, '{{user}}'{% endif %});">✎</span>
+        <span class="act" title="{{ _('project.clone') }}"
+              onclick="project_action('clone', this, '{{p}}'{% if user %}, '{{user}}'{% endif %});">⧉</span>
+        <span class="act" title="{{ _('project.download') }}"
+              onclick="project_action('download', this, '{{p}}'{% if user %}, '{{user}}'{% endif %});">⤓</span>
+        <span class="act danger" title="{{ _('project.delete') }}"
+              onclick="project_action('delete', this, '{{p}}'{% if user %}, '{{user}}'{% endif %});">🗑</span>
+      </span>
+    </div>
     {% endfor %}
-  </ul>
+  </div>
   {% endif %}
   {% endfor %}
 </div>

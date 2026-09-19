@@ -1843,3 +1843,57 @@ li.selectable.direct:hover {
 #identification .part-title { margin-top: 0; }
 #n-identifications { font-size: 1.3rem; font-weight: 700; }
 #identification .filename { color: var(--text); }
+
+/* ============================================================
+   Projets — cartes avec actions au survol
+   ============================================================ */
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+    margin: 0 0 8px;
+}
+.project-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 10px 12px;
+    cursor: pointer;
+}
+.project-card:hover { border-color: var(--primary); background: var(--tint-info); }
+.pc-name {
+    flex: 1;
+    min-width: 0;
+    font-weight: 550;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pc-actions { display: flex; gap: 4px; opacity: 0; transition: opacity .12s; }
+.project-card:hover .pc-actions,
+.project-card:focus-within .pc-actions { opacity: 1; }
+.act {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+}
+.act:hover { background: var(--surface-2); color: var(--text); }
+.act.danger:hover { background: var(--tint-danger); color: var(--danger); border-color: var(--danger); }
+.userhead {
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-muted);
+    margin: 14px 0 8px;
+}
+.project-change-name { width: 100%; }
