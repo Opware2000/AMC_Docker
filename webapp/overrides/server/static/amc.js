@@ -1731,7 +1731,7 @@ function flash_files(e) {
             var panel = x[0];
             var color = "#f5f542";
             var y = panel.getElementsByClassName("recent");
-            if(!y) color="#f55e42";
+            if(!y.length) color="#f55e42";
             var orig_color = panel.style.backgroundColor;
             panel.style.transition = "none";
             panel.style.backgroundColor = color;
