@@ -1508,6 +1508,9 @@ input, select, textarea { border-radius: 7px; }
     min-height: 0;
     display: grid;
     grid-template-columns: 340px 300px 1fr;
+    /* ligne contrainte : sinon la hauteur des volets suit le contenu
+       et la page de vérification ne peut pas se caler sur la hauteur */
+    grid-template-rows: minmax(0, 1fr);
 }
 #pages {
     display: flex;
@@ -1524,7 +1527,7 @@ input, select, textarea { border-radius: 7px; }
     border-left: none;
     margin: 0;
 }
-#manual { padding: 8px; min-width: 0; }
+#manual { padding: 8px; min-width: 0; min-height: 0; }
 
 /* Rapport : cartes avec icône + couleur (le texte reste le nombre seul) */
 #report-numbers { border-radius: 0; overflow: visible; gap: 8px; }
@@ -1702,3 +1705,35 @@ input, select, textarea { border-radius: 7px; }
 
 /* Images des pages en échec : cadrage dans le volet */
 .img-pane { flex: 1; min-height: 0; overflow: auto; }
+
+/* ============================================================
+   Vue manuelle (vérification des cases cochées)
+   ============================================================ */
+#manual-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+}
+/* la page entière tient dans la hauteur du volet */
+#manual-view > svg {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    background: var(--surface);
+}
+
+/* Vignettes de cases : plus compactes */
+.zoom-image {
+    width: 2.6em;
+    height: 2.6em;
+}
+.zoom-one {
+    border-radius: 0 0 6px 6px;
+    margin: 2px;
+}
+.zoom-prop {
+    font-size: .8rem;
+}
