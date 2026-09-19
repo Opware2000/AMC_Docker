@@ -1,61 +1,86 @@
-<h1>{{ _('newproject.title') }}</h1>
-<p>
-  {{ _('newproject.intro') }}
-</p>
-<p>
-  {{ _('newproject.name') }}
-  <input id="new-project-name" type="text"></input>
-</p>
-<div class="one-way">
-  <input class="one-way" type="radio"
-         id="way-empty" name="way" value="empty" checked="checked"/>
-  <label for="way-empty" class="way-title">{{ _('newproject.empty') }}</label>
-  <div>
-    {{ _('newproject.empty.desc') }}
-    <select id="source-type" name="source-type">
-      <option value="latex">LaTeX</option>
-      <option value="plain">AMC-TXT</option>
-    </select>
+<div class="new-project">
+  <h1>{{ _('newproject.title') }}</h1>
+  <p class="new-project-intro">{{ _('newproject.intro') }}</p>
+
+  <div class="field">
+    <label for="new-project-name">{{ _('newproject.name') }}</label>
+    <input id="new-project-name" type="text" placeholder="ex. DST3-2026 — Sujet A">
   </div>
-</div>
-<div class="one-way">
-  <input class="one-way" type="radio"
-         id="way-file" name="way" value="file"/>
-  <label for="way-file" class="way-title">{{ _('newproject.file') }}</label>
-  <div>
-    {{ _('newproject.file.desc') }}
-    <input id="source-file" type="file"></input>
-  </div>
-</div>
-{% if templates %}
-<div id="way-templates" class="one-way">
-  <input class="one-way" type="radio"
-         id="way-template" name="way" value="template"/>
-  <label for="way-template" class="way-title">{{ _('newproject.template') }}</label>
-  <div>
-    <select id="template-group" name="template-group" onchange="template_group_select(this.value);">
-      <option value="">{{ _('newproject.template.allgroups') }}</option>
-      {% for g in groups %}
-      <option value="{{ g["id"] }}">{{ g["title"] }}</option>
-      {% endfor %}
-    </select>
-    <div id="template-list">
-      {% for t in templates %}
-      <div class="template-info"
-           tid="{{ t["id"] }}" gid="{{ t["gid"] }}">
-        <input id="t:{{ t["gid"] }}:{{ t["id"] }}"
-               type="radio" name="tid" value="{{ t["gid"] }}/{{ t["id"] }}"/>
-        <label for="t:{{ t["gid"] }}:{{ t["id"] }}" class="template-title">{{ t["title"] }}</label>
-        <div class="template-text">
-          {{ t["text"] }}
-        </div>
-      </div>
-      {% endfor %}
+
+  <!-- ponytail: libellé littéral faute de clé i18n amont -->
+  <div class="new-project-label">Point de départ</div>
+
+  <div class="one-way">
+    <input class="one-way" type="radio"
+           id="way-empty" name="way" value="empty" checked="checked"/>
+    <label for="way-empty" class="way">
+      <span class="way-ic">✎</span>
+      <span class="way-txt">
+        <span class="way-title">{{ _('newproject.empty') }}</span>
+        <span class="way-desc">{{ _('newproject.empty.desc') }}</span>
+      </span>
+    </label>
+    <div class="way-body">
+      <label for="source-type" class="way-mini">{{ _('newproject.name') }}</label>
+      <select id="source-type" name="source-type">
+        <option value="latex">LaTeX</option>
+        <option value="plain">AMC-TXT</option>
+      </select>
     </div>
   </div>
-</div>
-{% endif %}
-<div class="bandeau">
-  <span id="do-create-project" class="btn btn-ok"
-        onclick="do_create_project();">{{ _('newproject.create') }}</span>
+
+  <div class="one-way">
+    <input class="one-way" type="radio"
+           id="way-file" name="way" value="file"/>
+    <label for="way-file" class="way">
+      <span class="way-ic">⤒</span>
+      <span class="way-txt">
+        <span class="way-title">{{ _('newproject.file') }}</span>
+        <span class="way-desc">{{ _('newproject.file.desc') }}</span>
+      </span>
+    </label>
+    <div class="way-body">
+      <input id="source-file" type="file">
+    </div>
+  </div>
+
+  {% if templates %}
+  <div id="way-templates" class="one-way">
+    <input class="one-way" type="radio"
+           id="way-template" name="way" value="template"/>
+    <label for="way-template" class="way">
+      <span class="way-ic">▤</span>
+      <span class="way-txt">
+        <span class="way-title">{{ _('newproject.template') }}</span>
+        <span class="way-desc">{{ _('newproject.template.allgroups') }}</span>
+      </span>
+    </label>
+    <div class="way-body">
+      <select id="template-group" name="template-group" onchange="template_group_select(this.value);">
+        <option value="">{{ _('newproject.template.allgroups') }}</option>
+        {% for g in groups %}
+        <option value="{{ g["id"] }}">{{ g["title"] }}</option>
+        {% endfor %}
+      </select>
+      <div id="template-list">
+        {% for t in templates %}
+        <div class="template-info"
+             tid="{{ t["id"] }}" gid="{{ t["gid"] }}">
+          <input id="t:{{ t["gid"] }}:{{ t["id"] }}"
+                 type="radio" name="tid" value="{{ t["gid"] }}/{{ t["id"] }}"/>
+          <label for="t:{{ t["gid"] }}:{{ t["id"] }}" class="template-title">{{ t["title"] }}</label>
+          <div class="template-text">
+            {{ t["text"] }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="bandeau">
+    <span id="do-create-project" class="btn btn-ok"
+          onclick="do_create_project();">{{ _('newproject.create') }}</span>
+  </div>
 </div>

@@ -1919,3 +1919,80 @@ li.selectable.direct:hover {
 }
 #code-code-a { border-top: 1px solid var(--border); }
 #files-list { margin: 8px; }
+
+/* ============================================================
+   Nouveau projet — cartes de point de départ
+   ============================================================ */
+#project-new {
+    width: 26em;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 16px;
+    overflow-y: auto;
+}
+.new-project h1 { font-size: 1.15rem; margin: 0 0 4px; }
+.new-project-intro { font-size: .88rem; color: var(--text-muted); margin: 0 0 14px; }
+.new-project-label {
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-muted);
+    margin: 6px 0 8px;
+}
+.new-project .field { margin-bottom: 14px; }
+.new-project .field > label { display: block; font-size: .86rem; font-weight: 550; margin-bottom: 4px; }
+#new-project-name { width: 100%; }
+
+.new-project .one-way {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    margin: 8px 0;
+    overflow: hidden;
+    transition: border-color .12s, background .12s;
+}
+.new-project .one-way:hover { border-color: var(--primary); }
+input.one-way { display: none; }
+.new-project label.way {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 11px 12px;
+    cursor: pointer;
+}
+.way-ic {
+    width: 34px;
+    height: 34px;
+    flex: none;
+    border-radius: 8px;
+    background: var(--surface-2);
+    display: grid;
+    place-items: center;
+    font-size: 1rem;
+}
+.way-txt { min-width: 0; }
+.way-title { display: block; font-weight: 600; font-size: .92rem; }
+.way-desc { display: block; font-size: .78rem; color: var(--text-muted); }
+input.one-way:checked ~ label.way {
+    background: var(--tint-info);
+    box-shadow: inset 3px 0 0 var(--primary);
+}
+input.one-way:checked ~ label.way .way-ic { background: var(--primary); color: var(--primary-fg); }
+input.one-way:checked ~ label.way .way-title { color: var(--primary); }
+.way-body { padding: 0 12px 12px; }
+.way-mini { display: block; font-size: .78rem; color: var(--text-muted); margin-bottom: 4px; }
+.way-body select, .way-body input[type="file"] { max-width: 100%; }
+#template-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+    max-height: none;
+    overflow: visible;
+}
+.template-info { border: 1px solid var(--border); border-radius: 8px; padding: 9px; font-size: .85rem; }
+.template-info:hover { background: var(--surface-2); }
+.template-title { font-weight: 600; }
+.template-text { font-size: .78rem; color: var(--text-muted); }
+#do-create-project { width: 100%; text-align: center; justify-content: center; }
