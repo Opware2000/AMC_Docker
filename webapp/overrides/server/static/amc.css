@@ -2497,3 +2497,11 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
 #topbar { flex: none; }
 #scans-toolbar { flex: none; }
 #grading-switch { flex: none; }
+
+/* Configuration : champs numériques plus compacts, sans débordement */
+.config-body input[type="number"] {
+    min-height: 30px;
+    padding: 4px 8px;
+}
+.config-body .range-row { grid-template-columns: 1fr 5.5rem; }
+.config-body .range-row input[type="number"] { width: 100%; }
