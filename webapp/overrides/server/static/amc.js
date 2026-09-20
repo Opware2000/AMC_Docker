@@ -223,6 +223,24 @@ function connection_status(s) {
     }
 }
 
+// Ripple Material sur les éléments cliquables.
+function md_ripple(event) {
+    var host = event.target.closest(
+        ".btn, .menubtn, .subbtn, .act, .view-btn, .fchip, .btn-grow");
+    if(!host) return;
+    var r = host.getBoundingClientRect();
+    if(!r.width || !r.height) return;
+    var size = Math.max(r.width, r.height);
+    var span = document.createElement("span");
+    span.className = "ripple";
+    span.style.width = size + "px";
+    span.style.height = size + "px";
+    span.style.left = (event.clientX - r.left - size / 2) + "px";
+    span.style.top = (event.clientY - r.top - size / 2) + "px";
+    host.appendChild(span);
+    setTimeout(function() { span.remove(); }, 500);
+}
+
 function set_theme(t) {
     document.documentElement.setAttribute("data-theme", t);
     try { localStorage.setItem("amc-theme", t); } catch(e) {}
@@ -2158,6 +2176,7 @@ document.addEventListener('DOMContentLoaded', function() {
     start_inactivity();
     render_workflow();
     document.getElementById("app-body").addEventListener("keyup", key_up);
+    document.addEventListener("click", md_ripple);
     window.addEventListener("beforeunload", function(e) {
         if(source_dirty) {
             e.preventDefault();
