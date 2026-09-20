@@ -1660,6 +1660,7 @@ function association_manual() {
         })
         .then(assoc_refresh_all);
     update_students_list();
+    namefield_conf = {};
 }
 
 function association_manual_done() {
@@ -1770,6 +1771,7 @@ function select_assoc_sheet(e, student, copy) {
                 var auto = e.getAttribute("amc-auto");
                 var manual = e.getAttribute("amc-manual");
                 student_highlight(manual == "None" ? auto : manual);
+                assoc_confidence_selected(student, copy);
             })
             .then(start_student_entry);
     } else {
@@ -1849,6 +1851,7 @@ function assoc_refresh_all() {
         var fc = chip.querySelector(".fc");
         if(fc) fc.textContent = counts[chip.getAttribute("data-status")];
     }
+    assoc_apply_cached_conf();
 }
 
 function filter_assoc(chip) {
@@ -1863,6 +1866,103 @@ function filter_assoc(chip) {
 function reapply_assoc_filter() {
     var c = document.querySelector("#assoc-filter .fchip.current");
     if(c) filter_assoc(c);
+}
+
+// ----------------------- CONFIANCE (proxy)
+
+// ponytail: proxie de confiance — compare le texte détecté du champ nom
+// (uniquement disponible quand le champ est textuel) au nom de l'élève
+// associé. Aucun score n'existe côté serveur ; ce n'est pas un score AMC.
+var namefield_conf = {};
+
+function levenshtein(a, b) {
+    var m = a.length, n = b.length;
+    if(!m) return n;
+    if(!n) return m;
+    var prev = new Array(n + 1), cur = new Array(n + 1);
+    for(var j = 0; j <= n; j++) prev[j] = j;
+    for(var i = 1; i <= m; i++) {
+        cur[0] = i;
+        for(var k = 1; k <= n; k++) {
+            var cost = (a[i - 1] == b[k - 1]) ? 0 : 1;
+            cur[k] = Math.min(prev[k] + 1, cur[k - 1] + 1, prev[k - 1] + cost);
+        }
+        var t = prev; prev = cur; cur = t;
+    }
+    return prev[n];
+}
+
+function clean_name(s) {
+    return normalize_string(s || "").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function name_similarity(a, b) {
+    a = clean_name(a); b = clean_name(b);
+    if(!a || !b) return 0;
+    return 1 - levenshtein(a, b) / Math.max(a.length, b.length);
+}
+
+function student_name_by_id(id) {
+    var e = document.querySelector('#students-list li.student-name[amc-id="' + id + '"]');
+    return e ? e.textContent.trim() : null;
+}
+
+function detected_namefield_text() {
+    var num = document.querySelector("#studentname .sheetnum div");
+    if(!num) return null;
+    var t = num.textContent.trim();
+    if(!t || /^Sheet\b/.test(t)) return null;
+    return t;
+}
+
+function set_conf(tr, conf, detected) {
+    var el = tr.querySelector(".assoc-conf");
+    if(el) {
+        if(conf === null || conf === undefined) {
+            el.textContent = "";
+            el.className = "assoc-conf";
+        } else {
+            el.textContent = conf + " %";
+            el.className = "assoc-conf " + (conf >= 90 ? "hi" : (conf >= 70 ? "mid" : "lo"));
+        }
+        if(detected) el.setAttribute("title", "Détecté : " + detected);
+        else el.removeAttribute("title");
+    }
+}
+
+function assoc_confidence_selected(student, copy) {
+    if(student < 0) return;
+    var detected = detected_namefield_text();
+    var tr = document.querySelector(
+        `#assoc-sheets tbody tr[amc-student="${student}"][amc-copy="${copy}"]`);
+    var manual = tr ? tr.getAttribute("amc-manual") : "None";
+    var auto = tr ? tr.getAttribute("amc-auto") : "None";
+    var assigned = (manual && manual != "None") ? manual : auto;
+    var conf = null;
+    if(detected && assigned && assigned != "None") {
+        var name = student_name_by_id(assigned);
+        if(name) conf = Math.round(100 * name_similarity(detected, name));
+    }
+    namefield_conf[student + "-" + copy] = { conf: conf, detected: detected };
+    if(tr) set_conf(tr, conf, detected);
+    var cb = document.getElementById("studentname-conf");
+    if(cb) {
+        if(conf === null || conf === undefined) {
+            cb.classList.add("hidden");
+        } else {
+            cb.classList.remove("hidden");
+            cb.className = "conf-badge " + (conf >= 90 ? "hi" : (conf >= 70 ? "mid" : "lo"));
+            cb.textContent = "Correspondance " + conf + " %";
+        }
+    }
+}
+
+function assoc_apply_cached_conf() {
+    for(var tr of document.querySelectorAll("#assoc-sheets tbody tr")) {
+        var k = tr.getAttribute("amc-student") + "-" + tr.getAttribute("amc-copy");
+        var v = namefield_conf[k];
+        if(v) set_conf(tr, v.conf, v.detected);
+    }
 }
 
 function student_id_test_row(element, event) {
@@ -1904,6 +2004,8 @@ socket.on("update-association", function(data) {
     first_not_associated();
     assoc_refresh_all();
     reapply_assoc_filter();
+    if(student == assoc_sheet[0] && copy == assoc_sheet[1])
+        assoc_confidence_selected(student, copy);
 });
 
 function change_export_module(e) {

@@ -2066,3 +2066,28 @@ tr.assoc-manual .assoc-status::before { content: "✎"; color: var(--primary); }
 tr.assoc-auto .assoc-status::before { content: "✓"; color: var(--ok); }
 tr.assoc-none .assoc-status::before { content: "?"; color: var(--text-muted); }
 tr.assoc-none td { background: var(--tint-warn); }
+
+/* Association : indice de correspondance (proxy) */
+.assoc-conf {
+    margin-left: 6px;
+    font-size: .78rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.assoc-conf.hi { color: var(--ok); }
+.assoc-conf.mid { color: var(--warn); }
+.assoc-conf.lo { color: var(--danger); }
+.conf-badge {
+    margin-top: 10px;
+    align-self: center;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: .85rem;
+    font-weight: 600;
+    background: var(--surface-2);
+    color: var(--text-muted);
+}
+.conf-badge.hi { background: var(--tint-ok); color: var(--ok); }
+.conf-badge.mid { background: var(--tint-warn); color: var(--warn); }
+.conf-badge.lo { background: var(--tint-danger); color: var(--danger); }
+.conf-badge.hidden { display: none; }
