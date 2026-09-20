@@ -1663,20 +1663,25 @@ input, select, textarea { border-radius: 7px; }
     flex-direction: column;
 }
 #assoc-sheets { flex: 1; min-height: 0; overflow-y: auto; }
-#assoc-center {
+/* image du champ nom en haut, liste des élèves en dessous */
+#assoc-right {
     flex: 1;
     min-width: 0;
     min-height: 0;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+#assoc-center {
+    flex: none;
+    min-width: 0;
     padding: 12px;
     background: var(--surface-2);
-    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     display: flex;
     flex-direction: column;
 }
 #assoc-choice {
-    width: 380px;
-    flex: none;
+    flex: 1;
     min-height: 0;
     padding: 8px;
     display: flex;
@@ -1694,7 +1699,6 @@ input, select, textarea { border-radius: 7px; }
 @media (max-width: 1000px) {
     #scans-body { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
     #pages, #zooms { border-right: none; border-bottom: 1px solid var(--border); }
-    #assoc-center { display: none; }
 }
 @media (max-width: 900px) {
     #association { flex-direction: column; }

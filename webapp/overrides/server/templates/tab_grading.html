@@ -162,30 +162,32 @@
         <div id="assoc-sheets">
         </div>
       </div>
-      <div id="assoc-center">
-        <div id="studentname">
+      <div id="assoc-right">
+        <div id="assoc-center">
+          <div id="studentname">
+          </div>
+          <div id="studentname-conf" class="conf-badge hidden"></div>
         </div>
-        <div id="studentname-conf" class="conf-badge hidden"></div>
-      </div>
-      <div id="assoc-choice">
-        <div class="bandeau">
-          <input type="text" id="student-entry" tabindex="1"
-                 placeholder="{{ _('student.type-to-select') }}"
-                 oninput="select_students(this);"
-                 onkeyup="select_students_keyup(this, event);"></input>
-          <input type="checkbox" id="global:filter_beginning" name="global:filter_beginning"
-                 tabindex="10"
-                 onchange="select_students();change_config_value(this);"/>
-          <label for="global:filter_beginning">{{ _('config.association.filter_beginning') }}</label>
-        </div>
-        <div id="create-student" class="bandeau hidden">
-          {{ _('assoc.new.id') }} <input type="text" id="create-student-id" size="12" tabindex="2"
-                                         onpaste="student_id_test_row(this, event);"/>
-          {{ _('assoc.new.surname') }} <input type="text" id="create-student-surname" size="12" tabindex="3"/>
-          {{ _('assoc.new.name') }} <input type="text" id="create-student-name" size="12" tabindex="4"/>
-          <span class="btn btn-ok" onclick="create_student();" tabindex="5">{{ _('assoc.new.go') }}</span>
-        </div>
-        <div id="students-list">
+        <div id="assoc-choice">
+          <div class="bandeau">
+            <input type="text" id="student-entry" tabindex="1"
+                   placeholder="{{ _('student.type-to-select') }}"
+                   oninput="select_students(this);"
+                   onkeyup="select_students_keyup(this, event);"></input>
+            <input type="checkbox" id="global:filter_beginning" name="global:filter_beginning"
+                   tabindex="10"
+                   onchange="select_students();change_config_value(this);"/>
+            <label for="global:filter_beginning">{{ _('config.association.filter_beginning') }}</label>
+          </div>
+          <div id="create-student" class="bandeau hidden">
+            {{ _('assoc.new.id') }} <input type="text" id="create-student-id" size="12" tabindex="2"
+                                           onpaste="student_id_test_row(this, event);"/>
+            {{ _('assoc.new.surname') }} <input type="text" id="create-student-surname" size="12" tabindex="3"/>
+            {{ _('assoc.new.name') }} <input type="text" id="create-student-name" size="12" tabindex="4"/>
+            <span class="btn btn-ok" onclick="create_student();" tabindex="5">{{ _('assoc.new.go') }}</span>
+          </div>
+          <div id="students-list">
+          </div>
         </div>
       </div>
     </div>
