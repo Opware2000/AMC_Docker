@@ -2465,3 +2465,30 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
 }
 @keyframes md-ripple { to { transform: scale(2.5); opacity: 0; } }
 .menubtn, .subbtn, .act, .view-btn, .fchip, .btn-grow { position: relative; overflow: hidden; }
+
+/* --- FAB (bouton d'action flottant) --- */
+.fab {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 5;
+    width: 56px;
+    height: 56px;
+    border: none;
+    border-radius: 50%;
+    background: var(--secondary);
+    color: #ffffff;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    box-shadow: 0 3px 5px rgba(0,0,0,.2), 0 6px 10px rgba(0,0,0,.14), 0 1px 18px rgba(0,0,0,.12);
+    transition: box-shadow .2s, transform .12s;
+}
+.fab:hover {
+    box-shadow: 0 5px 5px rgba(0,0,0,.2), 0 8px 10px rgba(0,0,0,.14), 0 3px 14px rgba(0,0,0,.12);
+}
+.fab:active { transform: scale(.96); }
+.fab.hidden { display: none; }
+.fab-icon { font-size: 24px; line-height: 1; }
+[data-theme="dark"] .fab { color: #000000; }

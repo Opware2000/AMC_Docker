@@ -198,7 +198,57 @@ function set_current_tab(tab_name) {
         if(name == current_tab) e.classList.add("current");
         else e.classList.remove("current");
     }
+    update_fab();
     set_hash_url();
+}
+
+// ----------------------- FAB (action principale de l'écran)
+
+var fab_actions = {
+    main: {
+        icon: "＋", title: "Nouveau projet",
+        run: function() {
+            var n = document.getElementById("new-project-name");
+            if(n) { n.scrollIntoView({block: "center"}); n.focus(); }
+        }
+    },
+    source: {
+        icon: "⤓", title: "Enregistrer la source",
+        run: function() {
+            if(!source_dirty) { notify('info', "Aucune modification à enregistrer."); return; }
+            source_save();
+        }
+    },
+    scans: {
+        icon: "↑", title: "Téléverser des scans",
+        run: function() {
+            var f = document.getElementById("scans-upload");
+            if(f) f.click();
+        }
+    },
+    grading: {
+        icon: "✓", title: "Calculer les notes",
+        run: function() { do_mark(); }
+    },
+};
+
+function fab_action() {
+    var a = fab_actions[current_tab];
+    if(a) a.run();
+}
+
+function update_fab() {
+    var f = document.getElementById("fab");
+    if(!f) return;
+    var a = fab_actions[current_tab];
+    if(!a) {
+        f.classList.add("hidden");
+        return;
+    }
+    f.classList.remove("hidden");
+    f.querySelector(".fab-icon").textContent = a.icon;
+    f.setAttribute("title", a.title);
+    f.setAttribute("aria-label", a.title);
 }
 
 function adapt_menu(data) {
@@ -226,7 +276,7 @@ function connection_status(s) {
 // Ripple Material sur les éléments cliquables.
 function md_ripple(event) {
     var host = event.target.closest(
-        ".btn, .menubtn, .subbtn, .act, .view-btn, .fchip, .btn-grow");
+        ".btn, .menubtn, .subbtn, .act, .view-btn, .fchip, .btn-grow, .fab");
     if(!host) return;
     var r = host.getBoundingClientRect();
     if(!r.width || !r.height) return;
