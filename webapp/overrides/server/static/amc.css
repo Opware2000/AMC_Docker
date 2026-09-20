@@ -2492,3 +2492,8 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
 .fab.hidden { display: none; }
 .fab-icon { font-size: 24px; line-height: 1; }
 [data-theme="dark"] .fab { color: #000000; }
+
+/* --- Barres fixes : ne doivent jamais être compressées par le contenu --- */
+#topbar { flex: none; }
+#scans-toolbar { flex: none; }
+#grading-switch { flex: none; }
