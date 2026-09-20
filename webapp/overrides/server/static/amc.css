@@ -2095,3 +2095,79 @@ tr.assoc-none td { background: var(--tint-warn); }
 .conf-badge.mid { background: var(--tint-warn); color: var(--warn); }
 .conf-badge.lo { background: var(--tint-danger); color: var(--danger); }
 .conf-badge.hidden { display: none; }
+
+/* ============================================================
+   Pages en échec — comparateur avant/après
+   ============================================================ */
+#failed-images {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    padding: 10px;
+    overflow: hidden;
+}
+#failed-compare { width: 100%; max-width: 820px; display: flex; flex-direction: column; min-height: 0; }
+#failed-frames {
+    position: relative;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    flex: 1;
+    min-height: 0;
+}
+#failed-frames .cmp-img {
+    grid-area: 1 / 1;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+#failed-frames .cmp-pp { clip-path: inset(0 0 0 50%); }
+#failed-compare:not(.has-pp) .cmp-pp { display: none; }
+#failed-compare:not(.has-pp) .cmp-handle,
+#failed-compare:not(.has-pp) .cmp-tag,
+#failed-compare:not(.has-pp) #failed-slider { display: none; }
+.cmp-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    background: var(--primary);
+    pointer-events: none;
+}
+.cmp-handle::after {
+    content: "⇔";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--primary-fg);
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    box-shadow: var(--shadow-lg);
+}
+.cmp-tag {
+    position: absolute;
+    top: 8px;
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+.cmp-tag.left { left: 8px; }
+.cmp-tag.right { right: 8px; }
+#failed-slider { width: 100%; margin-top: 10px; flex: none; accent-color: var(--primary); }

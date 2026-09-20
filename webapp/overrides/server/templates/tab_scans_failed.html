@@ -20,13 +20,17 @@
   </div>
   <div id="failed-images">
     <!-- ponytail: libellés littéraux faute de clés i18n amont -->
-    <div id="failed-orig" class="img-pane">
-      <div class="img-head">Original</div>
-      <img id="failed-orig-img" src=""/>
-    </div>
-    <div id="failed-pp" class="img-pane">
-      <div class="img-head">Après prétraitement</div>
-      <img id="failed-pp-img" src=""/>
+    <div id="failed-compare">
+      <div id="failed-frames">
+        <img id="failed-orig-img" class="cmp-img" src="" alt="Original"/>
+        <img id="failed-pp-img" class="cmp-img cmp-pp" src="" alt="Après prétraitement"/>
+        <div class="cmp-handle"></div>
+        <span class="cmp-tag left">Original</span>
+        <span class="cmp-tag right">Après prétraitement</span>
+      </div>
+      <input type="range" id="failed-slider" min="0" max="100" value="50"
+             oninput="failed_set_split(this.value);"
+             aria-label="Comparer avant/après"/>
     </div>
   </div>
 </div>

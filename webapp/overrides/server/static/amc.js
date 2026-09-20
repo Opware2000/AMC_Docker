@@ -1040,6 +1040,18 @@ socket.on("tab-scans", tab_scans);
 function failed_clear_img() {
     for(var n of ["failed-orig-img", "failed-pp-img"])
         document.getElementById(n).setAttribute("src", "");
+    var c = document.getElementById("failed-compare");
+    if(c) c.classList.remove("has-pp");
+    failed_set_split(50);
+}
+
+// Comparateur avant/après : le volet prétraité est révélé à droite du curseur.
+function failed_set_split(v) {
+    v = Number(v);
+    var pp = document.getElementById("failed-pp-img");
+    var h = document.querySelector("#failed-frames .cmp-handle");
+    if(pp) pp.style.clipPath = `inset(0 0 0 ${v}%)`;
+    if(h) h.style.left = v + "%";
 }
 
 function u_scans_failed_report() {
@@ -1063,6 +1075,14 @@ function tab_scans_failed() {
 function failed_set_pp_url(url) {
     document.getElementById("failed-pp-img")
         .setAttribute("src", url);
+    var c = document.getElementById("failed-compare");
+    if(c) {
+        if(url) c.classList.add("has-pp");
+        else c.classList.remove("has-pp");
+    }
+    var s = document.getElementById("failed-slider");
+    if(s) s.value = 50;
+    failed_set_split(50);
 }
 
 function failed_scan_view(e) {
