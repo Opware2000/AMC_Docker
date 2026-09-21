@@ -102,7 +102,7 @@ services:
       - amc-data:/root/.AMC.d
 
     shm_size: '256mb'
-    restart: "no"
+    restart: unless-stopped   # suit le démarrage de Docker
 
 # ── Volumes nommés ─────────────────────────────────────────
 volumes:
