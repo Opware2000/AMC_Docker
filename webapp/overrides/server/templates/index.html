@@ -76,6 +76,12 @@
               onclick="admin_back();"><i class="iconoir-profile-circle"></i></span>
         <span id="theme-toggle" class="admin-action" onclick="toggle_theme();"
               title="{{ _('webapp.theme.toggle') }}">◐</span>
+        {% if app_version %}
+        <a id="app-version" class="app-version" href="/version"
+           target="_blank" rel="noopener"
+           title="{{ _('webapp.version') }} {{ app_version }}"
+           >v{{ app_version[:7] }}</a>
+        {% endif %}
       </div>
     </nav>
 
