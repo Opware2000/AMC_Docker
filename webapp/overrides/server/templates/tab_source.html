@@ -1,0 +1,57 @@
+<div id="source">
+  <div id="code">
+    <div class="bandeau">
+      <span id="source-name" class="clickable" onclick="source_other();"></span>
+      <span id="source-dirty" class="dirty hidden"
+            title="{{ _('btn.save') }}"></span>
+      <span id="source-revert" class="btn btn-warning disabled"
+            onclick="source_revert();"
+            title="{{ _('btn.revert') }}"><i class="iconoir-u-turn-arrow-left" style="rotate: 90deg;"></i></span>
+      <span id="source-save" class="btn btn-ok disabled" onclick="source_save();">{{ _('btn.save') }}</span>
+      <span id="printing-status" class="hidden badge"><i class="iconoir-printing-page iconoir"></i> <span id="printing-status-n"></span> <span onclick="cancel_printing();" class="sub-badge" title="{{ _('print.cancel') }}"><i class="iconoir-xmark-circle-solid iconoir" style="color: red;"></i></span></span>
+    </div>
+    <div id="files-list" class="hidden">
+      <div class="bandeau">
+        <input type="checkbox" id="all-files" name="all-files" value="1"
+               onchange="all_files_change();"/>
+        <label for="all-files">{{ _('btn.allfiles') }}</label>
+        |
+        <input type="file" id="project-upload-file" name="file" class="hidden"
+               onchange="upload_file_to_project();"/>
+        <label for="project-upload-file" class="btn btn-neutral">{{ _('btn.upload') }}</label>
+      </div>       
+      <div id="files-list-list">
+      </div>
+    </div>
+    <div id="code-code-a">
+      <div id="code-code">
+      </div>
+    </div>
+  </div>
+  <div id="document">
+    <div class="bandeau">
+      {{ _('number.copies') }} <input id="ncopies" type="number" min="0"
+                      onchange="change_ncopies();"/>
+      <select id="doc-type" onchange="change_doc_type(this);">
+        <option value="">-- {{ _('option.choose') }} --</option>
+        <option value="sujet">{{ _('doc.subject') }}</option>
+        <option value="calage">{{ _('doc.layout') }}</option>
+        <option value="catalog">{{ _('doc.catalog') }}</option>
+        <option value="corrige">{{ _('doc.answers') }}</option>
+        <option value="indiv-solution">{{ _('doc.corrected') }}</option>
+      </select>
+      <span id="doc-update" class="btn btn-ok disabled" onclick="doc_update(this);">{{ _('btn.update') }}</span>
+      <span id="doc-print-btn" class="btn btn-ok hidden" onclick="doc_print();">{{ _('btn.print') }}</span>
+      <span id="defects-button" class="hidden"
+            onclick="toggle_defects_view();">
+        <i class="iconoir-warning-triangle"></i>   
+      </span>
+    </div>
+    <div id="defects-list" class="hidden">
+    </div>
+    <div id="document-view">
+    </div>
+  </div>
+  <div id="print" class="hidden">
+  </div>
+</div>

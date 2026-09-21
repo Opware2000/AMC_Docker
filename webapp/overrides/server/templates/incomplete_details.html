@@ -1,0 +1,4 @@
+<b>{{ ngettext('scans.incomplete.one', 'scans.incomplete.plural', n_incomplete) }}</b><br/>
+{% for m in missing %}
+{{ _('scans.missing.text', copy=m["sc"], pages=m["pages"]) }}.<br/>
+{% endfor %}

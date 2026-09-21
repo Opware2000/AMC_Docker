@@ -1,0 +1,77 @@
+<div id="scans" class="scans-main">
+  <div id="scans-toolbar">
+    <label class="tool">
+      <input type="checkbox" id="scans-photocopied"
+             name="scans-photocopied" onchange="scans_mode_change();"/>
+      {{ _('scans.photocopy') }}
+    </label>
+    {% if nmaxpages > 1 %}
+    <div id="multi-mode" class="tool hidden">
+      <select id="multi_scan_mode" name="multi_scan_mode">
+        <option value="strict">{{ _('multi.mode.strict') }}</option>
+        <option value="skip-unrecognized">{{ _('multi.mode.skip') }}</option>
+        <option value="increasing">{{ _('multi.mode.inc') }}</option>
+        <option value="file">{{ _('multi.mode.file') }}</option>
+      </select>
+    </div>
+    {% endif %}
+    <div class="tool">
+      <input type="file" id="scans-upload" name="file" class="hidden"
+             onchange="upload_scans();" multiple />
+      <label class="btn btn-ok" for="scans-upload">{{ _('scans.upload') }}</label>
+    </div>
+    <div id="scans-params" class="tool">
+      <span class="tool-label">{{ _('scans.thresholds') }}</span>
+      <input type="number" id="threshold" name="threshold"
+             min="0" max="1" step="0.01" onchange="threshold_change();">
+      <label for="threshold">{{ _('scans.thresholds.lower') }}</label>
+      <input type="number" id="threshold-up" name="threshold-up"
+             min="0" max="1" step="0.01" onchange="threshold_change();">
+      <label for="threshold-up">{{ _('scans.thresholds.upper') }}</label>
+    </div>
+    <span class="spacer"></span>
+    <div id="scans-actions-open" class="clickable-simple"
+         onclick="this.classList.toggle('selected');"
+         ><span class="plus"><i class="iconoir-plus-circle"></i></span><span class="minus"><i class="iconoir-minus-circle"></i></span> {{ _('scans.actions') }}</div>
+    <div id="scans-actions">
+      <input type="text" id="add-student-n" name="add-student-n"
+             size="4" placeholder="num"/>
+      <span class="btn btn-ok" onclick="add_student();">{{ _('scans.add') }}</span>
+      <div class="distrib">
+        <span id="pages-delete-stop" class="btn btn-neutral btn-large hidden"
+              onclick="stop_delete_pages();"
+              title="{{ _('scans.delete.cancel') }}"
+              ><i class="iconoir-u-turn-arrow-left" style="rotate: 90deg;"></i></span>
+        <span id="pages-delete-do" class="btn btn-danger btn-large hidden"
+              onclick="do_delete_pages();"
+              title="{{ _('scans.delete.go') }}"
+              ><i class="iconoir-xmark-circle"></i></span>
+        <span id="pages-delete-start" class="btn btn-danger"
+              onclick="start_delete_pages();"
+              >{{ _('scans.delete') }}</span>
+      </div>
+      <input type="checkbox" id="global:scanslist_allcols"
+             onchange="scanslist_allcols_change(this);"
+             name="global:scanslist_allcols"/>
+      <label for="global:scanslist_allcols">{{ _('config.scans.allcols') }}</label>
+    </div>
+  </div>
+
+  <div id="scans-body">
+    <div id="pages">
+      <div id="scans-report">
+      </div>
+    </div>
+    <div id="zooms">
+      <div class="zooms-title zooms-0">{{ _('scans.ticked.no') }}</div>
+      <div id="zooms-0">
+      </div>
+      <div class="zooms-title zooms-1">{{ _('scans.ticked.yes') }}</div>
+      <div id="zooms-1">
+      </div>
+    </div>
+    <div id="manual">
+      {% include 'scans_page_none.html' %}
+    </div>
+  </div>
+</div>

@@ -9,6 +9,8 @@ Configuration Docker pour **Auto-Multiple-Choice** sur Mac Apple Silicon avec :
 - Accès à vos dossiers de travail (projets, listes, scans, sujets) via des volumes
 - Affichage distant natif via **Xpra** (fenêtre Mac, pas d'émulation)
 - Ouvrir les fichiers depuis AMC directement dans les apps Mac (TextEdit, Preview, Finder…)
+- Alternative **navigateur** : le même AMC servi par [amc-webapp](https://gitlab.com/auto-multiple-choice/amc-webapp), via le profil Docker `webapp`
+- Interface web **repensée** (Material Design, thème clair/sombre, stepper de progression, notifications, FAB contextuel) — voir « Interface web personnalisée »
 
 ---
 
@@ -54,10 +56,16 @@ amc-docker/
 ├── .dockerignore               # Fichiers ignorés par Docker
 ├── Dockerfile                  # Image texlive/texlive + AMC + Xpra (arm64)
 ├── entrypoint.sh               # Installe nQCM, configure GTK, démarre xpra:14500
+├── Dockerfile.webapp           # Couche serveur web (Flask amc-webapp + gunicorn)
+├── entrypoint-webapp.sh        # Installe nQCM puis lance le serveur web
+├── webapp/                     # Surcharges de la GUI du serveur web (Material Design)
 ├── docker-compose.yml          # Volumes et configuration (non versionné)
 ├── docker-compose.yaml.example # Template à copier/adapter
-├── launch.sh                   # Lanceur Mac : vérifie Docker, pont HTTP, démarre le conteneur, attache Xpra
-├── create-app.sh               # Crée « Auto Multiple Choice.app » pour le Dock
+├── launch-gtk.sh               # Lanceur GTK : Docker, pont HTTP, conteneur, attache Xpra
+├── launch-web.sh               # Lanceur web : démarre amc-web et ouvre localhost:8080
+├── launch.sh                   # Alias de compatibilité → launch-gtk.sh
+├── create-app.sh               # Crée l'app du Dock (gtk par défaut, web en argument)
+├── create-app-web.sh           # Raccourci : crée « Auto Multiple Choice Web.app »
 ├── libreoffice-stub.sh         # Stub libreoffice (ssconvert + pont HTTP)
 ├── logs/                       # Logs Docker (gitignoré)
 └── README.md                   # Ce fichier
@@ -104,7 +112,7 @@ volumes:
 ```
 
 > `docker-compose.yml` est **gitignoré** : vos chemins réels ne sont jamais
-> versionnés. `launch.sh` lit ces volumes via `docker compose config` — le pont
+> versionnés. `launch-gtk.sh` lit ces volumes via `docker compose config` — le pont
 > Mac-bridge pointe donc automatiquement vers les mêmes dossiers, sans aucun
 > chemin en dur dans le script.
 
@@ -115,16 +123,16 @@ volumes:
 ### 1. Rendre les scripts exécutables
 
 ```bash
-chmod +x launch.sh entrypoint.sh
+chmod +x launch.sh launch-gtk.sh launch-web.sh entrypoint.sh
 ```
 
-### 2. Lancer AMC
+### 2. Lancer AMC (interface GTK)
 
 ```bash
-./launch.sh
+./launch-gtk.sh        # (ou ./launch.sh, alias de compatibilité)
 ```
 
-Le script `launch.sh` fait tout automatiquement :
+Le script `launch-gtk.sh` fait tout automatiquement :
 
 1. Vérifie que Docker Desktop est lancé
 2. Construit **ou reconstruit** l'image `amc-nqcm:latest` :
@@ -137,11 +145,25 @@ Le script `launch.sh` fait tout automatiquement :
 5. Attend que Xpra soit prêt, puis attache le client Mac natif
 6. La fenêtre AMC s'ouvre comme une application Mac normale
 
-Pour lancer plus tard, un simple `./launch.sh` suffit — l'image existant déjà, le démarrage prend quelques secondes.
+Pour lancer plus tard, un simple `./launch-gtk.sh` suffit — l'image existant déjà, le démarrage prend quelques secondes.
+
+### 2 bis. Lancer l'interface web (navigateur)
+
+```bash
+./launch-web.sh
+```
+
+Construit l'image de base si nécessaire, démarre `amc-web` et ouvre
+<http://localhost:8080>. Détails dans « Alternative navigateur » plus bas.
+
+Les deux interfaces peuvent tourner **en même temps** (ports 14500 et 8080
+distincts), mais évitez d'ouvrir le **même projet** dans les deux : elles
+partagent la configuration AMC et le dossier de projets (verrous, caches).
 
 ### 3. Arrêter AMC
 
-Fermez la fenêtre AMC ou faites `Ctrl+C` dans le Terminal — le script arrête proprement le conteneur et le pont.
+- GTK : fermez la fenêtre AMC ou faites `Ctrl+C` dans le Terminal.
+- Web : `docker compose --profile webapp stop amc-web`.
 
 ---
 
@@ -158,7 +180,7 @@ Lancer un éditeur depuis AMC (« Ouvrir le sujet », « Ouvrir le PDF »…) ou
 | `libreoffice`                 | LibreOffice             |
 | `gnumeric`                    | Numbers                 |
 
-C'est le pont HTTP du `launch.sh` qui transporte la demande. Les conversions de fichiers
+C'est le pont HTTP du `launch-gtk.sh` qui transporte la demande. Les conversions de fichiers
 (libreoffice → PDF) restent dans le conteneur via `ssconvert`.
 
 ---
@@ -167,7 +189,9 @@ C'est le pont HTTP du `launch.sh` qui transporte la demande. Les conversions de 
 
 À chaque lancement, `entrypoint.sh` effectue :
 
-- **Classe nQCM** — copiée dans `TEXMFLOCAL` et `mktexlsr` relancé
+- **Classe nQCM** — copiée dans `TEXMFLOCAL`, `mktexlsr` relancé, et un alias
+  `nQcm.sty` ↔ `nQCM.sty` créé (le nom de fichier est **sensible à la casse**
+  sous Linux, contrairement à macOS)
 - **GTK3** — scrollbars toujours visibles, double-tap tolérant, signets pour `/amc/controles`, `/LISTES`, `/SCAN`, `/SUJETS` et `/QCM`
 - **Symlink projets** — `/root/MC-Projects` pointe vers `/amc/controles`
 - **Xpra** — serveur X virtuel, clavier français / Apple
@@ -219,6 +243,71 @@ Pour accéder à vos fichiers depuis AMC :
 
 ---
 
+## Alternative navigateur (AMC webapp)
+
+En plus de l'interface GTK, le même AMC peut être utilisé **dans le navigateur**
+grâce au serveur officiel [amc-webapp](https://gitlab.com/auto-multiple-choice/amc-webapp).
+La couche web est construite **par-dessus l'image existante** (`amc-nqcm:latest`) :
+même AMC, même TeX Live, même classe nQCM — seuls Flask et gunicorn sont ajoutés.
+
+```bash
+# Lanceur dédié (construit l'image de base si besoin, démarre, ouvre le navigateur)
+./launch-web.sh
+
+# — ou, à la main —
+docker compose build amc                                  # image de base (une seule fois)
+docker compose --profile webapp up -d --build amc-web     # serveur web
+# puis http://localhost:8080
+```
+
+Le service `amc-web` vit dans le même `docker-compose.yml`, sous le profil
+`webapp` : `./launch-gtk.sh` (profil par défaut) ne le lance donc jamais. Il partage
+avec la GUI les **projets** (`CONTROLES` → `/amc/controles`, via
+`AMC_PROJECTSDIR`), la **configuration AMC** (volume `amc-data` → `/root/.AMC.d`)
+et le dossier nQCM (`/nqcm`).
+
+Pour **personnaliser la GUI** (templates HTML, CSS, JS), déposez vos fichiers
+dans `webapp/overrides/` en reproduisant l'arborescence cible (`/amc-web/`) :
+ils écraseront ceux du serveur au moment du build. Détails dans
+`webapp/README.md`.
+
+### Interface web personnalisée
+
+La GUI du serveur web est **repensée** dans `webapp/overrides/` :
+
+- **Material Design** — palette Indigo, typographie Roboto, élévations,
+  app bar, drawer de navigation, champs « filled », chips, snackbars, ripple ;
+- **thème sombre** — bouton ◐ dans le menu, préférence mémorisée
+  (`localStorage`) et appliquée avant le premier rendu ;
+- **stepper** de progression (projet prêt, copies scannées, notes calculées,
+  export) alimenté par les événements existants, sans appel réseau en plus ;
+- **notifications** (snackbars) pour les succès/erreurs, blocs d'erreur de
+  chargement avec bouton « Réessayer » ;
+- **FAB** contextuel (nouveau projet, enregistrer, téléverser, calculer les
+  notes) ;
+- écrans retravaillés : **Scans** (barre d'outils + 3 volets, rapport en
+  cartes), **Notation/Association** (bascule de vue, filtres de statut,
+  indice de correspondance, image du champ nom au-dessus de la liste des
+  élèves), **Configuration** (cartes + curseurs), **Projets** (recherche,
+  actions au survol), **création de projet**, **comparateur avant/après**
+  des pages en échec.
+
+> Roboto est chargée depuis Google Fonts ; hors ligne, une police sans-serif
+> système est utilisée (le rendu reste correct).
+
+Arrêter le serveur web :
+
+```bash
+docker compose --profile webapp stop amc-web
+```
+
+> **Mono-utilisateur.** Le serveur n'a **aucune authentification** : il est
+> destiné à `localhost`. Pour un accès distant, placez-le derrière un
+> reverse-proxy avec authentification (voir la doc officielle pour le mode
+> multi-utilisateurs ; l'isolation landrun nécessite un noyau Linux ≥ 6.7).
+
+---
+
 ## Dépannage
 
 ### La fenêtre AMC n'apparaît pas
@@ -236,18 +325,24 @@ docker compose logs
 
 ### Erreur "xpra is ready" attendue mais absente des logs
 
-Le serveur Xpra met ~5 s à démarrer. `launch.sh` attend jusqu'à 30 s.
+Le serveur Xpra met ~5 s à démarrer. `launch-gtk.sh` attend jusqu'à 30 s.
 Si le délai est dépassé, lancez `docker compose logs` pour voir le message d'erreur.
 
 ### La classe nQCM n'est pas trouvée par LaTeX
+
+Le paquet s'appelle **`nQCM.sty`** (extension `.sty`, pas `.cls`). Sous Linux
+le nom de fichier est **sensible à la casse** : `\usepackage{nQCM}` est
+l'orthographe exacte. Un alias `nQcm.sty` est créé automatiquement au
+démarrage pour les documents qui écrivent `\usepackage{nQcm}` (voir
+« Ce qui est configuré automatiquement »).
 
 ```bash
 # Vérifiez que le chemin dans docker-compose.yml est correct :
 ls ~/chemin/vers/nQcm
 
-# Vérifiez dans le conteneur :
+# Vérifiez dans le conteneur (les deux orthographes doivent répondre) :
 docker compose run --entrypoint bash amc \
-  -c "kpsewhich nQCM.cls 2>/dev/null || echo 'non trouvé'"
+  -c "kpsewhich nQCM.sty nQcm.sty"
 ```
 
 ### Reconstruire l'image (après mise à jour)
@@ -322,13 +417,17 @@ Pour lancer AMC comme n'importe quelle application macOS, sans passer par le Ter
 ### 1. Générer l'application
 
 ```bash
-chmod +x create-app.sh
-./create-app.sh
+chmod +x create-app.sh create-app-web.sh
+
+./create-app.sh            # « Auto Multiple Choice.app »      → interface GTK
+./create-app-web.sh        # « Auto Multiple Choice Web.app »  → interface web
+# (équivalent : ./create-app.sh web)
 ```
 
-Ce script crée `Auto Multiple Choice.app` dans `~/Applications/` et ouvre
-automatiquement le dossier pour vous. Il télécharge l'icône officielle d'AMC
-si la connexion internet est disponible.
+Ces scripts créent les applications dans `~/Applications/` et ouvrent
+automatiquement le dossier pour vous. Ils téléchargent l'icône officielle d'AMC
+si la connexion internet est disponible. `AMC_NO_OPEN=1` évite d'ouvrir le
+dossier (utile en automatisation).
 
 ### 2. Ajouter au Dock
 
@@ -346,17 +445,20 @@ Vous voyez les messages de démarrage (utile pour diagnostiquer un problème).
 
 ### Recréer l'application après un déplacement du dossier amc-docker
 
-L'application contient le chemin absolu vers `launch.sh`. Si vous déplacez
-le dossier `amc-docker`, relancez simplement `./create-app.sh` pour mettre
-à jour l'application.
+L'application contient le chemin absolu vers `launch-gtk.sh`. Si vous déplacez
+le dossier `amc-docker`, relancez simplement `./create-app.sh` (et
+`./create-app-web.sh` pour la version web) pour mettre à jour l'application.
 
 ---
 
 ## Commandes utiles
 
 ```bash
-# Lancer AMC
-./launch.sh
+# Lancer AMC (interface GTK)
+./launch-gtk.sh
+
+# Lancer AMC (interface web)
+./launch-web.sh
 
 # Shell dans le conteneur (pour déboguer)
 docker compose run --entrypoint bash amc
@@ -371,7 +473,7 @@ docker compose down
 docker volume rm amc-docker_amc-data
 
 # Vérifier la classe nQCM dans le conteneur
-docker compose run --entrypoint bash amc -c "kpsewhich -all nQCM.cls 2>/dev/null || echo 'non trouvé'"
+docker compose run --entrypoint bash amc -c "kpsewhich -all nQCM.sty nQcm.sty 2>/dev/null || echo 'non trouvé'"
 
 # Reconstruire l'image
 docker compose build --no-cache

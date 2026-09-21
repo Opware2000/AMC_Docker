@@ -1,0 +1,36 @@
+{% if defects %}
+Some defects have been detected on your subject:
+<ul>
+  {% for d in defects %}
+  <li amc-defect="{{ d[0] }}" amc-class="{{ d[1] }}">
+    {% if d[0] == "NO_NAME" %}
+    The <span class="code">\namefield</span> command is not used. Writing subjects without name field is not recommended.
+    {% endif %}
+    {% if d[0] == "SEVERAL_NAMES" %}
+    The <span class="code">\namefield</span> command is used several times for the same subject. This should not be the case, as each student should write his name only once.
+    {% endif %}
+    {% if d[0] == "NO_BOX" %}
+    There are no boxes to be ticked.
+    {% endif %}
+    {% if d[0] == "DIFFERENT_POSITIONS" %}
+    The corner marks and binary boxes are not at the same location on all pages.
+    {% endif %}
+    {% if d[0] == "OUT_OF_PAGE" %}
+    Some material has been placed out of the page. This is often a result of a multiple columns question group starting too close from the page bottom. In such a case, use <span class="code">needspace</span>.
+    {% endif %}
+    {% if d[0] == "INCOMPLETE_MULTI" %}
+    <span class="code">AMCcode[multi]</span> is missing on some pages.
+    {% endif %}
+    {% if d[0] == "DIFFERENT_POSITIONS" %}
+    See for example pages {{ d[2] }} and {{ d[3] }}.
+    {% elif d[0] in  ("OUT_OF_PAGE", "INCOMPLETE_MULTI") %}
+    This concerns {{ d[2] }} pages, see for example page {{ d[3] }}.
+    {% else %}
+    This concerns {{ d[2] }} exams, see for example sheet {{ d[3] }}.
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+No defects detected.
+{% endif %}

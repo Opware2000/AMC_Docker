@@ -1,0 +1,11 @@
+<ul class="selectable">
+  {% for s in students %}
+  <li amc-id="{{ s[0] }}"
+      class="student-name selectable
+             {%if s[2] %}associated{% endif %}
+             "
+      onclick="select_student_name(this);">
+    {{ s[1] }}
+  </li>
+  {% endfor %}
+</ul>

@@ -1,0 +1,62 @@
+<div id="report-numbers">
+  <div title="{{ _('scans.numbers.complete') }}"
+       class="{% if n_complete > 0 %}ok{% endif %}"
+       >{{ n_complete }}</div>
+  <div title="{{ _('scans.numbers.incomplete') }}"
+       class="{% if n_incomplete > 0 %}warning{% endif %}"
+       onclick="n_incomplete_details();"
+       >{{ n_incomplete }}</div>
+  <div title="{{ _('scans.numbers.failed') }}"
+       class="{% if n_failed > 0 %}error{% endif %}"
+       onclick="{% if n_failed > 0 %}tab_scans_failed();{% endif %}"
+       >{{ n_failed }}</div>
+</div>
+{% if questions_textpos %}
+<div id="q-textpos">
+  <select id="q-select" name="q-select"
+          onchange="q_select_change(this);"
+          >
+    <option value="" selected>-- {{ _('qselect.none') }} --</option>
+    {% for q in questions_textpos %}
+    <option value="{{ q[0] }}">{{ q[1] }}</option>
+    {% endfor %}
+  </select>
+</div>
+{% endif %}
+<div id="scans-pages-block">
+  <table id="scans-pages"
+         class="lock-header
+                {% if hide_mse %}hide-mse{% endif %}
+                {% if hide_sens %}hide-sens{% endif %}
+                {% if allcols %}all-columns{% endif %}
+                ">
+  <thead>
+    <tr>
+      <th onclick="scans_report_sort('');">{{ _('scans.page') }}</th>
+      <th onclick="scans_report_sort('mse');">{{ _('scans.mse') }}</th>
+      <th onclick="scans_report_sort('sens');">{{ _('scans.sensitivity') }}</th>
+    </tr>
+  </thead>
+  <tbody id="scans-pages-rows">
+    {% for p in pages %}
+    <tr onclick="scans_page_select(this,{{ p["student"] }},{{ p["page"] }},{{ p["copy"] }},event);"
+        class="pagerow"
+        amc-student="{{ p["student"] }}" amc-copy="{{ p["copy"] }}" amc-page="{{ p["page"] }}"
+        amc-manual="{% if p["timestamp_manual"]>0 %}1{%else %}0{% endif %}"
+        amc-mse="{{ p["mse"] }}" amc-sens="{{ p["sensitivity"] }}">
+      <td>{{ p["student"] }}/{{ p["page"] }}
+        {%- if p["copy"]>0 -%}
+        :{{ p["copy"] }}
+        {%- endif -%}
+      </td>
+      <td
+        {% if p["mse-level"] != None %}style="background: var(--level{{ p["mse-level"] }});"{% endif %}
+        >{% if p["mse"] == None %}--{% else %}{{ p["mse"]|round(1) }}{% endif %}</td>
+      <td
+        {% if p["sens-level"] != None %}style="background: var(--level{{ p["sens-level"] }});"{% endif %}
+          >{% if p["sensitivity"] == None %}--{% else %}<span class="manual-tag">(</span>{{ p["sensitivity"]|round(1) }}<span class="manual-tag">)</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>

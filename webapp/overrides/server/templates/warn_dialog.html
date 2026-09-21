@@ -1,0 +1,29 @@
+{% if err %}
+<div id="warn-err" class="msg-err">
+  <p id="warn-err-text" class="message">
+    <img src="{{ url_for('static', filename='error.svg') }}" class="dialog-img">
+    {{ err | safe }}
+  </p>
+</div>
+{% endif %}
+{% if warn %}
+<div id="warn-warn" class="msg-warn">
+  <p id="warn-warn-text" class="message">
+    <img src="{{ url_for('static', filename='warning.svg') }}" class="dialog-img">
+    {{ warn | safe }}
+  </p>
+</div>
+{% endif %}
+{% if info %}
+<div id="warn-info" class="msg-info">
+  <p id="warn-warn-text" class="message">
+    {{ info | safe }}
+  </p>
+</div>
+{% endif %}
+<div class="bandeau adroite">
+  {%- if cancel_btn -%}
+  <span id="warn-dialog-cancel" class="btn btn-{{cancel_class}}" onclick="{{ cancel_onclick }}">{{ cancel_txt }}</span>
+  {%- endif %}
+  <span id="warn-dialog-ok" class="btn btn-{{ok_class}}" onclick="{{ ok_onclick }}">{{ ok_txt }}</span>
+</div>

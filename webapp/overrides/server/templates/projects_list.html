@@ -1,0 +1,39 @@
+{% if projects %}
+<div class="bandeau">
+  <!-- ponytail: libellé littéral faute de clé i18n amont -->
+  <input type="search" id="projects-filter" class="projects-filter"
+         placeholder="Rechercher un projet…" oninput="filter_projects(this);">
+</div>
+<div class="overy">
+  {% for user,plist in projects %}
+  {% if user %}
+  <div class="userhead">{{ user }}</div>
+  {% endif %}
+  {% if plist %}
+  <div class="project-grid">
+    {% for p in plist %}
+    <div class="project-card"
+         amc-url="/fs/{{ p }}{% if user %}?user={{ user }}{% endif %}"
+         onclick="project_action('open', this, '{{p}}'{% if user %}, '{{user}}'{% endif %});">
+      <span class="pc-name">{{ p }}</span>
+      <span class="pc-actions" onclick="event.stopPropagation();">
+        <span class="act" title="{{ _('project.open') }}"
+              onclick="project_action('open', this, '{{p}}'{% if user %}, '{{user}}'{% endif %});">↗</span>
+        <span class="act" title="{{ _('project.rename') }}"
+              onclick="project_action('rename', this, '{{p}}'{% if user %}, '{{user}}'{% endif %});">✎</span>
+        <span class="act" title="{{ _('project.clone') }}"
+              onclick="project_action('clone', this, '{{p}}'{% if user %}, '{{user}}'{% endif %});">⧉</span>
+        <span class="act" title="{{ _('project.download') }}"
+              onclick="project_action('download', this, '{{p}}'{% if user %}, '{{user}}'{% endif %});">⤓</span>
+        <span class="act danger" title="{{ _('project.delete') }}"
+              onclick="project_action('delete', this, '{{p}}'{% if user %}, '{{user}}'{% endif %});">🗑</span>
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% else %}
+<ul amc-user=""/>
+{% endif %}

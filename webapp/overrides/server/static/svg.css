@@ -1,0 +1,23 @@
+.box1 {
+    stroke: #00e462;
+    stroke-width: 10;
+    fill: none;
+}
+
+.box2 {
+    stroke: #ff7c00;
+    stroke-width: 10;
+    fill: none;
+}
+
+.namefield {
+    stroke: #eb0cf9;
+    stroke-width: 10;
+    fill: none;
+} 
+
+.corner-mark {
+    stroke: #21fff2;
+    stroke-width: 10;
+    fill: none;
+}
