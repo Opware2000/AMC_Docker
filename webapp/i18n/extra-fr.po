@@ -1,0 +1,128 @@
+# Traductions de l'overlay webapp (amc-docker) — français
+# Fusionnées au build dans server/translations/fr/LC_MESSAGES/messages.po
+msgid ""
+msgstr ""
+"Project-Id-Version: amc-docker-overlay\n"
+"Report-Msgid-Bugs-To: \n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+# Interface générale
+msgid "webapp.theme.toggle"
+msgstr "Thème clair / sombre"
+
+msgid "webapp.btn.close"
+msgstr "Fermer"
+
+msgid "webapp.btn.retry"
+msgstr "Réessayer"
+
+msgid "webapp.error.load"
+msgstr "Échec du chargement de cette section."
+
+msgid "webapp.upload.inprogress"
+msgstr "Envoi en cours…"
+
+msgid "webapp.error.upload_status"
+msgstr "Échec de l'envoi (statut %%s)."
+
+# Étapes (stepper)
+msgid "webapp.step.project"
+msgstr "Projet prêt"
+
+msgid "webapp.step.scans"
+msgstr "Copies scannées"
+
+msgid "webapp.step.marks"
+msgstr "Notes calculées"
+
+msgid "webapp.step.export"
+msgstr "Export"
+
+# FAB
+msgid "webapp.fab.new_project"
+msgstr "Nouveau projet"
+
+msgid "webapp.fab.save"
+msgstr "Enregistrer la source"
+
+msgid "webapp.fab.upload"
+msgstr "Téléverser des scans"
+
+msgid "webapp.fab.mark"
+msgstr "Calculer les notes"
+
+msgid "webapp.info.nothing_to_save"
+msgstr "Aucune modification à enregistrer."
+
+# Notifications
+msgid "webapp.toast.source_saved"
+msgstr "Source enregistrée."
+
+msgid "webapp.toast.export_done"
+msgstr "Export terminé."
+
+msgid "webapp.toast.annotated"
+msgstr "Copies annotées générées."
+
+msgid "webapp.toast.print_files"
+msgstr "Fichiers d'impression générés."
+
+msgid "webapp.toast.upload_cancelled"
+msgstr "Envoi annulé."
+
+# Source
+msgid "webapp.confirm.unsaved"
+msgstr "La source contient des modifications non enregistrées. Continuer ?"
+
+# Configuration — badges de portée
+msgid "webapp.config.project"
+msgstr "projet"
+
+msgid "webapp.config.global"
+msgstr "global"
+
+# Projets
+msgid "webapp.projects.search"
+msgstr "Rechercher un projet…"
+
+msgid "webapp.newproject.start"
+msgstr "Point de départ"
+
+msgid "webapp.newproject.name_ph"
+msgstr "ex. DST3-2026 — Sujet A"
+
+# Scans — pages en échec
+msgid "webapp.failed.original"
+msgstr "Original"
+
+msgid "webapp.failed.preprocessed"
+msgstr "Après prétraitement"
+
+msgid "webapp.failed.compare"
+msgstr "Comparer avant/après"
+
+# Notation — bascule de vue et filtres d'association
+msgid "webapp.grading.results"
+msgstr "Résultats & export"
+
+msgid "webapp.assoc.filter.all"
+msgstr "Toutes"
+
+msgid "webapp.assoc.filter.auto"
+msgstr "Auto"
+
+msgid "webapp.assoc.filter.manual"
+msgstr "Manuelles"
+
+msgid "webapp.assoc.filter.none"
+msgstr "Non associées"
+
+msgid "webapp.assoc.confidence"
+msgstr "Correspondance %%s %%"
+
+msgid "webapp.assoc.detected"
+msgstr "Détecté : %%s"

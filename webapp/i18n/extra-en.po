@@ -1,0 +1,128 @@
+# Overlay webapp (amc-docker) translations — English
+# Merged at build time into server/translations/en/LC_MESSAGES/messages.po
+msgid ""
+msgstr ""
+"Project-Id-Version: amc-docker-overlay\n"
+"Report-Msgid-Bugs-To: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# General UI
+msgid "webapp.theme.toggle"
+msgstr "Light / dark theme"
+
+msgid "webapp.btn.close"
+msgstr "Close"
+
+msgid "webapp.btn.retry"
+msgstr "Retry"
+
+msgid "webapp.error.load"
+msgstr "Failed to load this section."
+
+msgid "webapp.upload.inprogress"
+msgstr "Uploading…"
+
+msgid "webapp.error.upload_status"
+msgstr "Upload failed (status %%s)."
+
+# Steps (stepper)
+msgid "webapp.step.project"
+msgstr "Project ready"
+
+msgid "webapp.step.scans"
+msgstr "Copies scanned"
+
+msgid "webapp.step.marks"
+msgstr "Marks computed"
+
+msgid "webapp.step.export"
+msgstr "Export"
+
+# FAB
+msgid "webapp.fab.new_project"
+msgstr "New project"
+
+msgid "webapp.fab.save"
+msgstr "Save source"
+
+msgid "webapp.fab.upload"
+msgstr "Upload scans"
+
+msgid "webapp.fab.mark"
+msgstr "Compute marks"
+
+msgid "webapp.info.nothing_to_save"
+msgstr "Nothing to save."
+
+# Notifications
+msgid "webapp.toast.source_saved"
+msgstr "Source saved."
+
+msgid "webapp.toast.export_done"
+msgstr "Export finished."
+
+msgid "webapp.toast.annotated"
+msgstr "Annotated copies generated."
+
+msgid "webapp.toast.print_files"
+msgstr "Print files generated."
+
+msgid "webapp.toast.upload_cancelled"
+msgstr "Upload cancelled."
+
+# Source
+msgid "webapp.confirm.unsaved"
+msgstr "The source has unsaved changes. Continue?"
+
+# Configuration — scope badges
+msgid "webapp.config.project"
+msgstr "project"
+
+msgid "webapp.config.global"
+msgstr "global"
+
+# Projects
+msgid "webapp.projects.search"
+msgstr "Search for a project…"
+
+msgid "webapp.newproject.start"
+msgstr "Starting point"
+
+msgid "webapp.newproject.name_ph"
+msgstr "e.g. DST3-2026 — Paper A"
+
+# Scans — failed pages
+msgid "webapp.failed.original"
+msgstr "Original"
+
+msgid "webapp.failed.preprocessed"
+msgstr "After pre-processing"
+
+msgid "webapp.failed.compare"
+msgstr "Compare before/after"
+
+# Grading — view switch and association filters
+msgid "webapp.grading.results"
+msgstr "Results & export"
+
+msgid "webapp.assoc.filter.all"
+msgstr "All"
+
+msgid "webapp.assoc.filter.auto"
+msgstr "Auto"
+
+msgid "webapp.assoc.filter.manual"
+msgstr "Manual"
+
+msgid "webapp.assoc.filter.none"
+msgstr "Unassigned"
+
+msgid "webapp.assoc.confidence"
+msgstr "Match %%s %%"
+
+msgid "webapp.assoc.detected"
+msgstr "Detected: %%s"

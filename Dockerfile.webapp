@@ -51,6 +51,13 @@ RUN printf 'APP_VERSION="%s"\n' "$AMC_WEBAPP_REV" > /amc-web/server/version.py
 # Copiées après le clone : tout fichier présent écrase l'original.
 COPY webapp/overrides/ /amc-web/
 
+# ── 4c. Traductions de l'overlay ─────────────────────────────
+# Fusionnées dans les catalogues amont (pas de .po surchargé, donc les
+# traductions d'amc-webapp restent à jour lors d'un changement de révision).
+COPY webapp/i18n/ /tmp/i18n/
+RUN /venv/bin/python /tmp/i18n/merge_po.py /amc-web/server/translations /tmp/i18n \
+    && rm -rf /tmp/i18n
+
 ENV PATH=/venv/bin:$PATH
 ENV FLASK_APP=amc
 # Les projets AMC sont les dossiers montés (CONTROLES) — mêmes que la GUI

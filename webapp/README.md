@@ -46,12 +46,37 @@ overrides/server/static/amc.js
 - La police **Roboto** est chargée depuis Google Fonts ; hors ligne, une pile
   sans-serif système prend le relais.
 
+## Internationalisation
+
+Les chaînes ajoutées par l'overlay sont traduites via **gettext**, sans
+surcharger les catalogues amont :
+
+- `webapp/i18n/extra-fr.po` et `extra-en.po` ne contiennent que nos clés
+  (préfixe `webapp.`) ;
+- au build, `merge_po.py` **fusionne** ces entrées dans
+  `server/translations/<lang>/LC_MESSAGES/messages.po` — les catalogues amont
+  restent donc à jour lors d'un changement de `AMC_WEBAPP_REV` ;
+- `make` compile ensuite les `.mo`.
+
+Côté templates : `{{ _('webapp.…') }}`, comme partout.
+Côté JavaScript : `index.html` expose `window.AMC_I18N` (mêmes clés) et
+`amc.js` les lit via `t('webapp.…')`.
+
+> **Piège** : le `_()` de Jinja applique une mise en forme `%`. Une chaîne
+> contenant un `%` littéral doit l'écrire `%%` dans le `.po`
+> (ex. `Correspondance %%s %%`) ; Jinja la restitue en `%s` / `%` pour le JS.
+
+Pour ajouter une chaîne : la déclarer dans les **deux** `extra-*.po`, l'utiliser
+dans le template (`_()`) ou l'ajouter à `window.AMC_I18N` et l'appeler via `t()`
+en JS, puis reconstruire.
+
 ## Ordre de construction
 
 1. clone de `amc-webapp` → `/amc-web/`
 2. copie de `overrides/` par-dessus
-3. `make` (traductions, ACE, icônes)
-4. `flask digest compile`
+3. fusion des traductions de l'overlay (`webapp/i18n/` → catalogues amont)
+4. `make` (traductions, ACE, icônes)
+5. `flask digest compile`
 
 > **Ne surchargez pas** les fichiers générés par `make` :
 > `server/static/icons.css`, `server/ace/mode-amc_txt.js` et les

@@ -1,10 +1,9 @@
 <div id="grading-tab">
-  <!-- ponytail: libellés littéraux faute de clés i18n amont -->
   <div id="grading-switch" class="hidden">
     <span id="view-results" class="view-btn current"
-          onclick="association_manual_done();">Résultats &amp; export</span>
+          onclick="association_manual_done();">{{ _('webapp.grading.results') }}</span>
     <span id="view-assoc" class="view-btn"
-          onclick="association_manual();">Association manuelle</span>
+          onclick="association_manual();">{{ _('assoc.manual') }}</span>
   </div>
 
   <div id="grading-views">
@@ -148,16 +147,15 @@
                 class="btn btn-ok btn-grow"
                 onclick="association_manual_done();">{{ _('assoc.done') }}</span>
         </div>
-        <!-- ponytail: libellés littéraux faute de clés i18n amont -->
         <div id="assoc-filter">
           <span class="fchip current" data-status="all"
-                onclick="filter_assoc(this);">Toutes <span class="fc"></span></span>
+                onclick="filter_assoc(this);">{{ _('webapp.assoc.filter.all') }} <span class="fc"></span></span>
           <span class="fchip" data-status="auto"
-                onclick="filter_assoc(this);">Auto <span class="fc"></span></span>
+                onclick="filter_assoc(this);">{{ _('webapp.assoc.filter.auto') }} <span class="fc"></span></span>
           <span class="fchip" data-status="manual"
-                onclick="filter_assoc(this);">Manuelles <span class="fc"></span></span>
+                onclick="filter_assoc(this);">{{ _('webapp.assoc.filter.manual') }} <span class="fc"></span></span>
           <span class="fchip" data-status="none"
-                onclick="filter_assoc(this);">Non associées <span class="fc"></span></span>
+                onclick="filter_assoc(this);">{{ _('webapp.assoc.filter.none') }} <span class="fc"></span></span>
         </div>
         <div id="assoc-sheets">
         </div>

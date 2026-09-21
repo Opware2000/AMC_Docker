@@ -4,11 +4,11 @@
 
   <div class="field">
     <label for="new-project-name">{{ _('newproject.name') }}</label>
-    <input id="new-project-name" type="text" placeholder="ex. DST3-2026 — Sujet A">
+    <input id="new-project-name" type="text"
+           placeholder="{{ _('webapp.newproject.name_ph') }}">
   </div>
 
-  <!-- ponytail: libellé littéral faute de clé i18n amont -->
-  <div class="new-project-label">Point de départ</div>
+  <div class="new-project-label">{{ _('webapp.newproject.start') }}</div>
 
   <div class="one-way">
     <input class="one-way" type="radio"
