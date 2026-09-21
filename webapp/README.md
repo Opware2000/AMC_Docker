@@ -43,8 +43,28 @@ overrides/server/static/amc.js
   redéfinies sous `[data-theme="dark"]` (sur `<html>`).
 - La préférence est stockée dans `localStorage` (clé `amc-theme`) et appliquée
   par un petit script en `<head>` **avant le premier rendu** (pas de flash).
-- La police **Roboto** est chargée depuis Google Fonts ; hors ligne, une pile
-  sans-serif système prend le relais.
+- La police **Roboto** est **hébergée localement** (aucune requête vers Google
+  Fonts) ; en cas d'échec, une pile sans-serif système prend le relais.
+
+## Polices
+
+- `static/fonts.css` déclare `@font-face` et pointe vers
+  `static/fonts/roboto-latin.woff2`.
+- C'est la version **variable** de Roboto, sous-ensemble **latin**, qui couvre
+  le français (accents, `œ`, `€`, `’`, `—`, `…`). Un seul fichier suffit donc
+  pour toutes les graisses (100–900).
+- La source est Google Fonts (`fonts.gstatic.com`, licence Apache 2.0).
+
+Pour rafraîchir le fichier, récupérer l'URL du sous-ensemble latin (avec un
+`User-Agent` de navigateur) puis télécharger :
+
+```bash
+curl -s -A "Mozilla/5.0 ... Chrome/124 Safari/537.36" \
+  "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" \
+  | grep -A6 'U+0000-00FF' | grep -o 'https://[^)]*\.woff2' | head -1
+# puis :
+curl -s -o static/fonts/roboto-latin.woff2 "<l'URL obtenue>"
+```
 
 ## Internationalisation
 
