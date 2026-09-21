@@ -2,6 +2,8 @@
 # Auto-Multiple-Choice — docker-compose pour Mac Apple Silicon
 # ============================================================
 # Prérequis : Xpra installé sur Mac (https://xpra.org/downloads/)
+# Services  : « amc »     = interface GTK (profil par défaut)
+#             « amc-web » = interface navigateur (profil « webapp », port 8080)
 # Usage     : Copiez ce fichier en docker-compose.yml
 #             Adaptez les chemins des volumes ci-dessous
 #             puis lancez : ./launch-gtk.sh  (ou ./launch-web.sh)

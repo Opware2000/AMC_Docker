@@ -23,6 +23,29 @@ overrides/server/static/amc.css
 overrides/server/static/amc.js
 ```
 
+## Contenu actuel des surcharges
+
+- `templates/index.html` — shell de l'application : rail de navigation,
+  app bar, stepper, FAB, conteneurs de notifications et de progression
+- `templates/tab_*.html` — écrans Scans (et « pages en échec »), Notation,
+  Configuration, Source
+- `templates/projects_list.html`, `project_new.html`, `assoc_sheets.html`,
+  `manual_view.html`… — listes et vues détaillées
+- `static/amc.css` — tokens de couleurs, thème **Material Design** (clair et
+  sombre) et styles des écrans
+- `static/amc.js` — comportements ajoutés : bascule de thème, stepper, FAB,
+  notifications, blocs d'erreur, comparateur avant/après, filtres
+  d'association, indice de correspondance, ripple, recherche de projets
+
+## Thèmes
+
+- Les couleurs passent par des variables CSS définies dans `:root` et
+  redéfinies sous `[data-theme="dark"]` (sur `<html>`).
+- La préférence est stockée dans `localStorage` (clé `amc-theme`) et appliquée
+  par un petit script en `<head>` **avant le premier rendu** (pas de flash).
+- La police **Roboto** est chargée depuis Google Fonts ; hors ligne, une pile
+  sans-serif système prend le relais.
+
 ## Ordre de construction
 
 1. clone de `amc-webapp` → `/amc-web/`
@@ -42,7 +65,12 @@ Toute modification sous `overrides/` nécessite de reconstruire l'image :
 
 ```bash
 docker compose --profile webapp up -d --build amc-web
+# ou, via le lanceur : ./launch-web.sh
 ```
+
+> Les noms d'assets sont **hachés** par `flask digest compile` (`amc-<hash>.css`).
+> Un redémarrage simple ne suffit donc pas : il faut bien **reconstruire** après
+> chaque modification de `amc.css` ou `amc.js`.
 
 ## Itérer sans rebuild
 

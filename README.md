@@ -10,6 +10,7 @@ Configuration Docker pour **Auto-Multiple-Choice** sur Mac Apple Silicon avec :
 - Affichage distant natif via **Xpra** (fenêtre Mac, pas d'émulation)
 - Ouvrir les fichiers depuis AMC directement dans les apps Mac (TextEdit, Preview, Finder…)
 - Alternative **navigateur** : le même AMC servi par [amc-webapp](https://gitlab.com/auto-multiple-choice/amc-webapp), via le profil Docker `webapp`
+- Interface web **repensée** (Material Design, thème clair/sombre, stepper de progression, notifications, FAB contextuel) — voir « Interface web personnalisée »
 
 ---
 
@@ -57,7 +58,7 @@ amc-docker/
 ├── entrypoint.sh               # Installe nQCM, configure GTK, démarre xpra:14500
 ├── Dockerfile.webapp           # Couche serveur web (Flask amc-webapp + gunicorn)
 ├── entrypoint-webapp.sh        # Installe nQCM puis lance le serveur web
-├── webapp/                     # Surcharges de la GUI du serveur web (overlay)
+├── webapp/                     # Surcharges de la GUI du serveur web (Material Design)
 ├── docker-compose.yml          # Volumes et configuration (non versionné)
 ├── docker-compose.yaml.example # Template à copier/adapter
 ├── launch-gtk.sh               # Lanceur GTK : Docker, pont HTTP, conteneur, attache Xpra
@@ -188,7 +189,9 @@ C'est le pont HTTP du `launch-gtk.sh` qui transporte la demande. Les conversions
 
 À chaque lancement, `entrypoint.sh` effectue :
 
-- **Classe nQCM** — copiée dans `TEXMFLOCAL` et `mktexlsr` relancé
+- **Classe nQCM** — copiée dans `TEXMFLOCAL`, `mktexlsr` relancé, et un alias
+  `nQcm.sty` ↔ `nQCM.sty` créé (le nom de fichier est **sensible à la casse**
+  sous Linux, contrairement à macOS)
 - **GTK3** — scrollbars toujours visibles, double-tap tolérant, signets pour `/amc/controles`, `/LISTES`, `/SCAN`, `/SUJETS` et `/QCM`
 - **Symlink projets** — `/root/MC-Projects` pointe vers `/amc/controles`
 - **Xpra** — serveur X virtuel, clavier français / Apple
@@ -268,6 +271,30 @@ dans `webapp/overrides/` en reproduisant l'arborescence cible (`/amc-web/`) :
 ils écraseront ceux du serveur au moment du build. Détails dans
 `webapp/README.md`.
 
+### Interface web personnalisée
+
+La GUI du serveur web est **repensée** dans `webapp/overrides/` :
+
+- **Material Design** — palette Indigo, typographie Roboto, élévations,
+  app bar, drawer de navigation, champs « filled », chips, snackbars, ripple ;
+- **thème sombre** — bouton ◐ dans le menu, préférence mémorisée
+  (`localStorage`) et appliquée avant le premier rendu ;
+- **stepper** de progression (projet prêt, copies scannées, notes calculées,
+  export) alimenté par les événements existants, sans appel réseau en plus ;
+- **notifications** (snackbars) pour les succès/erreurs, blocs d'erreur de
+  chargement avec bouton « Réessayer » ;
+- **FAB** contextuel (nouveau projet, enregistrer, téléverser, calculer les
+  notes) ;
+- écrans retravaillés : **Scans** (barre d'outils + 3 volets, rapport en
+  cartes), **Notation/Association** (bascule de vue, filtres de statut,
+  indice de correspondance, image du champ nom au-dessus de la liste des
+  élèves), **Configuration** (cartes + curseurs), **Projets** (recherche,
+  actions au survol), **création de projet**, **comparateur avant/après**
+  des pages en échec.
+
+> Roboto est chargée depuis Google Fonts ; hors ligne, une police sans-serif
+> système est utilisée (le rendu reste correct).
+
 Arrêter le serveur web :
 
 ```bash
@@ -303,13 +330,19 @@ Si le délai est dépassé, lancez `docker compose logs` pour voir le message d'
 
 ### La classe nQCM n'est pas trouvée par LaTeX
 
+Le paquet s'appelle **`nQCM.sty`** (extension `.sty`, pas `.cls`). Sous Linux
+le nom de fichier est **sensible à la casse** : `\usepackage{nQCM}` est
+l'orthographe exacte. Un alias `nQcm.sty` est créé automatiquement au
+démarrage pour les documents qui écrivent `\usepackage{nQcm}` (voir
+« Ce qui est configuré automatiquement »).
+
 ```bash
 # Vérifiez que le chemin dans docker-compose.yml est correct :
 ls ~/chemin/vers/nQcm
 
-# Vérifiez dans le conteneur :
+# Vérifiez dans le conteneur (les deux orthographes doivent répondre) :
 docker compose run --entrypoint bash amc \
-  -c "kpsewhich nQCM.cls 2>/dev/null || echo 'non trouvé'"
+  -c "kpsewhich nQCM.sty nQcm.sty"
 ```
 
 ### Reconstruire l'image (après mise à jour)
@@ -440,7 +473,7 @@ docker compose down
 docker volume rm amc-docker_amc-data
 
 # Vérifier la classe nQCM dans le conteneur
-docker compose run --entrypoint bash amc -c "kpsewhich -all nQCM.cls 2>/dev/null || echo 'non trouvé'"
+docker compose run --entrypoint bash amc -c "kpsewhich -all nQCM.sty nQcm.sty 2>/dev/null || echo 'non trouvé'"
 
 # Reconstruire l'image
 docker compose build --no-cache
