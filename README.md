@@ -260,6 +260,10 @@ docker compose --profile webapp up -d --build amc-web     # serveur web
 # puis http://localhost:8080
 ```
 
+Le conteneur embarque un **healthcheck** (l'index est sondé toutes les 30 s) et,
+dans `docker-compose.yaml.example`, `restart: unless-stopped` : il **redémarre
+avec Docker**.
+
 Le service `amc-web` vit dans le même `docker-compose.yml`, sous le profil
 `webapp` : `./launch-gtk.sh` (profil par défaut) ne le lance donc jamais. Il partage
 avec la GUI les **projets** (`CONTROLES` → `/amc/controles`, via

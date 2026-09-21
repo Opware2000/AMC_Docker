@@ -78,5 +78,10 @@ COPY entrypoint-webapp.sh /entrypoint-webapp.sh
 RUN chmod +x /entrypoint-webapp.sh
 
 EXPOSE 8080
+
+# Sonde de disponibilité : l'index se rend sans dépendre d'un projet.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl -fsS -o /dev/null http://127.0.0.1:8080/ || exit 1
+
 ENTRYPOINT ["/entrypoint-webapp.sh"]
 CMD ["gunicorn", "-k", "gevent", "-w", "1", "amc:app", "-b", "0.0.0.0:8080", "--preload", "--access-logfile", "-"]

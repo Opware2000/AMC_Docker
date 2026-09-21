@@ -7,6 +7,11 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Ajouté
+
+- Interface web : **healthcheck** du conteneur (`HEALTHCHECK` sur l'index) et
+  **redémarrage automatique** (`restart: unless-stopped`).
+
 ### Modifié
 
 - Interface web : **police Roboto hébergée localement** (plus aucune requête
