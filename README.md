@@ -9,8 +9,7 @@ Configuration Docker pour **Auto-Multiple-Choice** sur Mac Apple Silicon avec :
 - Accès à vos dossiers de travail (projets, listes, scans, sujets) via des volumes
 - Affichage distant natif via **Xpra** (fenêtre Mac, pas d'émulation)
 - Ouvrir les fichiers depuis AMC directement dans les apps Mac (TextEdit, Preview, Finder…)
-- Alternative **navigateur** : le même AMC servi par [amc-webapp](https://gitlab.com/auto-multiple-choice/amc-webapp), via le profil Docker `webapp`
-- Interface web **repensée** (Material Design, thème clair/sombre, stepper de progression, notifications, FAB contextuel) — voir « Interface web personnalisée »
+- Alternative **navigateur** : le même AMC servi par [amc-webapp](https://gitlab.com/auto-multiple-choice/amc-webapp) (profil Docker `webapp`), avec une GUI **repensée** — Material Design, thème clair/sombre, stepper, FAB, notifications
 
 ---
 
@@ -69,6 +68,7 @@ amc-docker/
 ├── create-app-web.sh           # Raccourci : crée « Auto Multiple Choice Web.app »
 ├── libreoffice-stub.sh         # Stub libreoffice (ssconvert + pont HTTP)
 ├── logs/                       # Logs Docker (gitignoré)
+├── CHANGELOG.md                # Journal des versions
 └── README.md                   # Ce fichier
 ```
 
@@ -209,12 +209,10 @@ L'image n'utilise **pas** le paquet AMC de Debian, mais le **PPA officiel
 - Série Ubuntu utilisée : **stonking** (binaires Ubuntu 26.10)
 - Version embarquée : `1.7.0+git20260914164232-1~stonking1`
 
-> **Pourquoi la série *stonking* ?** La base de l'image est Debian forky. Les
-> binaires Ubuntu *noble*/*jammy* réclament OpenCV 4.6 (`libopencv-core406`),
-> absent de Debian. La série *stonking* utilise OpenCV 4.10
-> (`libopencv-*-410`), **la même ABI que Debian forky**, et s'exécute donc
-> nativement. Le dépôt est épinglé (`Pin-Priority: 100` global, `990` pour les
-> paquets AMC) : aucun autre paquet Ubuntu n'entre dans l'image.
+> **Pourquoi *stonking* ?** La base Debian forky et les binaires Ubuntu
+> *stonking* partagent la même ABI OpenCV (4.10) — les séries *noble*/*jammy*
+> réclament OpenCV 4.6, absent. Le dépôt est épinglé : aucun autre paquet
+> Ubuntu n'entre dans l'image.
 
 Vérifier la version installée :
 
@@ -275,29 +273,13 @@ ils écraseront ceux du serveur au moment du build. Détails dans
 
 ### Interface web personnalisée
 
-La GUI du serveur web est **repensée** dans `webapp/overrides/` :
+La GUI du serveur web est **repensée** dans `webapp/overrides/` : Material
+Design (thème **clair/sombre**), rail + **stepper** de progression, **FAB**
+contextuel, **notifications**, et écrans retravaillés (Scans, pages en échec
+avec comparateur avant/après, Notation/Association, Configuration, Projets).
+Les chaînes ajoutées sont **traduites FR/EN** (gettext).
 
-- **Material Design** — palette Indigo, typographie Roboto, élévations,
-  app bar, drawer de navigation, champs « filled », chips, snackbars, ripple ;
-- **traductions FR/EN** — les chaînes ajoutées passent par des catalogues
-  gettext d'extension, fusionnés au build (aucune surcharge des `.po` amont) ;
-- **thème sombre** — bouton ◐ dans le menu, préférence mémorisée
-  (`localStorage`) et appliquée avant le premier rendu ;
-- **stepper** de progression (projet prêt, copies scannées, notes calculées,
-  export) alimenté par les événements existants, sans appel réseau en plus ;
-- **notifications** (snackbars) pour les succès/erreurs, blocs d'erreur de
-  chargement avec bouton « Réessayer » ;
-- **FAB** contextuel (nouveau projet, enregistrer, téléverser, calculer les
-  notes) ;
-- écrans retravaillés : **Scans** (barre d'outils + 3 volets, rapport en
-  cartes), **Notation/Association** (bascule de vue, filtres de statut,
-  indice de correspondance, image du champ nom au-dessus de la liste des
-  élèves), **Configuration** (cartes + curseurs), **Projets** (recherche,
-  actions au survol), **création de projet**, **comparateur avant/après**
-  des pages en échec.
-
-> Roboto est chargée depuis Google Fonts ; hors ligne, une police sans-serif
-> système est utilisée (le rendu reste correct).
+Détail complet dans [`CHANGELOG.md`](CHANGELOG.md) et `webapp/README.md`.
 
 Arrêter le serveur web :
 
@@ -412,6 +394,14 @@ Inspectez ensuite les labels :
 docker image inspect amc-nqcm:latest \
   --format '{{ json .Config.Labels }}' | jq
 ```
+
+---
+
+## Historique des versions
+
+Les nouveautés et correctifs de chaque version sont dans
+[`CHANGELOG.md`](CHANGELOG.md). Guide de passage depuis la 2.0.0 :
+[`docs/migration-2-to-3.md`](docs/migration-2-to-3.md).
 
 ---
 
