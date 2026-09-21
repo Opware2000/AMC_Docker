@@ -281,7 +281,8 @@ La GUI du serveur web est **repensée** dans `webapp/overrides/` : Material
 Design (thème **clair/sombre**), rail + **stepper** de progression, **FAB**
 contextuel, **notifications**, et écrans retravaillés (Scans, pages en échec
 avec comparateur avant/après, Notation/Association, Configuration, Projets).
-Les chaînes ajoutées sont **traduites FR/EN** (gettext).
+Les chaînes ajoutées sont **traduites FR/EN** (gettext), avec un **sélecteur de
+langue** dans le menu.
 
 Détail complet dans [`CHANGELOG.md`](CHANGELOG.md) et `webapp/README.md`.
 

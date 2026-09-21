@@ -17,6 +17,9 @@ msgstr "Light / dark theme"
 msgid "webapp.version"
 msgstr "Version"
 
+msgid "webapp.lang.title"
+msgstr "Interface language"
+
 msgid "webapp.btn.close"
 msgstr "Close"
 
