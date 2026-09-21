@@ -241,6 +241,9 @@ function update_fab() {
     var f = document.getElementById("fab");
     if(!f) return;
     var a = fab_actions[current_tab];
+    // La vue « pages en échec » n'a pas d'action principale : on masque le FAB
+    // (elle partage l'onglet « scans », dont l'action est le téléversement).
+    if(a && document.getElementById("failed-compare")) a = null;
     if(!a) {
         f.classList.add("hidden");
         return;
