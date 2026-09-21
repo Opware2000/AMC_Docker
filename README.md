@@ -400,7 +400,8 @@ docker image inspect amc-nqcm:latest \
 ## Historique des versions
 
 Les nouveautés et correctifs de chaque version sont dans
-[`CHANGELOG.md`](CHANGELOG.md).
+[`CHANGELOG.md`](CHANGELOG.md). Guide de passage depuis la 2.0.0 :
+[`docs/migration-2-to-3.md`](docs/migration-2-to-3.md).
 
 ---
 
