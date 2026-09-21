@@ -1480,7 +1480,7 @@ input, select, textarea { border-radius: 7px; }
 /* --- Responsive --- */
 @media (max-width: 900px) {
     #menu { width: 64px; flex-basis: 64px; align-items: stretch; }
-    .menulabel, .brandname, #workflow .t { display: none; }
+    .menulabel, .brandname, #workflow .t, .app-version { display: none; }
     .menubtn { justify-content: center; padding: 9px 0; }
     .brand { justify-content: center; }
     #workflow .step { justify-content: center; }
@@ -2505,3 +2505,13 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
 }
 .config-body .range-row { grid-template-columns: 1fr 5.5rem; }
 .config-body .range-row input[type="number"] { width: 100%; }
+
+/* Version de l'application (pied du menu) */
+.app-version {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: .72rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    white-space: nowrap;
+}
+.app-version:hover { color: var(--text); }
