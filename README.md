@@ -63,6 +63,7 @@ amc-docker/
 ├── docker-compose.yaml.example # Template à copier/adapter
 ├── launch-gtk.sh               # Lanceur GTK : Docker, pont HTTP, conteneur, attache Xpra
 ├── launch-web.sh               # Lanceur web : démarre amc-web et ouvre localhost:8080
+├── stop-web.sh                 # Arrête l'interface web (conteneur amc-web)
 ├── launch.sh                   # Alias de compatibilité → launch-gtk.sh
 ├── create-app.sh               # Crée l'app du Dock (gtk par défaut, web en argument)
 ├── create-app-web.sh           # Raccourci : crée « Auto Multiple Choice Web.app »
@@ -154,7 +155,8 @@ Pour lancer plus tard, un simple `./launch-gtk.sh` suffit — l'image existant d
 ```
 
 Construit l'image de base si nécessaire, démarre `amc-web` et ouvre
-<http://localhost:8080>. Détails dans « Alternative navigateur » plus bas.
+<http://localhost:8080>. Pour l'arrêter : `./stop-web.sh`.
+Détails dans « Alternative navigateur » plus bas.
 
 Les deux interfaces peuvent tourner **en même temps** (ports 14500 et 8080
 distincts), mais évitez d'ouvrir le **même projet** dans les deux : elles
@@ -163,7 +165,7 @@ partagent la configuration AMC et le dossier de projets (verrous, caches).
 ### 3. Arrêter AMC
 
 - GTK : fermez la fenêtre AMC ou faites `Ctrl+C` dans le Terminal.
-- Web : `docker compose --profile webapp stop amc-web`.
+- Web : `./stop-web.sh` (ou `docker compose --profile webapp stop amc-web`).
 
 ---
 
@@ -298,7 +300,8 @@ La GUI du serveur web est **repensée** dans `webapp/overrides/` :
 Arrêter le serveur web :
 
 ```bash
-docker compose --profile webapp stop amc-web
+./stop-web.sh
+# ou : docker compose --profile webapp stop amc-web
 ```
 
 > **Mono-utilisateur.** Le serveur n'a **aucune authentification** : il est
@@ -459,6 +462,9 @@ le dossier `amc-docker`, relancez simplement `./create-app.sh` (et
 
 # Lancer AMC (interface web)
 ./launch-web.sh
+
+# Arrêter l'interface web
+./stop-web.sh
 
 # Shell dans le conteneur (pour déboguer)
 docker compose run --entrypoint bash amc

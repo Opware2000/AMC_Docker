@@ -80,4 +80,4 @@ fi
 echo ""
 echo -e "  Interface : ${BLUE}${URL}${NC}"
 echo -e "  Logs      : docker compose --profile webapp logs -f amc-web"
-echo -e "  Arrêt     : docker compose --profile webapp stop amc-web"
+echo -e "  Arrêt     : ./stop-web.sh"
