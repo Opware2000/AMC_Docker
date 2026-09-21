@@ -7,6 +7,8 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [3.1.0] — 2026-09-21
+
 ### Ajouté
 
 - Interface web : **sélecteur de langue FR/EN** dans le pied du menu (cookie
@@ -20,6 +22,11 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 - Interface web : **police Roboto hébergée localement** (plus aucune requête
   vers Google Fonts).
+
+### Corrigé
+
+- Interface web : **FAB masqué** sur la vue « pages en échec », qui partage
+  l'onglet Scans et proposait donc « Téléverser des scans », hors sujet.
 
 ## [3.0.0] — 2026-09-21
 
@@ -103,7 +110,8 @@ reconstruction de l'image, mise à jour des volumes). Guide dédié :
   (Dockerfile, `docker-compose`, script de lancement, premier README),
   `xpdf`, fichier `.env` d'exemple.
 
-[Unreleased]: https://github.com/Opware2000/AMC_Docker/compare/3.0.0...HEAD
+[Unreleased]: https://github.com/Opware2000/AMC_Docker/compare/3.1.0...HEAD
+[3.1.0]: https://github.com/Opware2000/AMC_Docker/compare/3.0.0...3.1.0
 [3.0.0]: https://github.com/Opware2000/AMC_Docker/compare/2.0.0...3.0.0
 [2.0.0]: https://github.com/Opware2000/AMC_Docker/compare/1.0.0...2.0.0
 [1.0.0]: https://github.com/Opware2000/AMC_Docker/releases/tag/1.0.0
