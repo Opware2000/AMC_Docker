@@ -17,6 +17,9 @@ msgstr "Thème clair / sombre"
 msgid "webapp.version"
 msgstr "Version"
 
+msgid "webapp.lang.title"
+msgstr "Langue de l'interface"
+
 msgid "webapp.btn.close"
 msgstr "Fermer"
 

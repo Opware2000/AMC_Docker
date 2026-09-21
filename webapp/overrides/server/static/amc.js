@@ -312,6 +312,13 @@ function toggle_theme() {
     set_theme(dark ? "light" : "dark");
 }
 
+// Langue de l'interface : cookie lu par get_locale() côté serveur, puis
+// rechargement pour rendre la page dans la langue choisie.
+function set_lang(lang) {
+    document.cookie = "amc-lang=" + lang + ";path=/;max-age=31536000;SameSite=Lax";
+    location.reload();
+}
+
 // ----------------------- STEPPER
 
 // ponytail: libellés littéraux faute de clés i18n amont ; à extraire si besoin

@@ -9,6 +9,8 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 ### Ajouté
 
+- Interface web : **sélecteur de langue FR/EN** dans le pied du menu (cookie
+  `amc-lang`, préférence persistante, prioritaire sur la langue du navigateur).
 - Interface web : **version de l'application** affichée dans le pied du menu
   (lien vers la page `/version`).
 - Interface web : **healthcheck** du conteneur (`HEALTHCHECK` sur l'index) et

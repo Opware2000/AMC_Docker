@@ -58,6 +58,30 @@ COPY webapp/i18n/ /tmp/i18n/
 RUN /venv/bin/python /tmp/i18n/merge_po.py /amc-web/server/translations /tmp/i18n \
     && rm -rf /tmp/i18n
 
+# ── 4d. Langue choisie dans l'interface (cookie « amc-lang ») ─
+# get_locale() lit le cookie avant la langue du navigateur. Patch appliqué au
+# build (basic.py n'est pas surchargé : les évolutions amont restent prises).
+RUN /venv/bin/python - <<'PY'
+from pathlib import Path
+p = Path('/amc-web/server/basic.py')
+s = p.read_text()
+old = "def get_locale():\n    return request.accept_languages.best_match(['fr', 'en'])"
+new = (
+    "def get_locale():\n"
+    "    # langue choisie dans l'interface (cookie), sinon celle du navigateur\n"
+    "    chosen = request.cookies.get('amc-lang')\n"
+    "    if chosen in ('fr', 'en'):\n"
+    "        return chosen\n"
+    "    return request.accept_languages.best_match(['fr', 'en'])"
+)
+if old in s:
+    p.write_text(s.replace(old, new, 1))
+    print("i18n: get_locale() lié au cookie amc-lang")
+else:
+    print("i18n: AVERTISSEMENT — get_locale() non reconnu ; "
+          "le sélecteur de langue sera inactif (langue du navigateur)")
+PY
+
 ENV PATH=/venv/bin:$PATH
 ENV FLASK_APP=amc
 # Les projets AMC sont les dossiers montés (CONTROLES) — mêmes que la GUI

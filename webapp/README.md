@@ -90,6 +90,13 @@ Pour ajouter une chaîne : la déclarer dans les **deux** `extra-*.po`, l'utilis
 dans le template (`_()`) ou l'ajouter à `window.AMC_I18N` et l'appeler via `t()`
 en JS, puis reconstruire.
 
+**Choix de la langue.** Un sélecteur **FR / EN** (pied du menu) pose un cookie
+`amc-lang` puis recharge la page. Côté serveur, `get_locale()` lit ce cookie
+**avant** la langue du navigateur ; la fonction est **patchée au build** (étape
+4d du `Dockerfile.webapp`), ce qui évite de surcharger `basic.py` et de geler
+ses évolutions amont. Sans cookie, la langue reste celle du navigateur
+(`Accept-Language`).
+
 ## Ordre de construction
 
 1. clone de `amc-webapp` → `/amc-web/`

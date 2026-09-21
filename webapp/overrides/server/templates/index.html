@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="{{ request.accept_languages.best_match(['fr', 'en']) or 'en' }}">
+{% set ui_lang = request.cookies.get('amc-lang')
+                  or request.accept_languages.best_match(['fr', 'en']) or 'en' %}
+<html lang="{{ ui_lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -74,6 +76,12 @@
               onclick="admin_search();" title="Recherche admin"><i class="iconoir-crown"></i></span>
         <span id="menu-admin-back" class="hidden admin-action adapt-menu"
               onclick="admin_back();"><i class="iconoir-profile-circle"></i></span>
+        <span id="lang-switch" class="lang-switch" title="{{ _('webapp.lang.title') }}">
+          <span class="lang-opt{{ ' current' if ui_lang == 'fr' else '' }}"
+                onclick="set_lang('fr');">FR</span>
+          <span class="lang-opt{{ ' current' if ui_lang != 'fr' else '' }}"
+                onclick="set_lang('en');">EN</span>
+        </span>
         <span id="theme-toggle" class="admin-action" onclick="toggle_theme();"
               title="{{ _('webapp.theme.toggle') }}">◐</span>
         {% if app_version %}
