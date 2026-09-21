@@ -7,6 +7,11 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Modifié
+
+- Interface web : **police Roboto hébergée localement** (plus aucune requête
+  vers Google Fonts).
+
 ## [3.0.0] — 2026-09-21
 
 ### Migration depuis la 2.0.0
