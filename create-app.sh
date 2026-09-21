@@ -14,7 +14,7 @@ NC='\033[0m'
 
 # Répertoire absolu du projet amc-docker (là où se trouve ce script)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LAUNCH_SCRIPT="$SCRIPT_DIR/launch.sh"
+LAUNCH_SCRIPT="$SCRIPT_DIR/launch-gtk.sh"
 
 # Destination de l'application
 APP_NAME="Auto Multiple Choice"
@@ -27,7 +27,7 @@ echo ""
 
 # ── Vérifications ────────────────────────────────────────────
 if [ ! -f "$LAUNCH_SCRIPT" ]; then
-    echo -e "${RED}✗ launch.sh introuvable dans $SCRIPT_DIR${NC}"
+    echo -e "${RED}✗ launch-gtk.sh introuvable dans $SCRIPT_DIR${NC}"
     echo "  Exécutez ce script depuis le dossier amc-docker/"
     exit 1
 fi
@@ -79,7 +79,7 @@ cat > "$APP_PATH/Contents/Info.plist" << PLIST
 PLIST
 
 # ── Exécutable principal ─────────────────────────────────────
-# Utilise AppleScript pour ouvrir un Terminal et lancer launch.sh
+# Utilise AppleScript pour ouvrir un Terminal et lancer launch-gtk.sh
 # L'utilisateur voit les logs (utile pour le premier lancement)
 cat > "$APP_PATH/Contents/MacOS/launcher" << LAUNCHER
 #!/bin/bash
@@ -91,7 +91,7 @@ osascript << APPLESCRIPT
 tell application "Terminal"
     activate
     -- Ouvre un nouvel onglet (ou fenêtre si Terminal n'était pas ouvert)
-    set newTab to do script "echo ''; echo '🚀  Démarrage de Auto Multiple Choice…'; echo ''; cd \\"$SCRIPT_DIR\\" && ./launch.sh; echo ''; echo '✅  AMC fermé.'"
+    set newTab to do script "echo ''; echo '🚀  Démarrage de Auto Multiple Choice…'; echo ''; cd \\"$SCRIPT_DIR\\" && ./launch-gtk.sh; echo ''; echo '✅  AMC fermé.'"
     -- Renomme la fenêtre pour la retrouver facilement
     set custom title of newTab to "Auto Multiple Choice"
 end tell

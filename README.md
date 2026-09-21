@@ -60,7 +60,9 @@ amc-docker/
 ├── webapp/                     # Surcharges de la GUI du serveur web (overlay)
 ├── docker-compose.yml          # Volumes et configuration (non versionné)
 ├── docker-compose.yaml.example # Template à copier/adapter
-├── launch.sh                   # Lanceur Mac : vérifie Docker, pont HTTP, démarre le conteneur, attache Xpra
+├── launch-gtk.sh               # Lanceur GTK : Docker, pont HTTP, conteneur, attache Xpra
+├── launch-web.sh               # Lanceur web : démarre amc-web et ouvre localhost:8080
+├── launch.sh                   # Alias de compatibilité → launch-gtk.sh
 ├── create-app.sh               # Crée « Auto Multiple Choice.app » pour le Dock
 ├── libreoffice-stub.sh         # Stub libreoffice (ssconvert + pont HTTP)
 ├── logs/                       # Logs Docker (gitignoré)
@@ -108,7 +110,7 @@ volumes:
 ```
 
 > `docker-compose.yml` est **gitignoré** : vos chemins réels ne sont jamais
-> versionnés. `launch.sh` lit ces volumes via `docker compose config` — le pont
+> versionnés. `launch-gtk.sh` lit ces volumes via `docker compose config` — le pont
 > Mac-bridge pointe donc automatiquement vers les mêmes dossiers, sans aucun
 > chemin en dur dans le script.
 
@@ -119,16 +121,16 @@ volumes:
 ### 1. Rendre les scripts exécutables
 
 ```bash
-chmod +x launch.sh entrypoint.sh
+chmod +x launch.sh launch-gtk.sh launch-web.sh entrypoint.sh
 ```
 
-### 2. Lancer AMC
+### 2. Lancer AMC (interface GTK)
 
 ```bash
-./launch.sh
+./launch-gtk.sh        # (ou ./launch.sh, alias de compatibilité)
 ```
 
-Le script `launch.sh` fait tout automatiquement :
+Le script `launch-gtk.sh` fait tout automatiquement :
 
 1. Vérifie que Docker Desktop est lancé
 2. Construit **ou reconstruit** l'image `amc-nqcm:latest` :
@@ -141,11 +143,25 @@ Le script `launch.sh` fait tout automatiquement :
 5. Attend que Xpra soit prêt, puis attache le client Mac natif
 6. La fenêtre AMC s'ouvre comme une application Mac normale
 
-Pour lancer plus tard, un simple `./launch.sh` suffit — l'image existant déjà, le démarrage prend quelques secondes.
+Pour lancer plus tard, un simple `./launch-gtk.sh` suffit — l'image existant déjà, le démarrage prend quelques secondes.
+
+### 2 bis. Lancer l'interface web (navigateur)
+
+```bash
+./launch-web.sh
+```
+
+Construit l'image de base si nécessaire, démarre `amc-web` et ouvre
+<http://localhost:8080>. Détails dans « Alternative navigateur » plus bas.
+
+Les deux interfaces peuvent tourner **en même temps** (ports 14500 et 8080
+distincts), mais évitez d'ouvrir le **même projet** dans les deux : elles
+partagent la configuration AMC et le dossier de projets (verrous, caches).
 
 ### 3. Arrêter AMC
 
-Fermez la fenêtre AMC ou faites `Ctrl+C` dans le Terminal — le script arrête proprement le conteneur et le pont.
+- GTK : fermez la fenêtre AMC ou faites `Ctrl+C` dans le Terminal.
+- Web : `docker compose --profile webapp stop amc-web`.
 
 ---
 
@@ -162,7 +178,7 @@ Lancer un éditeur depuis AMC (« Ouvrir le sujet », « Ouvrir le PDF »…) ou
 | `libreoffice`                 | LibreOffice             |
 | `gnumeric`                    | Numbers                 |
 
-C'est le pont HTTP du `launch.sh` qui transporte la demande. Les conversions de fichiers
+C'est le pont HTTP du `launch-gtk.sh` qui transporte la demande. Les conversions de fichiers
 (libreoffice → PDF) restent dans le conteneur via `ssconvert`.
 
 ---
@@ -231,17 +247,17 @@ La couche web est construite **par-dessus l'image existante** (`amc-nqcm:latest`
 même AMC, même TeX Live, même classe nQCM — seuls Flask et gunicorn sont ajoutés.
 
 ```bash
-# 1) Image de base (une seule fois — ou un premier ./launch.sh)
-docker compose build amc
+# Lanceur dédié (construit l'image de base si besoin, démarre, ouvre le navigateur)
+./launch-web.sh
 
-# 2) Construire et lancer uniquement le serveur web
-docker compose --profile webapp up -d --build amc-web
-
-# 3) Ouvrir http://localhost:8080
+# — ou, à la main —
+docker compose build amc                                  # image de base (une seule fois)
+docker compose --profile webapp up -d --build amc-web     # serveur web
+# puis http://localhost:8080
 ```
 
 Le service `amc-web` vit dans le même `docker-compose.yml`, sous le profil
-`webapp` : `./launch.sh` (profil par défaut) ne le lance donc jamais. Il partage
+`webapp` : `./launch-gtk.sh` (profil par défaut) ne le lance donc jamais. Il partage
 avec la GUI les **projets** (`CONTROLES` → `/amc/controles`, via
 `AMC_PROJECTSDIR`), la **configuration AMC** (volume `amc-data` → `/root/.AMC.d`)
 et le dossier nQCM (`/nqcm`).
@@ -281,7 +297,7 @@ docker compose logs
 
 ### Erreur "xpra is ready" attendue mais absente des logs
 
-Le serveur Xpra met ~5 s à démarrer. `launch.sh` attend jusqu'à 30 s.
+Le serveur Xpra met ~5 s à démarrer. `launch-gtk.sh` attend jusqu'à 30 s.
 Si le délai est dépassé, lancez `docker compose logs` pour voir le message d'erreur.
 
 ### La classe nQCM n'est pas trouvée par LaTeX
@@ -391,7 +407,7 @@ Vous voyez les messages de démarrage (utile pour diagnostiquer un problème).
 
 ### Recréer l'application après un déplacement du dossier amc-docker
 
-L'application contient le chemin absolu vers `launch.sh`. Si vous déplacez
+L'application contient le chemin absolu vers `launch-gtk.sh`. Si vous déplacez
 le dossier `amc-docker`, relancez simplement `./create-app.sh` pour mettre
 à jour l'application.
 
@@ -400,8 +416,11 @@ le dossier `amc-docker`, relancez simplement `./create-app.sh` pour mettre
 ## Commandes utiles
 
 ```bash
-# Lancer AMC
-./launch.sh
+# Lancer AMC (interface GTK)
+./launch-gtk.sh
+
+# Lancer AMC (interface web)
+./launch-web.sh
 
 # Shell dans le conteneur (pour déboguer)
 docker compose run --entrypoint bash amc

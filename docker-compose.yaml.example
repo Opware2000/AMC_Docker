@@ -4,7 +4,7 @@
 # Prérequis : Xpra installé sur Mac (https://xpra.org/downloads/)
 # Usage     : Copiez ce fichier en docker-compose.yml
 #             Adaptez les chemins des volumes ci-dessous
-#             puis lancez : ./launch.sh
+#             puis lancez : ./launch-gtk.sh  (ou ./launch-web.sh)
 # ============================================================
 
 services:
@@ -72,7 +72,7 @@ services:
 
   # ── Serveur web (navigateur) ────────────────────────────────
   # Optionnel, profil « webapp ». Nécessite l'image de base amc-nqcm:latest
-  # (docker compose build amc, ou un premier ./launch.sh).
+  # (docker compose build amc, ou un premier ./launch-gtk.sh).
   #   docker compose --profile webapp up -d --build amc-web
   #   → http://localhost:8080
   amc-web:
