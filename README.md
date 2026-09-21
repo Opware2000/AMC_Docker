@@ -63,7 +63,8 @@ amc-docker/
 ├── launch-gtk.sh               # Lanceur GTK : Docker, pont HTTP, conteneur, attache Xpra
 ├── launch-web.sh               # Lanceur web : démarre amc-web et ouvre localhost:8080
 ├── launch.sh                   # Alias de compatibilité → launch-gtk.sh
-├── create-app.sh               # Crée « Auto Multiple Choice.app » pour le Dock
+├── create-app.sh               # Crée l'app du Dock (gtk par défaut, web en argument)
+├── create-app-web.sh           # Raccourci : crée « Auto Multiple Choice Web.app »
 ├── libreoffice-stub.sh         # Stub libreoffice (ssconvert + pont HTTP)
 ├── logs/                       # Logs Docker (gitignoré)
 └── README.md                   # Ce fichier
@@ -383,13 +384,17 @@ Pour lancer AMC comme n'importe quelle application macOS, sans passer par le Ter
 ### 1. Générer l'application
 
 ```bash
-chmod +x create-app.sh
-./create-app.sh
+chmod +x create-app.sh create-app-web.sh
+
+./create-app.sh            # « Auto Multiple Choice.app »      → interface GTK
+./create-app-web.sh        # « Auto Multiple Choice Web.app »  → interface web
+# (équivalent : ./create-app.sh web)
 ```
 
-Ce script crée `Auto Multiple Choice.app` dans `~/Applications/` et ouvre
-automatiquement le dossier pour vous. Il télécharge l'icône officielle d'AMC
-si la connexion internet est disponible.
+Ces scripts créent les applications dans `~/Applications/` et ouvrent
+automatiquement le dossier pour vous. Ils téléchargent l'icône officielle d'AMC
+si la connexion internet est disponible. `AMC_NO_OPEN=1` évite d'ouvrir le
+dossier (utile en automatisation).
 
 ### 2. Ajouter au Dock
 
@@ -408,8 +413,8 @@ Vous voyez les messages de démarrage (utile pour diagnostiquer un problème).
 ### Recréer l'application après un déplacement du dossier amc-docker
 
 L'application contient le chemin absolu vers `launch-gtk.sh`. Si vous déplacez
-le dossier `amc-docker`, relancez simplement `./create-app.sh` pour mettre
-à jour l'application.
+le dossier `amc-docker`, relancez simplement `./create-app.sh` (et
+`./create-app-web.sh` pour la version web) pour mettre à jour l'application.
 
 ---
 
