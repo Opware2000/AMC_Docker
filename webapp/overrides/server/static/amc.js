@@ -127,10 +127,10 @@ function show_fetch_error(targets, url, opts) {
         var box = document.createElement("div");
         box.className = "load-error";
         var p = document.createElement("p");
-        p.textContent = "Échec du chargement de cette section.";
+        p.textContent = t('webapp.error.load');
         var btn = document.createElement("span");
         btn.className = "btn btn-neutral";
-        btn.textContent = "Réessayer";
+        btn.textContent = t('webapp.btn.retry');
         btn.onclick = function() { fetch_to_dom(targets, url, opts); };
         box.appendChild(p);
         box.appendChild(btn);
@@ -148,7 +148,7 @@ function notify(kind, message, timeout) {
     msg.textContent = message;
     var close = document.createElement("button");
     close.className = "x";
-    close.setAttribute("aria-label", "Fermer");
+    close.setAttribute("aria-label", t('webapp.btn.close'));
     close.textContent = "✕";
     close.onclick = function() { el.remove(); };
     el.appendChild(msg);
@@ -178,7 +178,7 @@ function show_tab(tab_name) {
        && tab_name.replace(/_.*/, "") != "source") {
         // promesse jamais résolue : le .then() de l'appelant ne doit pas
         // charger l'onglet suivant alors qu'on reste sur la source
-        if(!confirm("La source contient des modifications non enregistrées. Continuer ?"))
+        if(!confirm(t('webapp.confirm.unsaved')))
             return new Promise(function() {});
     }
     return fetch_to_dom('tab', `/tab/${tab_name}`, {})
@@ -206,28 +206,28 @@ function set_current_tab(tab_name) {
 
 var fab_actions = {
     main: {
-        icon: "＋", title: "Nouveau projet",
+        icon: "＋", title: "webapp.fab.new_project",
         run: function() {
             var n = document.getElementById("new-project-name");
             if(n) { n.scrollIntoView({block: "center"}); n.focus(); }
         }
     },
     source: {
-        icon: "⤓", title: "Enregistrer la source",
+        icon: "⤓", title: "webapp.fab.save",
         run: function() {
-            if(!source_dirty) { notify('info', "Aucune modification à enregistrer."); return; }
+            if(!source_dirty) { notify('info', t('webapp.info.nothing_to_save')); return; }
             source_save();
         }
     },
     scans: {
-        icon: "↑", title: "Téléverser des scans",
+        icon: "↑", title: "webapp.fab.upload",
         run: function() {
             var f = document.getElementById("scans-upload");
             if(f) f.click();
         }
     },
     grading: {
-        icon: "✓", title: "Calculer les notes",
+        icon: "✓", title: "webapp.fab.mark",
         run: function() { do_mark(); }
     },
 };
@@ -247,8 +247,9 @@ function update_fab() {
     }
     f.classList.remove("hidden");
     f.querySelector(".fab-icon").textContent = a.icon;
-    f.setAttribute("title", a.title);
-    f.setAttribute("aria-label", a.title);
+    var label = t(a.title);
+    f.setAttribute("title", label);
+    f.setAttribute("aria-label", label);
 }
 
 function adapt_menu(data) {
@@ -271,6 +272,13 @@ function connection_status(s) {
     } else {
         console.error("Can't find connection-status")
     }
+}
+
+// Traduction côté client : les chaînes sont exposées par index.html
+// (window.AMC_I18N), alimentées par les catalogues gettext de l'overlay.
+function t(key, fallback) {
+    var d = window.AMC_I18N || {};
+    return d[key] || fallback || key;
 }
 
 // Ripple Material sur les éléments cliquables.
@@ -305,10 +313,10 @@ function toggle_theme() {
 
 // ponytail: libellés littéraux faute de clés i18n amont ; à extraire si besoin
 var workflow_steps = [
-    ["project", "Projet prêt"],
-    ["scans", "Copies scannées"],
-    ["marks", "Notes calculées"],
-    ["export", "Export"],
+    ["project", "webapp.step.project"],
+    ["scans", "webapp.step.scans"],
+    ["marks", "webapp.step.marks"],
+    ["export", "webapp.step.export"],
 ];
 var workflow_state = { project: false, scans: false, marks: false, export: false };
 var workflow_project = undefined;
@@ -337,7 +345,7 @@ function render_workflow() {
         if(!done) active_set = true;
         html += '<div class="step ' + cls + '">'
               + '<span class="pip">' + (done ? "✓" : (i + 1)) + '</span>'
-              + '<span class="t">' + workflow_steps[i][1] + '</span></div>';
+              + '<span class="t">' + t(workflow_steps[i][1]) + '</span></div>';
     }
     el.innerHTML = html;
 }
@@ -589,7 +597,7 @@ function upload_files(url, files,
                     alert_msg(r["error"]);
                 }
             } else {
-                notify('err', `Échec de l'envoi (statut ${xhr.status}).`);
+                notify('err', t('webapp.error.upload_status').replace('%s', xhr.status));
             }
         }
     };
@@ -605,7 +613,7 @@ function upload_file_to_project() {
     var f = document.getElementById('project-upload-file');
     if(f.files.length) {
         upload_files("/upload/project",
-                     f.files, "Uploading…", {},
+                     f.files, t('webapp.upload.inprogress'), {},
                      upload_file_to_project_done
                     );
     }
@@ -640,7 +648,7 @@ function do_create_project() {
         var f = document.getElementById('source-file');
         if(f.files.length) {
             upload_files("/upload/create",
-                         f.files, "Uploading…",
+                         f.files, t('webapp.upload.inprogress'),
                          { "name": name }
                         )
         } else {
@@ -712,7 +720,7 @@ function source_modified(t) {
 
 socket.on("source-saved", function() {
     source_modified(false);
-    notify('ok', "Source enregistrée.");
+    notify('ok', t('webapp.toast.source_saved'));
 });
 
 function select_file(f) {
@@ -755,7 +763,7 @@ function source_save() {
     upload_files("/upload/source",
                  [ [ new Blob([editor.getValue()],
                               { type: 'text/plain' }),
-                     fn ] ], "Uploading…",
+                     fn ] ], t('webapp.upload.inprogress'),
                  {}, null);
 }
 
@@ -920,7 +928,7 @@ function cancel_command() {
         current_upload_xhr._cancelled = true;
         current_upload_xhr.abort();
         current_upload_xhr = null;
-        notify('warn', "Envoi annulé.");
+        notify('warn', t('webapp.toast.upload_cancelled'));
     }
     end_command();
 }
@@ -1019,7 +1027,7 @@ function open_file(url) {
 socket.on("print-to-files", function(url) {
     open_file(url);
     doc_print_finished();
-    notify('ok', "Fichiers d'impression générés.");
+    notify('ok', t('webapp.toast.print_files'));
 });
 
 function show_multimode(ok) {
@@ -1545,7 +1553,7 @@ function upload_scans() {
     var f = document.getElementById('scans-upload');
     if(f.files.length) {
         upload_files("/upload/scans",
-                     f.files, "Uploading…", { "project_name": project_name },
+                     f.files, t('webapp.upload.inprogress'), { "project_name": project_name },
                      upload_scans_done
                     );
     }
@@ -1619,7 +1627,7 @@ function upload_students() {
     var f = document.getElementById('students-upload');
     if(f.files.length) {
         upload_files("/upload/students",
-                     f.files, "Uploading…", {},
+                     f.files, t('webapp.upload.inprogress'), {},
                      upload_students_done
                     );
     }
@@ -1671,7 +1679,7 @@ socket.on("update-exported-files", u_exported_files);
 socket.on("update-exported-files", function(t) {
     if(t) {
         set_workflow("export", true);
-        notify('ok', "Export terminé.");
+        notify('ok', t('webapp.toast.export_done'));
     }
 });
 
@@ -2013,7 +2021,7 @@ function set_conf(tr, conf, detected) {
             el.textContent = conf + " %";
             el.className = "assoc-conf " + (conf >= 90 ? "hi" : (conf >= 70 ? "mid" : "lo"));
         }
-        if(detected) el.setAttribute("title", "Détecté : " + detected);
+        if(detected) el.setAttribute("title", t('webapp.assoc.detected').replace('%s', detected));
         else el.removeAttribute("title");
     }
 }
@@ -2040,7 +2048,7 @@ function assoc_confidence_selected(student, copy) {
         } else {
             cb.classList.remove("hidden");
             cb.className = "conf-badge " + (conf >= 90 ? "hi" : (conf >= 70 ? "mid" : "lo"));
-            cb.textContent = "Correspondance " + conf + " %";
+            cb.textContent = t('webapp.assoc.confidence').replace('%s', conf);
         }
     }
 }
@@ -2206,7 +2214,7 @@ function u_annotated_files(t) {
 }
 socket.on("update-annotated-files", u_annotated_files);
 socket.on("update-annotated-files", function(t) {
-    if(t) notify('ok', "Copies annotées générées.");
+    if(t) notify('ok', t('webapp.toast.annotated'));
 });
 
 // ----------------------- keys

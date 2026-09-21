@@ -277,6 +277,8 @@ La GUI du serveur web est **repensée** dans `webapp/overrides/` :
 
 - **Material Design** — palette Indigo, typographie Roboto, élévations,
   app bar, drawer de navigation, champs « filled », chips, snackbars, ripple ;
+- **traductions FR/EN** — les chaînes ajoutées passent par des catalogues
+  gettext d'extension, fusionnés au build (aucune surcharge des `.po` amont) ;
 - **thème sombre** — bouton ◐ dans le menu, préférence mémorisée
   (`localStorage`) et appliquée avant le premier rendu ;
 - **stepper** de progression (projet prêt, copies scannées, notes calculées,

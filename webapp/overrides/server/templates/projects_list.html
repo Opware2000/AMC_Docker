@@ -1,8 +1,7 @@
 {% if projects %}
 <div class="bandeau">
-  <!-- ponytail: libellé littéral faute de clé i18n amont -->
   <input type="search" id="projects-filter" class="projects-filter"
-         placeholder="Rechercher un projet…" oninput="filter_projects(this);">
+         placeholder="{{ _('webapp.projects.search') }}" oninput="filter_projects(this);">
 </div>
 <div class="overy">
   {% for user,plist in projects %}
