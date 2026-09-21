@@ -9,6 +9,43 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 ## [3.0.0] — 2026-09-21
 
+### Migration depuis la 2.0.0
+
+1. **Nouveau client d'affichage : Xpra** (remplace XQuartz)
+
+   ```bash
+   brew install --cask xpra
+   ```
+
+   XQuartz n'est plus nécessaire ; `launch-gtk.sh` gère le serveur Xpra
+   (port 14500) et attache la fenêtre native.
+
+2. **Reconstruire l'image** (base TeX Live 2026 + AMC du PPA « test »). Ne pas
+   réutiliser une image 2.x :
+
+   ```bash
+   docker compose build --no-cache amc
+   ```
+
+3. **Mettre à jour `docker-compose.yml`** (fichier **non versionné**) : reporter
+   les nouveaux volumes depuis `docker-compose.yaml.example` (les dossiers
+   `LISTES`, `SCAN`, `SUJETS`, `QCM` sont désormais montés à la racine, et le
+   volume `amc-data` persiste la configuration AMC), en y remettant vos chemins.
+
+4. **Relancer** avec `./launch-gtk.sh` (ou `./launch.sh`, alias de
+   compatibilité). Puis régénérer l'application du Dock avec
+   `./create-app.sh` : elle pointe désormais sur `launch-gtk.sh`.
+
+5. **nQcm** : plus besoin de copier `nQCM.sty` dans vos projets — un alias
+   `nQcm.sty` est créé au démarrage. La forme correcte reste
+   `\usepackage{nQCM}`.
+
+6. *(optionnel)* **Interface web** :
+
+   ```bash
+   ./launch-web.sh        # → http://localhost:8080
+   ```
+
 ### Ajouté
 
 - **Interface web** (navigateur) : le même AMC servi par
